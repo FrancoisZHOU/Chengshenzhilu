@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#07060A">
+<title>成神之路</title>
+<style>
+:root{
+  --bg:#07060A;
+  --card:#0E0C14;
+  --line:#1E1A28;
+  --gold:#F0C75E;
+  --gold-deep:#C89B3C;
+  --gold-dim:#8A733E;
+  --ink:#F2EBDD;
+  --ink-dim:#7A7468;
+  --live:#F0C75E;
+  --night:#7C89C4;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans SC","PingFang SC","MiSans","Microsoft YaHei",sans-serif;
+  user-select:none;-webkit-user-select:none}
+button{font-family:inherit}
+.tab{position:fixed;inset:0 0 74px 0;overflow-y:auto;display:none;padding-bottom:30px}
+.tab.on{display:block}
+.nav{position:fixed;left:0;right:0;bottom:0;height:74px;
+  background:rgba(10,8,14,.96);border-top:1px solid var(--line);
+  display:flex;z-index:20;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;background:none;border:none;color:var(--ink-dim);
+  font-size:12px;letter-spacing:.15em;display:flex;flex-direction:column;gap:5px;
+  align-items:center;justify-content:center}
+.nav button .ic{font-size:19px}
+.nav button.on{color:var(--gold)}
+.hd{padding:52px 22px 6px}
+.hd .eyebrow{font-size:10px;letter-spacing:.5em;color:var(--gold-dim)}
+.hd h1{font-size:26px;font-weight:300;letter-spacing:.3em;margin-top:8px}
+.sec{padding:18px 20px 2px}
+.sec-t{font-size:11px;letter-spacing:.35em;color:var(--ink-dim);margin-bottom:12px;
+  display:flex;justify-content:space-between;align-items:center}
+.sec-t .mini{background:none;border:1px solid var(--line);color:var(--gold-dim);
+  border-radius:9px;padding:5px 12px;font-size:12px;letter-spacing:.05em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:15px;
+  padding:15px 16px;margin-bottom:10px}
+.empty{color:var(--ink-dim);font-size:13px;text-align:center;padding:22px 10px;
+  letter-spacing:.08em;line-height:2}
+
+/* ===== 今日 ===== */
+.day-big{padding:14px 22px 0}
+.day-n{font-size:64px;font-weight:100;color:var(--gold);letter-spacing:.02em;line-height:1}
+.day-n small{font-size:16px;color:var(--ink-dim);letter-spacing:.3em;font-weight:300;margin-left:8px}
+.day-date{font-size:12px;color:var(--ink-dim);letter-spacing:.2em;margin-top:8px}
+.live-row{display:flex;align-items:center;gap:12px}
+.live-dot{width:9px;height:9px;border-radius:50%;background:var(--gold);
+  box-shadow:0 0 14px var(--gold);animation:pulse 1.6s ease-in-out infinite;flex:none}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.live-name{flex:1;font-size:15px}
+.live-off{background:none;border:1px solid var(--gold-dim);color:var(--gold);
+  border-radius:10px;padding:8px 16px;font-size:13px;letter-spacing:.1em}
+.tk-row{display:flex;align-items:center;gap:12px}
+.tk-tier{font-size:10px;letter-spacing:.2em;color:var(--gold-dim);border:1px solid var(--gold-dim);
+  border-radius:7px;padding:3px 7px;flex:none}
+.tk-title{flex:1;font-size:15px;line-height:1.5}
+.tk-done{background:linear-gradient(135deg,var(--gold),var(--gold-deep));border:none;
+  color:#14100A;border-radius:10px;padding:9px 15px;font-size:13px;font-weight:600;letter-spacing:.08em;flex:none}
+.ev-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 2px}
+.ev-name{font-size:14px}
+.ev-cd{font-size:13px;color:var(--gold);font-variant-numeric:tabular-nums}
+.sleepbar{padding:22px 20px 6px}
+.b-sleep{width:100%;background:none;border:1px solid #2A3050;color:var(--night);
+  border-radius:16px;padding:18px;font-size:16px;letter-spacing:.4em}
+
+/* ===== 打点 ===== */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px}
+.act{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px 14px;text-align:center;position:relative;transition:all .25s}
+.act .nm{font-size:16px;font-weight:500;letter-spacing:.05em}
+.act .st{font-size:11px;color:var(--ink-dim);margin-top:7px;letter-spacing:.05em;
+  font-variant-numeric:tabular-nums}
+.act.lit{border-color:var(--gold);background:linear-gradient(160deg,#171208,#0E0C14);
+  box-shadow:0 0 22px rgba(240,199,94,.14)}
+.act.lit .nm{color:var(--gold)}
+.act.lit::after{content:'';position:absolute;top:10px;right:12px;width:7px;height:7px;
+  border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);
+  animation:pulse 1.4s ease-in-out infinite}
+.act.tapkind .st{color:var(--gold-dim)}
+.act-edit{grid-column:1/-1;background:none;border:1px dashed #2b2438;color:var(--ink-dim);
+  border-radius:16px;padding:14px;font-size:13px;letter-spacing:.15em}
+
+/* ===== 任务 ===== */
+.line-card .lt{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.line-card .lt .n{font-size:16px;font-weight:500}
+.line-card .lt .p{font-size:12px;color:var(--gold);font-variant-numeric:tabular-nums}
+.pbar{height:5px;background:#1A1622;border-radius:3px;overflow:hidden;margin-bottom:12px}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-deep),var(--gold));
+  border-radius:3px;transition:width .5s cubic-bezier(.2,.8,.3,1)}
+.stg{display:flex;align-items:center;gap:11px;padding:8px 2px}
+.stg .cb{width:22px;height:22px;border:1.5px solid #3A3248;border-radius:7px;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:13px;color:#14100A}
+.stg.done .cb{background:var(--gold);border-color:var(--gold)}
+.stg .sn{flex:1;font-size:14px}
+.stg.done .sn{color:var(--ink-dim);text-decoration:line-through}
+.stg .cnt{display:flex;align-items:center;gap:9px}
+.stg .cnt b{font-size:15px;color:var(--gold);font-variant-numeric:tabular-nums;min-width:20px;text-align:center}
+.stg .cnt button{width:32px;height:32px;border-radius:9px;background:none;
+  border:1px solid var(--gold-dim);color:var(--gold);font-size:16px}
+.linedel{background:none;border:none;color:#5A3A38;font-size:12px;letter-spacing:.1em;padding:6px 0 0}
+
+/* ===== 战绩 ===== */
+.stat-hero{display:flex;gap:10px;padding:16px 20px 4px}
+.stat-box{flex:1;background:var(--card);border:1px solid var(--line);border-radius:15px;
+  padding:16px 10px;text-align:center}
+.stat-box b{display:block;font-size:28px;font-weight:200;color:var(--gold);
+  font-variant-numeric:tabular-nums}
+.stat-box span{font-size:10px;color:var(--ink-dim);letter-spacing:.2em;margin-top:6px;display:block}
+.srow{display:flex;justify-content:space-between;align-items:baseline;
+  padding:12px 2px;border-bottom:1px solid var(--line)}
+.srow .n{font-size:14px}
+.srow .v{font-size:12px;color:var(--ink-dim);font-variant-numeric:tabular-nums;text-align:right}
+.srow .v b{color:var(--ink);font-weight:500}
+
+/* ===== sheet ===== */
+.sheet{position:fixed;inset:0;background:rgba(3,2,6,.78);display:none;
+  align-items:flex-end;z-index:40}
+.sheet.on{display:flex}
+.sheet-in{background:#110E18;border-radius:22px 22px 0 0;width:100%;
+  padding:24px 22px calc(26px + env(safe-area-inset-bottom));
+  border-top:1px solid #262034;max-height:82vh;overflow-y:auto}
+.sheet-in h3{font-weight:500;font-size:15px;letter-spacing:.2em;margin-bottom:16px;color:var(--gold)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;color:var(--ink-dim);margin-bottom:6px;letter-spacing:.15em}
+.field input,.field textarea,.field select{width:100%;background:#0A0810;
+  border:1px solid #262034;border-radius:12px;color:var(--ink);
+  padding:12px 13px;font-size:15px}
+.field textarea{min-height:120px;resize:vertical;line-height:1.7}
+.seg{display:flex;gap:8px}
+.seg button{flex:1;background:none;border:1px solid #262034;color:var(--ink-dim);
+  border-radius:11px;padding:11px;font-size:13px;letter-spacing:.08em}
+.seg button.on{border-color:var(--gold);color:var(--gold)}
+.sh-btns{display:flex;gap:10px;margin-top:6px}
+.sh-btns button{flex:1;border-radius:13px;padding:14px;font-size:15px;border:none}
+.b-gold{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#14100A;font-weight:600}
+.b-dim{background:none;border:1px solid #262034;color:var(--ink-dim)}
+.hint{font-size:11px;color:var(--ink-dim);line-height:1.9;margin-top:-6px;margin-bottom:12px}
+
+/* ===== feedback pop ===== */
+#pop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+  z-index:60;pointer-events:none}
+#pop.on{display:flex}
+.pop-in{text-align:center;padding:0 34px;transform:scale(.92);opacity:0;
+  transition:all .45s cubic-bezier(.2,.9,.3,1.3)}
+#pop.show .pop-in{transform:scale(1);opacity:1}
+.pop-main{font-size:24px;font-weight:300;color:var(--gold);letter-spacing:.06em;
+  line-height:1.7;text-shadow:0 0 30px rgba(240,199,94,.4)}
+.pop-sub{font-size:14px;color:var(--ink);margin-top:14px;line-height:1.9;opacity:.85}
+
+/* ===== ceremonies ===== */
+.cere{position:fixed;inset:0;z-index:80;display:none;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:0 30px;overflow:hidden}
+.cere.on{display:flex}
+#cereM{background:radial-gradient(ellipse at 50% 38%,#241A06 0%,#07060A 62%)}
+#cereN{background:radial-gradient(ellipse at 50% 62%,#0B1026 0%,#05040A 65%)}
+.halo{position:absolute;top:18%;left:50%;transform:translate(-50%,-50%);
+  width:230px;height:230px;border-radius:50%;filter:blur(46px);
+  background:radial-gradient(circle,rgba(240,199,94,.55) 0%,transparent 70%);
+  animation:halo 5s ease-in-out infinite}
+@keyframes halo{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.7}
+  50%{transform:translate(-50%,-50%) scale(1.18);opacity:1}}
+.halo.n{background:radial-gradient(circle,rgba(124,137,196,.4) 0%,transparent 70%);
+  animation-duration:7s}
+.c-eyebrow{font-size:11px;letter-spacing:.6em;color:var(--gold-dim);position:relative}
+.c-day{font-size:88px;font-weight:100;color:var(--gold);line-height:1.1;margin:10px 0 2px;
+  position:relative;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 44px rgba(240,199,94,.35)}
+.c-day small{font-size:20px;letter-spacing:.2em;color:var(--ink-dim);font-weight:300}
+.c-line{font-size:15px;color:var(--ink);line-height:2.1;margin-top:16px;position:relative;opacity:.9}
+.c-line b{color:var(--gold);font-weight:500}
+.c-list{margin-top:20px;position:relative;font-size:13px;color:var(--ink-dim);line-height:2.2}
+.c-list b{color:var(--gold);font-weight:500}
+.c-btn{margin-top:46px;position:relative;background:linear-gradient(135deg,var(--gold),var(--gold-deep));
+  color:#14100A;border:none;border-radius:16px;padding:17px 62px;
+  font-size:16px;font-weight:600;letter-spacing:.35em}
+.c-btn.night{background:none;border:1px solid #2A3050;color:var(--night)}
+.c-warm{font-size:17px;color:var(--ink);line-height:2.2;margin-top:22px;position:relative}
+.c-warm b{color:#A8B4E8;font-weight:500}
+.moon{position:relative;width:74px;height:74px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#C9D2F2,#5A6494);
+  box-shadow:0 0 50px rgba(124,137,196,.45);margin-bottom:26px;
+  animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips button{background:none;border:1px solid var(--line);color:var(--ink-dim);
+  border-radius:11px;padding:9px 15px;font-size:13px;letter-spacing:.06em}
+.chips button:active{border-color:var(--gold);color:var(--gold)}
+.snap-btns{display:flex;gap:8px;margin-top:10px}
+.snap-btns button{flex:1;background:none;border:1px solid var(--line);color:var(--ink-dim);
+  border-radius:12px;padding:12px;font-size:13px;letter-spacing:.08em}
+
+.c-chips{display:flex;gap:9px;margin-top:20px;position:relative;flex-wrap:wrap;justify-content:center}
+.c-chips button{background:none;border:1px solid #2A3050;color:var(--ink-dim);
+  border-radius:12px;padding:10px 18px;font-size:14px;letter-spacing:.1em}
+.c-chips button.on{border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(240,199,94,.18)}
+.n-weight{display:flex;gap:8px;margin-top:26px;position:relative;width:220px}
+.n-weight input{flex:1;background:rgba(10,12,26,.8);border:1px solid #2A3050;border-radius:12px;
+  color:var(--ink);padding:12px 14px;font-size:15px;text-align:center}
+.n-weight button{background:none;border:1px solid #2A3050;color:var(--night);
+  border-radius:12px;padding:0 18px;font-size:14px}
+
+#gate{position:fixed;inset:0;z-index:200;background:#07060A;display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:26px}
+#gate.on{display:flex}
+#gate .g-t{font-size:12px;letter-spacing:.5em;color:var(--gold-dim)}
+#gateIn{width:190px;background:none;border:none;border-bottom:1px solid #2b2438;
+  color:var(--gold);font-size:30px;text-align:center;letter-spacing:.45em;padding:10px}
+#gateIn:focus{outline:none;border-color:var(--gold-dim)}
+
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);
+  background:#1A1524;border:1px solid #2b2438;color:var(--ink);
+  padding:11px 20px;border-radius:12px;font-size:13px;letter-spacing:.05em;
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;white-space:nowrap}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ============ 今日 ============ -->
+<div id="tabToday" class="tab on">
+  <div class="hd"><div class="eyebrow">成 神 之 路</div></div>
+  <div class="day-big">
+    <div class="day-n"><span id="dayNum">1</span><small>DAY</small></div>
+    <div class="day-date" id="todayDate"></div>
+  </div>
+  <div class="sec" id="secLive" style="display:none">
+    <div class="sec-t">进 行 中</div>
+    <div id="liveList"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">快 照 · 随手一拍</div>
+    <div class="card">
+      <div class="chips" id="moodChips"></div>
+      <div class="snap-btns">
+        <button id="btnTrip">📍 出行打卡</button>
+        <button id="btnEnv">🌡 环境快照</button>
+        <button id="btnMoney">⚡ 能量槽</button>
+      </div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">今日任务 <button class="mini" id="btnAddTask">＋ 发布</button></div>
+    <div id="taskToday"></div>
+  </div>
+  <div class="sec" id="secLines0" style="display:none">
+    <div class="sec-t">任 务 线</div>
+    <div id="lineToday"></div>
+  </div>
+  <div class="sec" id="secEv" style="display:none">
+    <div class="sec-t">日 程 倒 计 时</div>
+    <div class="card" id="evList"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">修 炼 <button class="mini" id="btnAddWork">＋ 记一场运动</button></div>
+    <div id="workToday"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">燃 料 <button class="mini" id="btnAddEat">＋ 记一口</button></div>
+    <div class="card" id="eatToday"><div class="empty" style="padding:8px">今天还没入账</div></div>
+  </div>
+  <div class="sleepbar"><button class="b-sleep" id="btnSleep">睡 觉 · 收 官</button></div>
+</div>
+
+<!-- ============ 打点 ============ -->
+<div id="tabPoint" class="tab">
+  <div class="hd"><div class="eyebrow">打 点</div>
+    <h1 style="font-size:15px;letter-spacing:.1em;color:var(--ink-dim);font-weight:400;margin-top:10px">拍一下开始 · 再拍一下结算 · 可同时亮多个</h1></div>
+  <div class="grid" id="actGrid"></div>
+</div>
+
+<!-- ============ 任务 ============ -->
+<div id="tabTask" class="tab">
+  <div class="hd"><div class="eyebrow">任 务 系 统</div></div>
+  <div class="sec">
+    <div class="sec-t">任务板 <span>
+      <button class="mini" id="btnImportTask">粘贴导入</button>
+      <button class="mini" id="btnAddTask2">＋ 手动发布</button></span></div>
+    <div id="taskAll"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">任务线 <span>
+      <button class="mini" id="btnImportLine">粘贴导入</button>
+      <button class="mini" id="btnAddLine">＋ 手建</button></span></div>
+    <div id="lineAll"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">日程 <button class="mini" id="btnAddEv">＋ 添加</button></div>
+    <div class="card" id="evAll"><div class="empty">还没有日程</div></div>
+  </div>
+</div>
+
+<!-- ============ 战绩 ============ -->
+<div id="tabStat" class="tab">
+  <div class="hd"><div class="eyebrow">卷 王 面 板</div></div>
+  <div class="stat-hero">
+    <div class="stat-box"><b id="stDay">1</b><span>征程天数</span></div>
+    <div class="stat-box"><b id="stPoints">0</b><span>累计打点</span></div>
+    <div class="stat-box"><b id="stTasks">0</b><span>任务完成</span></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">各项累计</div>
+    <div class="card" id="stActs"><div class="empty">开始打点后这里会长出来</div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">最近入流（点错可删 · 点一下撤销）</div>
+    <div class="card" id="recentBox"><div class="empty">入流记录会出现在这里</div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">身体日志（原始数据 · 随时可调）</div>
+    <div class="card" id="stBody"><div class="empty">睡感 / 体重 / 运动 会记在这里</div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-t">账 本（PIN门）<button class="mini" id="btnLedgerImport" style="display:none">粘贴导入</button></div>
+    <div class="card" id="ledgerBox">
+      <button class="mini" id="btnLedgerUnlock" style="width:100%;padding:12px">解锁账本</button>
+      <div id="ledgerList" style="display:none"></div>
+    </div>
+  </div>
+  <div class="sec">
+    <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
+    <button class="mini" id="btnGate" style="width:100%;padding:13px;margin-bottom:8px">进门锁</button>
+    <button class="mini" id="btnExport" style="width:100%;padding:13px;margin-bottom:8px">⚙ 存档 · 一键甩给Claude或网盘</button>
+    <button class="mini" id="btnRestore" style="width:100%;padding:13px;margin-bottom:8px">📥 读档 · 从备份文件恢复</button>
+    <button class="mini" id="btnSnap" style="width:100%;padding:13px">🕰 本机快照回滚（近3天）</button>
+    <input type="file" id="fileRestore" accept=".json,application/json" style="display:none">
+  </div>
+</div>
+
+<!-- ============ NAV ============ -->
+<div class="nav">
+  <button data-tab="tabToday" class="on"><span class="ic">☀</span>今日</button>
+  <button data-tab="tabPoint"><span class="ic">◉</span>打点</button>
+  <button data-tab="tabTask"><span class="ic">⚔</span>任务</button>
+  <button data-tab="tabStat"><span class="ic">♛</span>战绩</button>
+</div>
+
+<!-- ============ SHEETS ============ -->
+<div class="sheet" id="shTask"><div class="sheet-in">
+  <h3>发布任务</h3>
+  <div class="field"><label>级别</label><div class="seg" id="tierSeg">
+    <button data-v="悬赏" class="on">悬赏</button><button data-v="主线">主线</button><button data-v="支线">支线</button></div></div>
+  <div class="field"><label>任务</label><input id="tTitle" maxlength="40" placeholder="要拿下什么"></div>
+  <div class="field"><label>哪天的任务</label><input id="tDate" type="date"></div>
+  <div class="field"><label>奖励（完成时念回给你）</label><input id="tReward" maxlength="60" placeholder="例：睡前一集想看的片 / 什么都行"></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="tSave">发布</button></div>
+</div></div>
+
+<div class="sheet" id="shLine"><div class="sheet-in">
+  <h3>粘贴导入（任务 + 任务线 · 一个框全吃）</h3>
+  <div class="hint">#开头 = 任务线，下面各行是阶段（行尾 ×数字 = 计数阶段）<br>普通行 = 任务板任务：日期 级别 任务 | 奖励:xxx（日期级别可省）<br>可以混着粘，空行隔开。Claude返回的块直接全选粘贴。</div>
+  <div class="field"><textarea id="lineText" placeholder="#招工视频
+初剪
+精剪
+面试 ×5
+
+2026-08-06 主线 收货验货入库 | 奖励:一集剧
+补垃圾袋"></textarea></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="lineSave">全部入库</button></div>
+</div></div>
+
+<div class="sheet" id="shEv"><div class="sheet-in">
+  <h3>添加日程</h3>
+  <div class="field"><label>事项</label><input id="evName" maxlength="30" placeholder="例：修车 / 巴黎进货"></div>
+  <div class="field"><label>日期</label><input id="evDate" type="date"></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="evSave">添加</button></div>
+</div></div>
+
+<div class="sheet" id="shMoodNote"><div class="sheet-in">
+  <h3>顺手补一句（可跳过）</h3>
+  <div class="field"><label>在哪 / 在干嘛</label><input id="moodNote" maxlength="40" placeholder="例：仓库理货"></div>
+  <div class="sh-btns"><button class="b-dim" data-close>跳过</button><button class="b-gold" id="moodNoteSave">入流</button></div>
+</div></div>
+
+<div class="sheet" id="shPin"><div class="sheet-in">
+  <h3 id="pinTitle">输入PIN</h3>
+  <div class="field"><input id="pinInput" type="password" maxlength="10" autocomplete="off" placeholder="4-10位 数字+字母" style="text-align:center;letter-spacing:.3em;font-size:19px"></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="pinOk">确认</button></div>
+</div></div>
+
+<div class="sheet" id="shLedger"><div class="sheet-in">
+  <h3>账本导入（Claude生成的粘贴块）</h3>
+  <div class="hint">每行一笔：日期 名目 金额（支出负数）<br>例：2026-08-03 Metro进货 -186.40<br>拍照发给Claude → 粘贴返回的块 → 入流</div>
+  <div class="field"><textarea id="ledgerText" placeholder="2026-08-03 Metro进货 -186.40
+2026-08-03 POS手续费 -3.20
+2026-08-04 外卖平台结算 +412.80"></textarea></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="ledgerSave">入流</button></div>
+</div></div>
+
+<div class="sheet" id="shMoney"><div class="sheet-in">
+  <h3>能量槽读数</h3>
+  <div class="field"><label>槽位（游戏代号，别写真实银行名）</label>
+    <input id="mSlot" maxlength="10" list="slotList" placeholder="主槽 / 战备槽 / 暗仓…">
+    <datalist id="slotList"></datalist></div>
+  <div class="field"><label>读数（€，只存在你手机本地）</label>
+    <input id="mAmount" type="number" step="0.01" inputmode="decimal" placeholder="今天的数"></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="mSave">入流</button></div>
+</div></div>
+
+<div class="sheet" id="shTrip"><div class="sheet-in">
+  <h3>出行打卡（定位自动抓）</h3>
+  <div class="field"><label>去哪 / 在哪</label><input id="tpPlace" maxlength="30" placeholder="例：Metro / 店里 / 泳池"></div>
+  <div class="field"><label>方式</label><div class="seg" id="tpModeSeg">
+    <button data-v="开车" class="on">开车</button><button data-v="走路">走路</button>
+    <button data-v="骑行">骑行</button><button data-v="其他">其他</button></div></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="tpSave">打卡</button></div>
+</div></div>
+
+<div class="sheet" id="shEnv"><div class="sheet-in">
+  <h3>环境快照（手动）</h3>
+  <div class="frow" style="display:flex;gap:12px">
+    <div class="field" style="flex:1"><label>气温 ℃</label><input id="envT" type="number" step="0.1" inputmode="decimal"></div>
+    <div class="field" style="flex:1"><label>湿度 %</label><input id="envH" type="number" inputmode="numeric"></div>
+  </div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="envSaveM">入流</button></div>
+</div></div>
+
+<div class="sheet" id="poke"><div class="sheet-in" style="border-top:1px solid var(--gold-dim)">
+  <h3 id="pokeQ" style="font-size:17px"></h3>
+  <div id="pokeBody"></div>
+  <div class="sh-btns"><button class="b-dim" id="pokeSkip">略过</button><button class="b-gold" id="pokeOk" style="display:none">入流</button></div>
+</div></div>
+
+<div class="sheet" id="shCount"><div class="sheet-in">
+  <h3 id="cntTitle">计数</h3>
+  <div class="seg" id="cntChips" style="margin-bottom:14px">
+    <button data-v="10">10</button><button data-v="15">15</button><button data-v="20" class="on">20</button>
+    <button data-v="30">30</button><button data-v="50">50</button></div>
+  <div class="field"><label>或自己填</label><input id="cntN" type="number" inputmode="numeric" placeholder="个数"></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="cntSave">入账</button></div>
+</div></div>
+
+<div class="sheet" id="shEat"><div class="sheet-in">
+  <h3>燃料入账（时间自动盖戳）</h3>
+  <div class="field"><label>吃了什么</label><input id="eatTxt" maxlength="60" placeholder="例：晚饭 三文鱼饭 / 一把坚果"></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="eatSave">入账</button></div>
+</div></div>
+
+<div class="sheet" id="shWork"><div class="sheet-in">
+  <h3>运动战报</h3>
+  <div class="field"><label>类型</label><div class="seg" id="wTypeSeg">
+    <button data-v="跑步" class="on">跑步</button><button data-v="游泳">游泳</button><button data-v="其他">其他</button></div></div>
+  <div class="field"><label>距离（km，可选）</label><input id="wKm" type="number" step="0.1" inputmode="decimal"></div>
+  <div class="field"><label>时长（分钟，可选）</label><input id="wMin" type="number" inputmode="numeric"></div>
+  <div class="field"><label>平均心率（可选）</label><input id="wAvg" type="number" inputmode="numeric"></div>
+  <div class="field"><label>最高心率（可选）</label><input id="wMax" type="number" inputmode="numeric"></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="wSave">入账</button></div>
+</div></div>
+
+<div class="sheet" id="shAct"><div class="sheet-in">
+  <h3>动作格子</h3>
+  <div class="field"><label>名称</label><input id="aName" maxlength="12" placeholder="例：洗碗"></div>
+  <div class="field"><label>类型</label><div class="seg" id="aTypeSeg">
+    <button data-v="timed" class="on">计时</button><button data-v="tap">轻点</button><button data-v="count">计数</button></div></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button>
+    <button class="b-dim" id="aDel" style="color:#C96A5A;display:none">删除</button>
+    <button class="b-gold" id="aSave">保存</button></div>
+</div></div>
+
+<!-- ============ POP & CEREMONIES ============ -->
+<div id="pop"><div class="pop-in"><div class="pop-main" id="popMain"></div><div class="pop-sub" id="popSub"></div></div></div>
+
+<div class="cere" id="cereM">
+  <div class="halo"></div>
+  <div class="c-eyebrow">欢 迎 回 到 这 个 世 界</div>
+  <div class="c-day"><span id="cDay">1</span><small> DAY</small></div>
+  <div class="c-line" id="cSleep"></div>
+  <div class="c-chips" id="cChips"></div>
+  <div class="c-line" id="cGreet"></div>
+  <div class="c-list" id="cEvents"></div>
+  <div class="c-list" id="cTasks"></div>
+  <button class="c-btn" id="cGo">开 启 今 日</button>
+  <button class="c-btn night" id="cBackSleep" style="margin-top:14px;padding:13px 40px;font-size:13px">继 续 睡</button>
+</div>
+
+<div class="cere" id="cereN">
+  <div class="halo n"></div>
+  <div class="moon"></div>
+  <div class="c-eyebrow" style="color:#5A6494">今 日 收 官</div>
+  <div class="c-line" id="nReport"></div>
+  <div class="c-warm" id="nWarm"></div>
+  <div class="n-weight"><input id="nWeight" type="number" step="0.1" inputmode="decimal" placeholder="体重 kg · 可选"><button id="nWeightSave">记</button></div>
+  <button class="c-btn night" id="nWake">醒 了</button>
+</div>
+
+<div id="gate"><div class="g-t">成 神 之 路</div>
+  <input id="gateIn" type="password" maxlength="10" autocomplete="off">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+const KEY='shenlu_v1';
+const $=id=>document.getElementById(id);
+const now=()=>Date.now();
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+
+const DEFAULT_ACTS=[
+  {id:'a1',name:'出菜上菜',type:'timed'},{id:'a2',name:'备料',type:'timed'},
+  {id:'a3',name:'洗碗',type:'timed'},{id:'a4',name:'幽灵机',type:'timed'},
+  {id:'a5',name:'扫拖地',type:'timed'},{id:'a6',name:'灶台',type:'timed'},
+  {id:'a7',name:'丢垃圾',type:'tap'},{id:'a8',name:'叫货排班',type:'timed'},
+  {id:'a9',name:'理仓库',type:'timed'},{id:'a10',name:'午休',type:'timed'},
+  {id:'a11',name:'洗澡',type:'timed'},{id:'a12',name:'刷牙',type:'tap'},
+  {id:'a13',name:'呼吸机换水',type:'tap'}
+];
+let S=load()||{
+  start:todayStr(),
+  acts:DEFAULT_ACTS,
+  timed:[],   // {aid,start,end,day}
+  taps:[],    // {aid,ts,day}
+  active:{},  // aid -> startTs
+  sleep:{start:null,lastDur:null},
+  tasks:[],   // {id,tier,title,reward,done,day}
+  lines:[],   // {id,title,stages:[{n,type,done,count,target}]}
+  events:[],  // {id,name,date}
+  tasksDone:0
+};
+function load(){try{const v=localStorage.getItem(KEY);return v?JSON.parse(v):null}catch(e){return null}}
+S.body=S.body||{weights:[],feels:[]};
+S.workouts=S.workouts||[];
+S.counts=S.counts||[];
+S.eats=S.eats||[];
+S.sleeps=S.sleeps||[];
+S.moods=S.moods||[];
+S.trips=S.trips||[];
+S.envs=S.envs||[];
+S.pings=S.pings||[];
+S.money=S.money||[];
+S.ledger=S.ledger||[];
+S.pin=S.pin||null;
+if(S.voice===undefined)S.voice=true;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function uid(){return 'x'+Math.random().toString(36).slice(2,9)}
+function vibe(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('on');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1900)}
+function dayNum(){const a=new Date(S.start+'T00:00:00'),b=new Date(todayStr()+'T00:00:00');
+  return Math.round((b-a)/86400000)+1}
+function fmtDur(ms){const m=ms/60000;
+  if(m<1)return Math.round(ms/1000)+'秒';
+  if(m<60)return (m<10?(Math.round(m*10)/10):Math.round(m))+'分钟';
+  return Math.floor(m/60)+'小时'+Math.round(m%60)+'分'}
+
+/* ============ AUDIO ============ */
+let AC=null;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+  if(AC&&AC.state==='suspended')AC.resume();return AC}
+function tone(f,t0,dur,type,gain){const c=ac();if(!c)return;
+  const o=c.createOscillator(),g=c.createGain();
+  o.type=type||'sine';o.frequency.value=f;
+  g.gain.setValueAtTime(0,c.currentTime+t0);
+  g.gain.linearRampToValueAtTime(gain||.14,c.currentTime+t0+.02);
+  g.gain.exponentialRampToValueAtTime(.001,c.currentTime+t0+dur);
+  o.connect(g);g.connect(c.destination);
+  o.start(c.currentTime+t0);o.stop(c.currentTime+t0+dur+.05)}
+function sTick(){tone(1150,0,.09,'triangle',.1)}
+function sOff(){tone(760,0,.1,'triangle',.1);tone(1140,.09,.13,'triangle',.09)}
+function sDing(){[880,1108.7,1318.5,1760].forEach((f,i)=>tone(f,i*.09,.35,'sine',.12))}
+function sEpic(){
+  [130.8,164.8,196,261.6].forEach(f=>tone(f,0,2.2,'sawtooth',.045));
+  [523.3,659.3,784].forEach((f,i)=>tone(f,.5+i*.16,1.4,'sine',.08));
+  tone(1046.5,1.05,1.8,'sine',.1)}
+function sLull(){[523.3,392,329.6,261.6].forEach((f,i)=>tone(f,i*.5,1.5,'sine',.07))}
+
+/* ============ FEEDBACK LINES ============ */
+const CHEERS=['任务拿下','干净利落','又下一城','就是这个节奏','稳','这一单结了','漂亮'];
+const M_GREET=['状态归位，世界已就绪','今天也是拉开差距的一天','规则由你来写','醒来即领先','棋盘已摆好，该你落子','这一天是你的地盘'];
+const N_WARM=[
+  '亲爱的，今天辛苦了，你做得很好',
+  '你今天很棒，剩下的交给睡眠',
+  '一天打完，收兵。爱你，好好睡',
+  '你已经比昨天更强了，安心睡',
+  '今天所有的付出都记下了，一分不少',
+  '辛苦了，把肩膀放下来，明天照样赢',
+  '你很好，真的很好。晚安',
+  '灯熄了，火还在。安眠',
+  '慢慢呼吸，今天圆满了',
+  '睡吧，账都替你记着呢'];
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+
+function pop(main,sub,sound){
+  $('popMain').textContent=main;$('popSub').innerHTML=sub||'';
+  const p=$('pop');p.classList.add('on');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>p.classList.add('show')));
+  if(sound==='ding')sDing();else if(sound==='off')sOff();else sTick();
+  clearTimeout(p._t);
+  p._t=setTimeout(()=>{p.classList.remove('show');
+    setTimeout(()=>p.classList.remove('on'),450)},sound==='ding'?2600:1900)}
+
+/* ============ TABS ============ */
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{
+  ac();
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id===b.dataset.tab));
+  renderAll()}));
+
+/* ============ SHEETS generic ============ */
+document.querySelectorAll('.sheet').forEach(sh=>{
+  sh.addEventListener('click',e=>{if(e.target===sh)sh.classList.remove('on')});
+  sh.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>sh.classList.remove('on')))});
+function seg(el){el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  el.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))}))}
+seg($('tierSeg'));seg($('aTypeSeg'));
+function segVal(el){const b=el.querySelector('button.on');return b?b.dataset.v:null}
+
+/* ============ TASKS ============ */
+function openTask(){$('tTitle').value='';$('tReward').value='';$('tDate').value=todayStr();$('shTask').classList.add('on')}
+$('btnAddTask').addEventListener('click',openTask);
+$('btnAddTask2').addEventListener('click',openTask);
+$('tSave').addEventListener('click',()=>{
+  const title=$('tTitle').value.trim();if(!title){toast('写点什么吧');return}
+  S.tasks.push({id:uid(),tier:segVal($('tierSeg'))||'悬赏',title,
+    reward:$('tReward').value.trim(),done:false,day:$('tDate').value||todayStr()});
+  save();$('shTask').classList.remove('on');sTick();renderAll()});
+function doneTask(id){
+  const t=S.tasks.find(x=>x.id===id);if(!t||t.done)return;
+  t.done=true;t.doneDay=todayStr();S.tasksDone++;save();
+  vibe([60,80,60,80,140]);
+  pop(pick(CHEERS),(t.reward?'奖励已到账：<b style="color:var(--gold)">'+esc(t.reward)+'</b><br>':'')+'「'+esc(t.title)+'」完成 · 累计 '+S.tasksDone+' 个','ding');
+  renderAll()}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function taskRow(t,showDone){
+  const d=document.createElement('div');d.className='card tk-row';
+  const future=t.day>todayStr();
+  d.innerHTML='<div class="tk-tier">'+t.tier+'</div><div class="tk-title"></div>'
+    +(future?'<span style="color:var(--ink-dim);font-size:11px;flex:none">'+t.day.slice(5)+'</span>':'')
+    +(showDone&&!future?'<button class="tk-done">提交</button>':'')
+    +(!showDone?'<span style="color:var(--gold-dim);font-size:12px">✓</span>':'');
+  d.querySelector('.tk-title').textContent=t.title;
+  const doneBtn=d.querySelector('.tk-done');
+  if(doneBtn)doneBtn.addEventListener('click',()=>doneTask(t.id));
+  if(!showDone){d.style.opacity=.45;
+    d.addEventListener('click',()=>{if(confirm('删除这条已完成任务？')){
+      S.tasks=S.tasks.filter(x=>x.id!==t.id);save();renderAll()}})}
+  return d}
+$('btnImportTask').addEventListener('click',()=>{
+  $('lineText').value='';$('shLine').classList.add('on')});
+function renderTasks(){
+  const today=todayStr();
+  const open=S.tasks.filter(t=>!t.done&&t.day<=today);
+  const bo=$('taskToday');bo.innerHTML='';
+  if(!open.length)bo.innerHTML='<div class="empty">任务板是空的<br>发布一条，今天就有目标了</div>';
+  else{const ord={'悬赏':0,'主线':1,'支线':2};
+    open.slice().sort((a,b)=>ord[a.tier]-ord[b.tier]).forEach(t=>bo.appendChild(taskRow(t,true)))}
+  const all=$('taskAll');all.innerHTML='';
+  if(!S.tasks.length)all.innerHTML='<div class="empty">还没有任务</div>';
+  else{S.tasks.filter(t=>!t.done).slice().sort((a,b)=>a.day<b.day?-1:1)
+      .forEach(t=>all.appendChild(taskRow(t,true)));
+    S.tasks.filter(t=>t.done).slice(-8).reverse().forEach(t=>all.appendChild(taskRow(t,false)))}}
+
+/* ============ QUEST LINES ============ */
+$('btnImportLine').addEventListener('click',()=>{$('lineText').value='';$('shLine').classList.add('on')});
+$('btnAddLine').addEventListener('click',()=>{$('lineText').value='';$('shLine').classList.add('on')});
+$('lineSave').addEventListener('click',()=>{
+  const raw=$('lineText').value;
+  if(!raw.trim()){toast('先粘贴或输入');return}
+  const newLines=[],newTasks=[];
+  let cur=null;
+  raw.split('\n').forEach(rl=>{
+    let l=rl.trim();
+    if(!l){cur=null;return}
+    if(l.startsWith('#')){
+      cur={id:uid(),title:l.replace(/^#+\s*/,'')||'任务线',stages:[]};
+      newLines.push(cur);return}
+    if(cur){
+      l=l.replace(/^[-*•·]\s*/,'');
+      const m=l.match(/[×x*]\s*(\d+|\?)\s*$/i);
+      if(m){const tg=m[1]==='?'?0:parseInt(m[1]);
+        cur.stages.push({n:l.replace(/[×x*]\s*(\d+|\?)\s*$/i,'').trim(),type:'count',count:0,target:tg,done:false})}
+      else cur.stages.push({n:l,type:'check',done:false});
+      return}
+    // task line
+    let day=todayStr(),tier='悬赏',reward='';
+    const rm=l.match(/[|｜]\s*奖励[:：]\s*(.+)$/);
+    if(rm){reward=rm[1].trim();l=l.replace(/[|｜]\s*奖励[:：].+$/,'').trim()}
+    const dm=l.match(/^(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2})\s+/);
+    if(dm){day=dm[1];
+      if(day.includes('/')){const p=day.split('/');
+        day=new Date().getFullYear()+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0')}
+      l=l.slice(dm[0].length).trim()}
+    const tm=l.match(/^(悬赏|主线|支线)\s+/);
+    if(tm){tier=tm[1];l=l.slice(tm[0].length).trim()}
+    if(l)newTasks.push({id:uid(),tier,title:l,reward,done:false,day})});
+  const okLines=newLines.filter(L=>L.stages.length);
+  if(!okLines.length&&!newTasks.length){toast('没识别出内容，检查格式');return}
+  okLines.forEach(L=>S.lines.push(L));
+  newTasks.forEach(t=>S.tasks.push(t));
+  save();$('shLine').classList.remove('on');
+  vibe([50,70,50]);sDing();
+  const parts=[];
+  if(okLines.length)parts.push('任务线 <b style="color:var(--gold)">'+okLines.length+'</b> 条');
+  if(newTasks.length)parts.push('任务 <b style="color:var(--gold)">'+newTasks.length+'</b> 条');
+  pop('全部入库',parts.join(' · '),'ding');
+  renderAll()});
+function lineProgress(L){
+  const tot=L.stages.length;if(!tot)return 0;
+  let sc=0;
+  L.stages.forEach(s=>{
+    if(s.type==='check'){if(s.done)sc++}
+    else{if(s.target>0)sc+=Math.min(s.count/s.target,1);else if(s.count>0)sc+=1}});
+  return sc/tot}
+function lineCard(L){
+  const d=document.createElement('div');d.className='card line-card';
+  const p=Math.round(lineProgress(L)*100);
+  d.innerHTML='<div class="lt"><div class="n"></div><div class="p">'+p+'%</div></div>'
+    +'<div class="pbar"><i style="width:'+p+'%"></i></div>';
+  d.querySelector('.lt .n').textContent=L.title;
+  L.stages.forEach((s,si)=>{
+    const r=document.createElement('div');r.className='stg'+(s.done?' done':'');
+    if(s.type==='check'){
+      r.innerHTML='<div class="cb">'+(s.done?'✓':'')+'</div><div class="sn"></div>';
+      r.querySelector('.sn').textContent=s.n;
+      r.addEventListener('click',()=>{
+        s.done=!s.done;save();
+        if(s.done){vibe(60);
+          const np=Math.round(lineProgress(L)*100);
+          if(np>=100)pop('任务线通关','「'+esc(L.title)+'」100% 完成','ding');
+          else pop('推进','「'+esc(L.title)+'」→ '+np+'%','off')}
+        renderAll()})}
+    else{
+      r.innerHTML='<div class="cb" style="border-style:dashed">'+(s.done?'✓':'')+'</div>'
+        +'<div class="sn"></div><div class="cnt"><b>'+s.count+'</b>'
+        +(s.target?'<span style="font-size:11px;color:var(--ink-dim)">/'+s.target+'</span>':'')
+        +'<button>＋</button></div>';
+      r.querySelector('.sn').textContent=s.n;
+      r.querySelector('.cnt button').addEventListener('click',e=>{
+        e.stopPropagation();s.count++;vibe(45);
+        if(s.target&&s.count>=s.target)s.done=true;
+        save();sTick();
+        pop(s.n+' +1','累计 '+s.count+(s.target?' / '+s.target:''),'tick');
+        renderAll()})}
+    d.appendChild(r)});
+  const del=document.createElement('button');del.className='linedel';del.textContent='移除此线';
+  del.addEventListener('click',()=>{if(confirm('移除「'+L.title+'」？')){
+    S.lines=S.lines.filter(x=>x.id!==L.id);save();renderAll()}});
+  d.appendChild(del);
+  return d}
+function renderLines(){
+  const act=S.lines.filter(L=>lineProgress(L)<1);
+  $('secLines0').style.display=act.length?'block':'none';
+  const bt=$('lineToday');bt.innerHTML='';act.forEach(L=>bt.appendChild(lineCard(L)));
+  const ba=$('lineAll');ba.innerHTML='';
+  if(!S.lines.length)ba.innerHTML='<div class="empty">扔骨架给Claude → 粘贴进度包 → 任务线立起来</div>';
+  else S.lines.forEach(L=>ba.appendChild(lineCard(L)))}
+
+/* ============ EVENTS ============ */
+$('btnAddEv').addEventListener('click',()=>{
+  $('evName').value='';$('evDate').value=todayStr();$('shEv').classList.add('on')});
+$('evSave').addEventListener('click',()=>{
+  const n=$('evName').value.trim(),d=$('evDate').value;
+  if(!n||!d){toast('名字和日期都要');return}
+  S.events.push({id:uid(),name:n,date:d});save();
+  $('shEv').classList.remove('on');sTick();renderAll()});
+function evCountdown(e){
+  const t=new Date(todayStr()+'T00:00:00'),d=new Date(e.date+'T00:00:00');
+  return Math.round((d-t)/86400000)}
+function renderEvents(){
+  S.events=S.events.filter(e=>evCountdown(e)>=-1);save();
+  const list=S.events.slice().sort((a,b)=>a.date<b.date?-1:1);
+  $('secEv').style.display=list.length?'block':'none';
+  const b1=$('evList');b1.innerHTML='';
+  list.slice(0,4).forEach(e=>{
+    const cd=evCountdown(e);
+    const r=document.createElement('div');r.className='ev-row';
+    r.innerHTML='<div class="ev-name"></div><div class="ev-cd">'+(cd===0?'就是今天':cd<0?'昨天':'还有 '+cd+' 天')+'</div>';
+    r.querySelector('.ev-name').textContent=e.name;b1.appendChild(r)});
+  const b2=$('evAll');b2.innerHTML='';
+  if(!list.length)b2.innerHTML='<div class="empty">还没有日程</div>';
+  else list.forEach(e=>{
+    const cd=evCountdown(e);
+    const r=document.createElement('div');r.className='ev-row';
+    r.innerHTML='<div class="ev-name"></div><div class="ev-cd">'+(cd===0?'今天':cd<0?'昨天':cd+' 天')+'</div>';
+    r.querySelector('.ev-name').textContent=e.name;
+    r.addEventListener('click',()=>{if(confirm('删除「'+e.name+'」？')){
+      S.events=S.events.filter(x=>x.id!==e.id);save();renderAll()}});
+    b2.appendChild(r)})}
+
+/* ============ POINT GRID ============ */
+let editActId=null;
+function actStats(aid){
+  const logs=S.timed.filter(l=>l.aid===aid);
+  const taps=S.taps.filter(l=>l.aid===aid);
+  const today=todayStr();
+  return{
+    count:logs.length,tapCount:taps.length,
+    todayCount:logs.filter(l=>l.day===today).length+taps.filter(l=>l.day===today).length,
+    last:logs.length?logs[logs.length-1]:null,
+    best:logs.length?Math.min.apply(null,logs.map(l=>l.end-l.start)):null}}
+function feedbackTimed(a,dur,st){
+  const lines=[];
+  if(st.last){
+    const prev=st.last.end-st.last.start;
+    const diff=prev-dur;
+    if(diff>30000)lines.push('比上次快了 <b style="color:var(--gold)">'+fmtDur(diff)+'</b>');
+    else if(diff<-30000)lines.push('这一轮做得扎实 · 全部记下了');}
+  if(st.best!==null&&dur<st.best)lines.push('<b style="color:var(--gold)">个人纪录！</b>历史最快');
+  lines.push('今天第 '+(st.todayCount+1)+' 次 · 累计第 '+(st.count+1)+' 次');
+  return lines.join('<br>')}
+function renderGrid(){
+  const g=$('actGrid');g.innerHTML='';
+  S.acts.forEach(a=>{
+    const st=actStats(a.id);
+    const lit=!!S.active[a.id];
+    const d=document.createElement('div');
+    d.className='act'+(lit?' lit':'')+(a.type==='tap'?' tapkind':'');
+    let sub;
+    const cntTot=S.counts.filter(c=>c.aid===a.id).reduce((s,c)=>s+c.n,0);
+    const cntToday=S.counts.filter(c=>c.aid===a.id&&c.day===todayStr()).reduce((s,c)=>s+c.n,0);
+    if(lit)sub='进行中 · 拍一下结算';
+    else if(a.type==='tap')sub='累计 '+st.tapCount+' 次';
+    else if(a.type==='count')sub=cntTot?('今天 '+cntToday+' · 累计 '+cntTot):'拍一下计数';
+    else sub=st.count?('累计 '+st.count+' 次'):'拍一下开始';
+    d.innerHTML='<div class="nm"></div><div class="st">'+sub+'</div>';
+    d.querySelector('.nm').textContent=a.name;
+    d.addEventListener('click',()=>{ac();
+      if(a.type==='count'){openCount(a);return}
+      if(a.type==='tap'){
+        S.taps.push({aid:a.id,ts:now(),day:todayStr()});save();
+        vibe(40);sTick();
+        pop(a.name+' ✓','累计第 '+(st.tapCount+1)+' 次','tick');
+        renderAll();return}
+      if(!lit){S.active[a.id]=now();save();vibe(50);sTick();renderAll()}
+      else{
+        const dur=now()-S.active[a.id];
+        delete S.active[a.id];
+        if(dur<20000){save();toast('手滑豁免 ✓');renderAll();return}
+        S.timed.push({aid:a.id,start:now()-dur,end:now(),day:todayStr()});
+        save();vibe([50,70,50]);
+        pop(a.name+' · '+fmtDur(dur),feedbackTimed(a,dur,st),'off');
+        renderAll()}});
+    let pt=null;
+    d.addEventListener('touchstart',()=>{pt=setTimeout(()=>{openActSheet(a.id)},750)});
+    d.addEventListener('touchend',()=>clearTimeout(pt));
+    d.addEventListener('touchmove',()=>clearTimeout(pt));
+    g.appendChild(d)});
+  const add=document.createElement('button');add.className='act-edit';
+  add.textContent='＋ 加一个动作格子（长按格子可编辑）';
+  add.addEventListener('click',()=>openActSheet(null));
+  g.appendChild(add)}
+function openActSheet(id){
+  editActId=id;
+  const a=id?S.acts.find(x=>x.id===id):null;
+  $('aName').value=a?a.name:'';
+  $('aTypeSeg').querySelectorAll('button').forEach(b=>
+    b.classList.toggle('on',b.dataset.v===(a?a.type:'timed')));
+  $('aDel').style.display=a?'block':'none';
+  $('shAct').classList.add('on')}
+$('aSave').addEventListener('click',()=>{
+  const name=$('aName').value.trim();if(!name){toast('起个名');return}
+  const type=segVal($('aTypeSeg'))||'timed';
+  if(editActId){const a=S.acts.find(x=>x.id===editActId);a.name=name;a.type=type}
+  else S.acts.push({id:uid(),name,type});
+  save();$('shAct').classList.remove('on');renderAll()});
+$('aDel').addEventListener('click',()=>{
+  if(confirm('删除这个格子？（历史数据保留）')){
+    S.acts=S.acts.filter(x=>x.id!==editActId);
+    delete S.active[editActId];save();
+    $('shAct').classList.remove('on');renderAll()}});
+
+/* ============ LIVE on 今日 ============ */
+function renderLive(){
+  const ids=Object.keys(S.active);
+  $('secLive').style.display=ids.length?'block':'none';
+  const b=$('liveList');b.innerHTML='';
+  ids.forEach(aid=>{
+    const a=S.acts.find(x=>x.id===aid);if(!a)return;
+    const d=document.createElement('div');d.className='card live-row';
+    d.innerHTML='<div class="live-dot"></div><div class="live-name"></div><button class="live-off">结算</button>';
+    d.querySelector('.live-name').textContent=a.name;
+    d.querySelector('.live-off').addEventListener('click',()=>{
+      const st=actStats(aid);
+      const dur=now()-S.active[aid];delete S.active[aid];
+      if(dur<20000){save();toast('手滑豁免 ✓');renderAll();return}
+      S.timed.push({aid,start:now()-dur,end:now(),day:todayStr()});save();
+      vibe([50,70,50]);pop(a.name+' · '+fmtDur(dur),feedbackTimed(a,dur,st),'off');
+      renderAll()});
+    b.appendChild(d)})}
+
+/* ============ SLEEP & CEREMONIES ============ */
+$('btnSleep').addEventListener('click',()=>{ac();startNight()});
+function startNight(){
+  S.sleep.start=now();save();
+  const today=todayStr();
+  const nPts=S.timed.filter(l=>l.day===today).length+S.taps.filter(l=>l.day===today).length;
+  const nTk=S.tasks.filter(t=>t.done&&t.doneDay===today).length;
+  const ms=S.timed.filter(l=>l.day===today).reduce((s,l)=>s+(l.end-l.start),0);
+  $('nReport').innerHTML='今日战报：打点 <b>'+nPts+'</b> 次 · 完成任务 <b>'+nTk+'</b> 个'
+    +(ms?' · 在线 <b>'+fmtDur(ms)+'</b>':'');
+  const warmLine=pick(N_WARM);
+  $('nWarm').innerHTML='<b>'+warmLine+'</b>';
+  speak(warmLine);
+  $('nWeight').value='';$('nWeight').placeholder='体重 kg · 可选';
+  $('cereN').classList.add('on');
+  sLull();vibe([80,120,200])}
+$('nWake').addEventListener('click',()=>{ac();wakeUp()});
+function wakeUp(){
+  let slept=null;
+  if(S.sleep.start){slept=now()-S.sleep.start;
+    if(slept<900000){slept=null;S.sleep.start=null;save()}
+    else{S.sleeps.push({start:S.sleep.start,end:now(),day:todayStr(),ms:slept});
+      S.sleep.lastDur=slept;S.sleep.start=null;save()}}
+  $('cereN').classList.remove('on');
+  $('cDay').textContent=dayNum();
+  $('cSleep').innerHTML=slept?('睡了 <b>'+fmtDur(slept)+'</b>'):'';
+  const greet=pick(M_GREET);
+  $('cGreet').textContent=greet;
+  speak('第'+dayNum()+'天，欢迎回到这个世界。'+greet);
+  renderChips();
+  const evs=S.events.slice().sort((a,b)=>a.date<b.date?-1:1)
+    .map(e=>{const cd=evCountdown(e);return cd>=0?('<div>'+esc(e.name)+' · <b>'+(cd===0?'今天':'还有'+cd+'天')+'</b></div>'):''})
+    .filter(Boolean).slice(0,3).join('');
+  $('cEvents').innerHTML=evs;
+  const open=S.tasks.filter(t=>!t.done).length;
+  $('cTasks').innerHTML=open?('任务板待办 <b>'+open+'</b> 条'):'任务板空着 · 醒来先发布今天的悬赏';
+  $('cereM').classList.add('on');
+  sEpic();vibe([60,80,60,80,60,80,180])}
+$('cGo').addEventListener('click',()=>{
+  $('cereM').classList.remove('on');
+  document.querySelector('.nav button[data-tab="tabToday"]').click()});
+$('cBackSleep').addEventListener('click',()=>{
+  $('cereM').classList.remove('on');
+  S.sleep.start=now();save();
+  $('nReport').innerHTML='';
+  $('nWarm').innerHTML='<b>接着睡 · 都记着呢</b>';
+  $('nWeight').value='';$('nWeight').placeholder='体重 kg · 可选';
+  $('cereN').classList.add('on');vibe(60)});
+
+/* ============ STATS ============ */
+function renderStats(){
+  $('stDay').textContent=dayNum();
+  $('stPoints').textContent=S.timed.length+S.taps.length;
+  $('stTasks').textContent=S.tasksDone;
+  const box=$('stActs');box.innerHTML='';
+  let any=false;
+  S.acts.forEach(a=>{
+    const st=actStats(a.id);
+    if(a.type==='tap'){if(!st.tapCount)return;any=true;
+      const r=document.createElement('div');r.className='srow';
+      r.innerHTML='<div class="n"></div><div class="v"><b>'+st.tapCount+'</b> 次</div>';
+      r.querySelector('.n').textContent=a.name;box.appendChild(r);return}
+    if(!st.count)return;any=true;
+    const logs=S.timed.filter(l=>l.aid===a.id);
+    const tot=logs.reduce((s,l)=>s+(l.end-l.start),0);
+    const r=document.createElement('div');r.className='srow';
+    r.innerHTML='<div class="n"></div><div class="v"><b>'+st.count+'</b> 次 · 共 '+fmtDur(tot)
+      +'<br>最快 '+fmtDur(st.best)+'</div>';
+    r.querySelector('.n').textContent=a.name;box.appendChild(r)});
+  if(!any)box.innerHTML='<div class="empty">开始打点后这里会长出来</div>'}
+function renderVoiceBtn(){$('btnVoice').textContent='语音陪伴：'+(S.voice?'开':'关')}
+$('btnVoice').addEventListener('click',()=>{
+  S.voice=!S.voice;save();renderVoiceBtn();
+  if(S.voice)speak('语音陪伴已开启');
+  toast('语音陪伴已'+(S.voice?'开启':'关闭'))});
+renderVoiceBtn();
+$('btnExport').addEventListener('click',async()=>{
+  const json=JSON.stringify(S,null,1);
+  const fname='shenlu_'+todayStr()+'.json';
+  S.lastBackup=now();save();
+  try{
+    const file=new File([json],fname,{type:'application/json'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:'成神之路数据包'});
+      toast('已交给系统');return}
+  }catch(e){}
+  const blob=new Blob([json],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=fname;
+  a.click();toast('已导出')});
+
+/* ============ COUNT ACTS & FUEL ============ */
+seg($('cntChips'));
+let cntActId=null;
+function openCount(a){
+  cntActId=a.id;$('cntTitle').textContent=a.name;$('cntN').value='';
+  $('shCount').classList.add('on')}
+$('cntSave').addEventListener('click',()=>{
+  const n=parseInt($('cntN').value)||parseInt(segVal($('cntChips')))||0;
+  if(n<=0){toast('填个数');return}
+  S.counts.push({aid:cntActId,n,ts:now(),day:todayStr()});save();
+  $('shCount').classList.remove('on');
+  const a=S.acts.find(x=>x.id===cntActId);
+  const today=S.counts.filter(c=>c.aid===cntActId&&c.day===todayStr()).reduce((s,c)=>s+c.n,0);
+  const tot=S.counts.filter(c=>c.aid===cntActId).reduce((s,c)=>s+c.n,0);
+  vibe([50,70,50]);sOff();
+  pop(a.name+' +'+n,'今天 '+today+' · 累计 <b style="color:var(--gold)">'+tot+'</b>','off');
+  renderAll()});
+function fmtTime(ts){const d=new Date(ts);
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+$('btnAddEat').addEventListener('click',()=>{
+  $('eatTxt').value='';$('shEat').classList.add('on');
+  setTimeout(()=>$('eatTxt').focus(),150)});
+$('eatSave').addEventListener('click',()=>{
+  const txt=$('eatTxt').value.trim();if(!txt){toast('写一口');return}
+  S.eats.push({ts:now(),day:todayStr(),txt});save();
+  $('shEat').classList.remove('on');sTick();vibe(40);
+  pop('燃料入账 · '+fmtTime(now()),esc(txt),'tick');
+  renderAll()});
+function renderEats(){
+  const b=$('eatToday');b.innerHTML='';
+  const es=S.eats.filter(e=>e.day===todayStr());
+  if(!es.length){b.innerHTML='<div class="empty" style="padding:8px">今天还没入账</div>';return}
+  es.forEach(e=>{
+    const r=document.createElement('div');r.className='ev-row';
+    r.innerHTML='<div class="ev-name" style="font-size:14px"></div><div class="ev-cd" style="font-size:13px">'+fmtTime(e.ts)+'</div>';
+    r.querySelector('.ev-name').textContent=e.txt;
+    r.addEventListener('click',()=>{if(confirm('删除这条？')){
+      S.eats=S.eats.filter(x=>x!==e);save();renderAll()}});
+    b.appendChild(r)})}
+
+/* ============ SNAPSHOT: MOOD / TRIP / ENV ============ */
+const MOOD_LABELS=['开心','平稳','一般','有点沉','疲惫'];
+const PRAISE=['顺便说一句：你最近的节奏，很稳','没事，就是想说你干得不错','这个点还在推进的人不多，你算一个','戳你一下:继续，别回头','今天的你已经在账上了，很厚实','就是路过，看你玩得挺好'];
+function speak(t){if(!S.voice)return;
+  try{const u=new SpeechSynthesisUtterance(t);u.lang='zh-CN';u.rate=1.05;
+    speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+let lastMoodRec=null;
+(function buildMood(){
+  const c=$('moodChips');
+  MOOD_LABELS.forEach(l=>{
+    const b=document.createElement('button');b.textContent=l;
+    b.addEventListener('click',()=>{
+      const rec={ts:now(),day:todayStr(),label:l};
+      S.moods.push(rec);save();lastMoodRec=rec;
+      vibe(40);sTick();
+      $('moodNote').value='';$('shMoodNote').classList.add('on')});
+    c.appendChild(b)})})();
+$('moodNoteSave').addEventListener('click',()=>{
+  const txt=$('moodNote').value.trim();
+  if(txt&&lastMoodRec){lastMoodRec.note=txt;save()}
+  $('shMoodNote').classList.remove('on');
+  pop('状态已入流 · '+fmtTime(now()),(lastMoodRec?lastMoodRec.label:'')+(txt?' · '+esc(txt):''),'tick')});
+seg($('tpModeSeg'));
+$('btnTrip').addEventListener('click',()=>{
+  $('tpPlace').value='';$('shTrip').classList.add('on')});
+$('tpSave').addEventListener('click',()=>{
+  const rec={ts:now(),day:todayStr(),place:$('tpPlace').value.trim()||null,
+    mode:segVal($('tpModeSeg'))||'其他',lat:null,lng:null};
+  S.trips.push(rec);save();
+  $('shTrip').classList.remove('on');sTick();vibe(40);
+  pop('出行已打卡 · '+fmtTime(now()),(rec.place?esc(rec.place)+' · ':'')+rec.mode,'tick');
+  if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>{
+    rec.lat=Math.round(p.coords.latitude*1e5)/1e5;
+    rec.lng=Math.round(p.coords.longitude*1e5)/1e5;save()},
+    ()=>{},{timeout:6000,maximumAge:120000});
+  renderAll()});
+$('btnEnv').addEventListener('click',()=>{
+  toast('抓取中…');
+  if(!navigator.geolocation){$('shEnv').classList.add('on');return}
+  navigator.geolocation.getCurrentPosition(p=>{
+    const la=p.coords.latitude,lo=p.coords.longitude;
+    fetch('https://api.open-meteo.com/v1/forecast?latitude='+la+'&longitude='+lo
+      +'&current=temperature_2m,relative_humidity_2m')
+      .then(r=>r.json()).then(j=>{
+        const t=j.current.temperature_2m,h=j.current.relative_humidity_2m;
+        S.envs.push({ts:now(),day:todayStr(),t,h,
+          lat:Math.round(la*1e5)/1e5,lng:Math.round(lo*1e5)/1e5});save();
+        vibe(40);sOff();
+        pop(t+'°C · 湿度 '+h+'%','环境已入流 · '+fmtTime(now()),'off');renderAll()})
+      .catch(()=>$('shEnv').classList.add('on'))},
+    ()=>$('shEnv').classList.add('on'),{timeout:7000,maximumAge:300000})});
+$('envSaveM').addEventListener('click',()=>{
+  const t=parseFloat($('envT').value),h=parseInt($('envH').value);
+  if(isNaN(t)&&isNaN(h)){toast('至少填一个');return}
+  S.envs.push({ts:now(),day:todayStr(),t:isNaN(t)?null:t,h:isNaN(h)?null:h,lat:null,lng:null});
+  save();$('shEnv').classList.remove('on');sTick();
+  pop('环境已入流 · '+fmtTime(now()),(isNaN(t)?'':t+'°C ')+(isNaN(h)?'':'湿度'+h+'%'),'tick');
+  renderAll()});
+
+$('btnMoney').addEventListener('click',()=>{
+  $('mAmount').value='';
+  const slots=[...new Set(S.money.map(m=>m.slot||'主槽'))];
+  $('slotList').innerHTML=slots.map(s=>'<option value="'+esc(s)+'">').join('');
+  $('mSlot').value=slots[0]||'主槽';
+  $('shMoney').classList.add('on')});
+$('mSave').addEventListener('click',()=>{
+  const v=parseFloat($('mAmount').value);
+  if(isNaN(v)){toast('填个数');return}
+  const slot=$('mSlot').value.trim()||'主槽';
+  S.money=S.money.filter(x=>!(x.day===todayStr()&&(x.slot||'主槽')===slot));
+  S.money.push({ts:now(),day:todayStr(),slot,amount:v});save();
+  $('shMoney').classList.remove('on');vibe([50,70,50]);sOff();
+  pop('能量槽已记 · '+esc(slot),'读数入流 · '+fmtTime(now()),'off');
+  renderAll()});
+
+/* ============ LEDGER (PIN-gated) ============ */
+let ledgerOpen=false,pinMode='unlock';
+$('btnLedgerUnlock').addEventListener('click',()=>{
+  pinMode=S.pin?'unlock':'set';
+  $('pinTitle').textContent=S.pin?'输入PIN解锁账本':'首次使用 · 设一个PIN（记牢）';
+  $('pinInput').value='';$('shPin').classList.add('on');
+  setTimeout(()=>$('pinInput').focus(),150)});
+$('pinOk').addEventListener('click',()=>{
+  const v=$('pinInput').value.trim().toLowerCase();
+  if(!/^[a-z0-9]{4,10}$/.test(v)){toast('4-10位，数字和字母');return}
+  if(pinMode==='set'){S.pin=v;S.gate=true;S.lastUnlock=now();
+    if(gatePendingOn){gatePendingOn=false;
+      save();renderGateBtn();toast('PIN已设 · 进门锁已开启')}
+    else{save();renderGateBtn();unlockLedger();toast('PIN已设 · 进门锁同步开启')}}
+  else if(v===S.pin.toLowerCase()){unlockLedger()}
+  else{toast('再试一次');$('pinInput').value='';return}
+  $('shPin').classList.remove('on')});
+function unlockLedger(){
+  ledgerOpen=true;
+  $('btnLedgerUnlock').style.display='none';
+  $('btnLedgerImport').style.display='inline-block';
+  $('ledgerList').style.display='block';
+  renderLedger();sTick()}
+$('btnLedgerImport').addEventListener('click',()=>{
+  $('ledgerText').value='';$('shLedger').classList.add('on')});
+$('ledgerSave').addEventListener('click',()=>{
+  const lines=$('ledgerText').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  let added=0;
+  lines.forEach(l=>{
+    const m=l.match(/^(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2})\s+(.+?)\s+([+-]?\d+[.,]?\d*)\s*€?$/);
+    if(!m)return;
+    let day=m[1];
+    if(day.includes('/')){const p=day.split('/');
+      day=new Date().getFullYear()+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0')}
+    S.ledger.push({day,label:m[2],amount:parseFloat(m[3].replace(',','.')),ts:now()});
+    added++});
+  if(!added){toast('没识别出条目，检查格式');return}
+  save();$('shLedger').classList.remove('on');
+  vibe([50,70,50]);sDing();
+  pop('账本入流','<b style="color:var(--gold)">'+added+'</b> 笔已入账','ding');
+  renderLedger()});
+function renderLedger(){
+  if(!ledgerOpen)return;
+  const box=$('ledgerList');box.innerHTML='';
+  if(!S.ledger.length){box.innerHTML='<div class="empty">拍照发Claude → 粘贴返回块 → 入流</div>';return}
+  S.ledger.slice(-20).reverse().forEach(e=>{
+    const r=document.createElement('div');r.className='ev-row';
+    r.innerHTML='<div class="ev-name" style="font-size:13px"></div>'
+      +'<div class="ev-cd" style="font-size:13px;color:'+(e.amount>=0?'var(--gold)':'var(--ink-dim)')+'">'
+      +(e.amount>=0?'+':'')+e.amount.toFixed(2)+' €</div>';
+    r.querySelector('.ev-name').textContent=e.day.slice(5)+' · '+e.label;
+    box.appendChild(r)})}
+
+/* ============ AUTO-SNAPSHOT (minute-level) ============ */
+let dirty=false;
+const _save=save;
+save=function(){_save();dirty=true};
+function autoSnap(force){try{
+  if(!dirty&&!force)return;
+  const K=KEY+'_auto';
+  let snaps=JSON.parse(localStorage.getItem(K)||'[]');
+  snaps.push({ts:now(),data:JSON.stringify(S)});
+  if(snaps.length>12)snaps=snaps.slice(-12);
+  localStorage.setItem(K,JSON.stringify(snaps));dirty=false;
+}catch(e){}}
+setInterval(()=>autoSnap(false),5*60000);
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden')autoSnap(true)});
+
+/* ============ APP GATE (trust window) ============ */
+const GATE_WIN=5*60000;
+function gateNeeded(){return S.gate&&S.pin&&(now()-(S.lastUnlock||0))>GATE_WIN}
+function showGate(){
+  $('gateIn').value='';$('gate').classList.add('on');
+  setTimeout(()=>$('gateIn').focus(),200)}
+$('gateIn').addEventListener('input',()=>{
+  const v=$('gateIn').value.toLowerCase();
+  if(S.pin&&v.length>=S.pin.length){
+    if(v===S.pin.toLowerCase()){S.lastUnlock=now();save();
+      $('gate').classList.remove('on');vibe(50);sTick()}
+    else{$('gateIn').value='';vibe([60,60,60])}}});
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&gateNeeded())showGate();
+  if(document.visibilityState==='hidden'&&!$('gate').classList.contains('on')
+    &&S.gate)S.lastSeen=now()});
+function renderGateBtn(){$('btnGate').textContent='进门锁：'+(S.gate?'开（5分钟信任窗）':'关')}
+$('btnGate').addEventListener('click',()=>{
+  if(!S.gate){
+    if(!S.pin){pinMode='set';
+      $('pinTitle').textContent='设一个PIN（进门+账本共用，记牢）';
+      $('pinInput').value='';$('shPin').classList.add('on');
+      gatePendingOn=true;return}
+    S.gate=true;S.lastUnlock=now()}
+  else S.gate=false;
+  save();renderGateBtn();
+  toast('进门锁已'+(S.gate?'开启':'关闭'))});
+let gatePendingOn=false;
+
+/* ============ ARCHIVE: RESTORE / SNAPSHOT / RECENT ============ */
+$('btnRestore').addEventListener('click',()=>{
+  if(confirm('读档会用备份文件覆盖当前全部数据，确定？'))$('fileRestore').click()});
+$('fileRestore').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{try{
+    const d=JSON.parse(rd.result);
+    if(!d.start||!d.acts){toast('不是有效存档');return}
+    localStorage.setItem(KEY,JSON.stringify(d));
+    toast('读档成功 · 世界恢复');setTimeout(()=>location.reload(),900)
+  }catch(err){toast('文件读不了')}};
+  rd.readAsText(f)});
+(function dailySnap(){try{
+  const K=KEY+'_snap';
+  let snaps=JSON.parse(localStorage.getItem(K)||'[]');
+  if(!snaps.length||snaps[snaps.length-1].day!==todayStr()){
+    snaps.push({day:todayStr(),data:JSON.stringify(S)});
+    if(snaps.length>3)snaps=snaps.slice(-3);
+    localStorage.setItem(K,JSON.stringify(snaps))}
+}catch(e){}})();
+$('btnSnap').addEventListener('click',()=>{try{
+  const daily=JSON.parse(localStorage.getItem(KEY+'_snap')||'[]')
+    .map(s=>({label:s.day,data:s.data}));
+  const auto=JSON.parse(localStorage.getItem(KEY+'_auto')||'[]')
+    .map(s=>{const d=new Date(s.ts);
+      return{label:(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'),data:s.data}});
+  const all=daily.concat(auto);
+  if(!all.length){toast('还没有本机快照');return}
+  const names=all.map(s=>s.label).join(' / ');
+  const pickL=prompt('回滚到哪个快照？可选：'+names,all[all.length-1].label);
+  const s=all.find(x=>x.label===pickL);
+  if(!s){toast('没有这个快照');return}
+  if(confirm('回滚到 '+s.label+' 的快照？当前数据将被覆盖')){
+    localStorage.setItem(KEY,s.data);
+    toast('已回滚');setTimeout(()=>location.reload(),900)}
+}catch(e){toast('快照读取出错')}});
+function actName(aid){const a=S.acts.find(x=>x.id===aid);return a?a.name:'动作'}
+function renderRecent(){
+  const box=$('recentBox');box.innerHTML='';
+  const items=[];
+  const add=(arr,rec,ts,label)=>items.push({arr,rec,ts,label});
+  S.timed.forEach(r=>add(S.timed,r,r.end,'计时 · '+actName(r.aid)+' '+fmtDur(r.end-r.start)));
+  S.taps.forEach(r=>add(S.taps,r,r.ts,'轻点 · '+actName(r.aid)));
+  S.counts.forEach(r=>add(S.counts,r,r.ts,'计数 · '+actName(r.aid)+' +'+r.n));
+  S.eats.forEach(r=>add(S.eats,r,r.ts,'燃料 · '+r.txt));
+  S.moods.forEach(r=>add(S.moods,r,r.ts,'状态 · '+r.label));
+  S.trips.forEach(r=>add(S.trips,r,r.ts,'出行 · '+(r.place||'')+' '+r.mode));
+  S.envs.forEach(r=>add(S.envs,r,r.ts,'环境 · '+(r.t!=null?r.t+'°C':'')+(r.h!=null?' '+r.h+'%':'')));
+  S.money.forEach(r=>add(S.money,r,r.ts,'能量槽读数'));
+  S.workouts.forEach(r=>add(S.workouts,r,r.ts||0,'修炼 · '+r.type+(r.km?' '+r.km+'km':'')));
+  S.body.weights.forEach(r=>add(S.body.weights,r,r.ts||0,'体重 · '+r.kg+'kg'));
+  if(!items.length){box.innerHTML='<div class="empty">入流记录会出现在这里</div>';return}
+  items.sort((a,b)=>b.ts-a.ts).slice(0,12).forEach(it=>{
+    const r=document.createElement('div');r.className='ev-row';
+    r.innerHTML='<div class="ev-name" style="font-size:13px"></div>'
+      +'<div class="ev-cd" style="font-size:12px">'+(it.ts?fmtTime(it.ts):'')+'</div>';
+    r.querySelector('.ev-name').textContent=it.label;
+    r.addEventListener('click',()=>{
+      if(confirm('撤销这条？「'+it.label+'」')){
+        const idx=it.arr.indexOf(it.rec);
+        if(idx>-1)it.arr.splice(idx,1);
+        save();toast('已撤销');renderAll()}});
+    box.appendChild(r)})}
+
+/* ============ POKE ENGINE ============ */
+function canPoke(){
+  return !$('cereN').classList.contains('on')
+    &&!$('cereM').classList.contains('on')
+    &&document.visibilityState==='visible'
+    &&now()>(S.nextPokeAt||0)}
+function rollNextPoke(){
+  S.nextPokeAt=now()+(25+Math.random()*95)*60000;save()}
+function showPoke(){
+  if(!canPoke())return;
+  rollNextPoke();
+  const roll=Math.random();
+  const body=$('pokeBody');body.innerHTML='';$('pokeOk').style.display='none';
+  let q;
+  if(roll<0.3){
+    q=pick(PRAISE);
+    $('pokeQ').textContent=q;
+    $('pokeSkip').textContent='收到';
+  }else if(roll<0.6){
+    q='戳一下：你现在的状态怎么样？';
+    $('pokeQ').textContent=q;$('pokeSkip').textContent='略过';
+    const c=document.createElement('div');c.className='chips';
+    MOOD_LABELS.forEach(l=>{
+      const b=document.createElement('button');b.textContent=l;
+      b.addEventListener('click',()=>{
+        S.moods.push({ts:now(),day:todayStr(),label:l,via:'poke'});
+        S.pings.push({ts:now(),day:todayStr(),q:'状态',a:l});save();
+        $('poke').classList.remove('on');vibe(40);
+        pop('收到 · 已入流',pick(CHEERS),'tick');renderAll()});
+      c.appendChild(b)});
+    body.appendChild(c);
+  }else{
+    const isWhere=roll<0.8;
+    q=isWhere?'戳一下：你现在在哪儿？':'戳一下：正在干嘛？';
+    $('pokeQ').textContent=q;$('pokeSkip').textContent='略过';
+    const inp=document.createElement('input');
+    inp.maxLength=40;inp.placeholder=isWhere?'一个词就行':'一句话就行';
+    inp.style.cssText='width:100%;background:#0A0810;border:1px solid #262034;border-radius:12px;color:var(--ink);padding:12px 13px;font-size:15px;margin-bottom:14px';
+    body.appendChild(inp);
+    $('pokeOk').style.display='block';
+    $('pokeOk').onclick=()=>{
+      const a=inp.value.trim();if(!a){toast('写一个词就行');return}
+      S.pings.push({ts:now(),day:todayStr(),q:isWhere?'在哪':'在干嘛',a});save();
+      $('poke').classList.remove('on');vibe(40);
+      pop('收到 · 已入流',esc(a),'tick');renderAll()};
+  }
+  $('poke').classList.add('on');vibe([50,60,50]);sTick();speak(q)}
+$('pokeSkip').addEventListener('click',()=>{$('poke').classList.remove('on')});
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&Math.random()<0.4)
+    setTimeout(showPoke,3000+Math.random()*5000)});
+setInterval(()=>{if(Math.random()<0.22)showPoke()},14*60000);
+
+/* ============ BODY MONITOR ============ */
+seg($('wTypeSeg'));
+$('btnAddWork').addEventListener('click',()=>{
+  ['wKm','wMin','wAvg','wMax'].forEach(id=>$(id).value='');
+  $('shWork').classList.add('on')});
+$('wSave').addEventListener('click',()=>{
+  const w={day:todayStr(),ts:now(),type:segVal($('wTypeSeg'))||'其他',
+    km:parseFloat($('wKm').value)||null,min:parseInt($('wMin').value)||null,
+    avg:parseInt($('wAvg').value)||null,max:parseInt($('wMax').value)||null};
+  S.workouts.push(w);save();$('shWork').classList.remove('on');
+  vibe([60,80,60]);
+  pop('修炼 +1',w.type+(w.km?' · '+w.km+' km':'')+'<br>累计 '+S.workouts.length+' 场','ding');
+  renderAll()});
+$('nWeightSave').addEventListener('click',e=>{
+  e.stopPropagation();
+  const kg=parseFloat($('nWeight').value);
+  if(!kg){toast('填个数字');return}
+  S.body.weights=S.body.weights.filter(x=>x.day!==todayStr());
+  S.body.weights.push({day:todayStr(),kg,ts:now()});save();
+  $('nWeight').value='';$('nWeight').placeholder=kg+' kg ✓ 已入账';
+  sTick();vibe(40)});
+function renderChips(){
+  const c=$('cChips');c.innerHTML='';
+  const today=todayStr();
+  const cur=S.body.feels.find(f=>f.day===today);
+  ['满血','清爽','还好','疲惫'].forEach(l=>{
+    const b=document.createElement('button');b.textContent=l;
+    if(cur&&cur.label===l)b.classList.add('on');
+    b.addEventListener('click',()=>{
+      S.body.feels=S.body.feels.filter(f=>f.day!==today);
+      S.body.feels.push({day:today,label:l,ts:now()});save();
+      c.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+      sTick();vibe(35)});
+    c.appendChild(b)})}
+function renderWorkToday(){
+  const b=$('workToday');b.innerHTML='';
+  const today=todayStr();
+  const ws=S.workouts.filter(w=>w.day===today);
+  if(!ws.length){b.innerHTML='<div class="empty" style="padding:12px">今天还没修炼 · 场子随时开</div>';return}
+  ws.forEach(w=>{
+    const d=document.createElement('div');d.className='card ev-row';
+    d.innerHTML='<div class="ev-name">'+w.type+(w.km?' · '+w.km+' km':'')+(w.min?' · '+w.min+' 分':'')+'</div>'
+      +'<div class="ev-cd">'+(w.avg?('均 '+w.avg+(w.max?' / 峰 '+w.max:'')):'✓')+'</div>';
+    b.appendChild(d)})}
+function renderBodyLog(){
+  const box=$('stBody');box.innerHTML='';
+  const rows=[];
+  S.body.weights.slice(-7).forEach(x=>rows.push({day:x.day,t:'体重',v:x.kg+' kg'}));
+  S.body.feels.slice(-7).forEach(x=>rows.push({day:x.day,t:'睡感',v:x.label}));
+  S.workouts.slice(-7).forEach(w=>rows.push({day:w.day,t:w.type,
+    v:(w.km?w.km+'km ':'')+(w.min?w.min+'分 ':'')+(w.avg?'均'+w.avg:'')+(w.max?'/峰'+w.max:'')||'✓'}));
+  S.eats.slice(-10).forEach(e=>rows.push({day:e.day,t:'燃料 '+fmtTime(e.ts),v:e.txt}));
+  S.moods.slice(-8).forEach(m=>rows.push({day:m.day,t:'状态 '+fmtTime(m.ts),v:m.label}));
+  S.trips.slice(-6).forEach(t=>rows.push({day:t.day,t:'出行 '+fmtTime(t.ts),v:(t.place?t.place+' · ':'')+t.mode}));
+  S.envs.slice(-6).forEach(e=>rows.push({day:e.day,t:'环境 '+fmtTime(e.ts),v:(e.t!=null?e.t+'°C ':'')+(e.h!=null?'湿度'+e.h+'%':'')}));
+  S.money.slice(-5).forEach(m=>rows.push({day:m.day,t:'能量槽·'+(m.slot||'主槽')+' '+fmtTime(m.ts),v:m.amount+' €'}));
+  if(!rows.length){box.innerHTML='<div class="empty">睡感 / 体重 / 运动 会记在这里</div>';return}
+  rows.sort((a,b)=>a.day<b.day?1:-1).slice(0,14).forEach(r=>{
+    const d=document.createElement('div');d.className='ev-row';
+    d.innerHTML='<div class="ev-name" style="font-size:13px">'+r.day.slice(5)+' · '+r.t+'</div><div class="ev-cd" style="font-size:13px">'+esc(String(r.v))+'</div>';
+    box.appendChild(d)})}
+
+/* ============ SEED (one-time) ============ */
+(function seed(){
+  if(!S.seeded_v2){S.seeded_v2=true;
+    S.acts.push(
+      {id:uid(),name:'俯卧撑',type:'count'},
+      {id:uid(),name:'仰卧起坐',type:'count'},
+      {id:uid(),name:'深蹲',type:'count'});
+    save()}
+  if(S.seeded_v1)return;S.seeded_v1=true;
+  S.events.push(
+    {id:uid(),name:'收货',date:'2026-08-05'},
+    {id:uid(),name:'拉车去保养',date:'2026-08-10'},
+    {id:uid(),name:'去巴黎',date:'2026-08-11'},
+    {id:uid(),name:'面试 Lilou · 09:00',date:'2026-08-13'},
+    {id:uid(),name:'Model Y 归还',date:'2026-09-15'});
+  S.lines.push({id:uid(),title:'收货补给线',stages:[
+    {n:'理仓库·腾位',type:'check',done:false},
+    {n:'收货·验货',type:'check',done:false},
+    {n:'归位入库',type:'check',done:false},
+    {n:'进鸡腿',type:'check',done:false}]});
+  save();
+})();
+
+/* ============ RENDER ALL / BOOT ============ */
+function renderAll(){
+  $('dayNum').textContent=dayNum();
+  const d=new Date();
+  $('todayDate').textContent=d.getFullYear()+' / '+(d.getMonth()+1)+' / '+d.getDate()
+    +' · '+['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+  renderLive();renderTasks();renderLines();renderEvents();renderGrid();renderStats();renderWorkToday();renderBodyLog();renderEats();renderRecent()}
+renderAll();
+renderGateBtn();
+if(S.gate&&S.pin)showGate();
+if(!S.lastBackup||now()-S.lastBackup>7*86400000)
+  setTimeout(()=>toast('提示：好久没存档了 · 战绩页⚙一键甩给网盘'),2600);
+if(S.sleep.start){ // still sleeping -> show night screen with wake button
+  $('nReport').innerHTML='';
+  $('nWarm').innerHTML='<b>'+pick(N_WARM)+'</b>';
+  $('cereN').classList.add('on')}
+})();
+</script>
+</body>
+</html>
