@@ -377,6 +377,14 @@ button:active{transform:scale(.94);transition-duration:.08s}
   mix-blend-mode:screen;pointer-events:none;z-index:3}
 .slx-pendulum .slx-chain,.slx-pendulum .slx-pin{display:none}
 
+
+.wake-label{font-size:14px;letter-spacing:.55em;color:var(--gold);
+  font-weight:600;margin-top:14px;text-shadow:0 0 10px rgba(255,215,0,.4);
+  font-family:"Times New Roman",Georgia,serif}
+.wake-label::before{content:'✦ '}.wake-label::after{content:' ✦'}
+.wake-motto{font-size:12.5px;letter-spacing:.14em;color:rgba(255,246,224,.8);
+  margin-top:8px;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+
 #gate{position:fixed;inset:0;z-index:200;background:#0D0A11;display:none;
   flex-direction:column;align-items:center;justify-content:center;gap:26px}
 #gate.on{display:flex}
@@ -665,6 +673,8 @@ body.slx-pixel-theme #gate{z-index:200}
     <div class="day-halo"></div>
     <div class="day-n"><span id="dayNum">1</span><small>DAY</small></div>
     <div class="day-date" id="todayDate"></div>
+    <div class="wake-label">连 续 觉 醒</div>
+    <div class="wake-motto">你的坚持，正在通往更高的自己</div>
   </div>
   <div class="sec" id="secLive" style="display:none">
     <div class="sec-t">进 行 中</div>
@@ -947,6 +957,8 @@ body.slx-pixel-theme #gate{z-index:200}
   <img class="c-title-img" src="ui_title.png" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="c-title" style="display:none">成神之路</div>
   <div class="c-eyebrow">欢 迎 回 到 这 个 世 界</div>
   <div class="c-day"><span id="cDay">1</span><small> DAY</small></div>
+  <div class="wake-label" style="position:relative">连 续 觉 醒</div>
+  <div class="wake-motto" style="position:relative">你的坚持，正在通往更高的自己</div>
   <div class="c-line" id="cSleep"></div>
   <div class="c-chips" id="cChips"></div>
   <div class="c-line" id="cGreet"></div>
