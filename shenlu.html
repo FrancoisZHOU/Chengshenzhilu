@@ -130,6 +130,77 @@ button{font-family:inherit}
 .b-sleep{width:100%;background:none;border:1px solid #3C3158;color:var(--night);
   border-radius:16px;padding:18px;font-size:16px;letter-spacing:.4em}
 
+
+/* ===== V2完结视觉 · 烙印结算 ===== */
+.tk-row{position:relative}
+.tk-row.is-completed{overflow:hidden;border-color:#2A3B32 !important;
+  background:linear-gradient(145deg,rgba(20,25,22,.9),rgba(10,12,11,.8)) !important;
+  transform:scale(.96);opacity:.6;transition:all .4s cubic-bezier(.2,.9,.3,1.3)}
+.tk-row.is-completed::after{content:'已斩获';position:absolute;right:15px;top:50%;
+  transform:translateY(-50%) rotate(-15deg) scale(2);color:#D4AF37;font-size:18px;
+  font-weight:900;letter-spacing:.2em;border:2px solid #D4AF37;padding:4px 8px;
+  border-radius:6px;opacity:0;z-index:3;
+  animation:stamp-slam .5s cubic-bezier(.175,.885,.32,1.275) forwards}
+@keyframes stamp-slam{
+  0%{transform:translateY(-50%) rotate(-15deg) scale(3);opacity:0;filter:blur(4px)}
+  50%{opacity:1;filter:blur(0)}
+  100%{transform:translateY(-50%) rotate(-15deg) scale(1);opacity:.85;box-shadow:0 0 15px rgba(212,175,55,.4)}}
+.tk-row.done-row::after{content:'已斩获';position:absolute;right:12px;top:50%;
+  transform:translateY(-50%) rotate(-12deg);color:#D4AF37;font-size:11px;font-weight:700;
+  letter-spacing:.18em;border:1px solid rgba(212,175,55,.6);padding:2px 6px;border-radius:5px;opacity:.55}
+
+/* ===== V2完结视觉 · 任务线塌缩金条 ===== */
+.line-card.is-cleared{max-height:64px;overflow:hidden;border-color:var(--gold) !important;
+  background:var(--gold-deep) !important;animation:card-collapse .6s ease forwards}
+.line-card.is-cleared.settled{animation:none}
+.line-card.is-cleared .stg,.line-card.is-cleared .linedel{display:none}
+.line-card.is-cleared .lt .n{color:#14100A;text-shadow:none}
+.line-card.is-cleared .lt .p{color:#14100A}
+.line-card.is-cleared .pbar i{background:#FFF;box-shadow:0 0 20px #FFF}
+@keyframes card-collapse{0%{max-height:500px}100%{max-height:64px}}
+
+/* ===== V2悬挂矩阵 · 侧轨 ===== */
+.sky-hanger-track{position:fixed;right:0;top:17vh;z-index:39;display:flex;align-items:flex-start;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.hanger-grip{width:26px;min-height:88px;border:1px solid var(--gold-dim);border-right:none;
+  border-radius:14px 0 0 14px;background:linear-gradient(270deg,rgba(20,16,10,.92),rgba(20,16,10,.55));
+  color:var(--gold);display:flex;flex-direction:column;align-items:center;gap:7px;
+  padding:12px 0;cursor:pointer}
+.hanger-grip .hg-chain{width:2px;height:26px;
+  background:linear-gradient(180deg,var(--gold-dim),var(--gold));box-shadow:0 0 8px rgba(255,215,0,.4)}
+.hanger-grip b{font-size:12px;font-weight:700}
+.hanger-grip::after{content:'✦';font-size:12px;text-shadow:0 0 10px var(--gold)}
+.hanger-items{width:0;overflow:hidden;transition:width .4s cubic-bezier(.34,1.56,.64,1);
+  background:var(--card);border-left:1px solid var(--gold-dim)}
+.sky-hanger-track.is-expanded .hanger-items{width:172px;
+  box-shadow:-10px 10px 30px rgba(0,0,0,.6),inset 0 0 15px rgba(255,215,0,.05);
+  padding:10px;max-height:62vh;overflow-y:auto;overflow-x:hidden}
+.sky-hanger-item{position:relative;width:148px;padding:13px 12px;margin:26px auto 6px;
+  background:linear-gradient(160deg,#2A2114,#120D08);border:1px solid var(--gold-dim);
+  border-radius:12px;color:var(--gold-bright);opacity:0;transform:scale(.8);transition:all .3s ease}
+.sky-hanger-track.is-expanded .sky-hanger-item{opacity:1;transform:scale(1)}
+.sky-hanger-item::before{content:'';position:absolute;top:-24px;left:50%;width:2px;height:24px;
+  background:linear-gradient(180deg,var(--gold-dim),var(--gold));box-shadow:0 0 8px rgba(255,215,0,.4)}
+.sky-hanger-item::after{content:'✦';position:absolute;top:-30px;left:50%;
+  transform:translateX(-50%);color:var(--gold);font-size:14px;text-shadow:0 0 10px var(--gold)}
+.sky-hanger-item .shi-t{font-size:14px;line-height:1.45;margin-bottom:9px;word-break:break-word}
+.sky-hanger-item .shi-done{width:100%;padding:7px 0;border:1px solid var(--gold-dim);
+  border-radius:9px;background:none;color:var(--gold);font-size:12px;letter-spacing:.15em}
+.sky-hanger-item.is-dropped{animation:chain-break .8s cubic-bezier(.55,.085,.68,.53) forwards;pointer-events:none}
+.sky-hanger-item.is-dropped::before{opacity:0}
+@keyframes chain-break{
+  0%{transform:translateY(0) rotate(0)}
+  30%{transform:translateY(-10px) rotate(5deg)}
+  100%{transform:translateY(800px) rotate(-15deg);opacity:0}}
+.sky-hanger-track .slx-pendulum{display:block}
+
+/* ===== 入世呼吸灯 ===== */
+.nav .flowdot{display:none;position:absolute;top:-2px;right:-4px;width:7px;height:7px;
+  border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.nav .nico{position:relative}
+.nav.flow-live .flowdot{display:block;animation:flowpulse 1.4s ease-in-out infinite}
+@keyframes flowpulse{0%,100%{opacity:.4;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+
 /* ===== 打点 ===== */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px}
 .act{background:var(--card);border:1px solid var(--line);border-radius:16px;
@@ -735,12 +806,12 @@ body.slx-pixel-theme #gate{z-index:200}
   <div class="sleepbar"><button class="b-sleep" id="btnSleep">睡 觉 · 收 官</button></div>
 </div>
 
-<!-- ============ 打点 ============ -->
-<div id="tabPoint" class="tab">
-  <div class="hd"><div class="eyebrow">打 点</div>
-    <h1 style="font-size:15px;letter-spacing:.1em;color:var(--ink-dim);font-weight:400;margin-top:10px">拍一下开始 · 再拍一下结算 · 可同时亮多个</h1></div>
-  <div class="grid" id="actGrid"></div>
-</div>
+<!-- ============ 入世 · 引擎面板 ============ -->
+<div class="sheet" id="shFlow"><div class="sheet-in">
+  <h3>入 世 · 引 擎 矩 阵</h3>
+  <div style="font-size:13px;color:var(--ink-dim);letter-spacing:.08em;margin:-6px 0 4px">触碰入阵 · 再触碰结算 · 可同时亮多个</div>
+  <div class="grid" id="actGrid" style="padding:16px 0"></div>
+</div></div>
 
 <!-- ============ 任务 ============ -->
 <div id="tabTask" class="tab">
@@ -770,12 +841,12 @@ body.slx-pixel-theme #gate{z-index:200}
   <div class="hd"><div class="eyebrow">卷 王 面 板</div></div>
   <div class="stat-hero">
     <div class="stat-box"><b id="stDay">1</b><span>征程天数</span></div>
-    <div class="stat-box"><b id="stPoints">0</b><span>累计打点</span></div>
+    <div class="stat-box"><b id="stPoints">0</b><span>累计入世</span></div>
     <div class="stat-box"><b id="stTasks">0</b><span>任务完成</span></div>
   </div>
   <div class="sec">
     <div class="sec-t">各项累计</div>
-    <div class="card" id="stActs"><div class="empty">开始打点后这里会长出来</div></div>
+    <div class="card" id="stActs"><div class="empty">开始入世后这里会长出来</div></div>
   </div>
   <div class="sec">
     <div class="sec-t">情 报 册 <span id="insCount" style="letter-spacing:.05em"></span></div>
@@ -810,9 +881,15 @@ body.slx-pixel-theme #gate{z-index:200}
 <!-- ============ NAV ============ -->
 <div class="nav">
   <button data-tab="tabToday" class="on"><span class="nico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9L19 19M19 5l-2.1 2.1M7.1 16.9L5 19"/></svg></span>今日</button>
-  <button data-tab="tabPoint"><span class="nico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/></svg></span>打点</button>
+  <button id="navFlow"><span class="nico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/></svg><i class="flowdot"></i></span>入世</button>
   <button data-tab="tabTask"><span class="nico"><svg viewBox="0 0 24 24"><path d="M4 20l6.5-6.5M20 4l-9.5 9.5M14.5 4H20v5.5M4 14.5V20h5.5"/></svg></span>任务</button>
   <button data-tab="tabStat"><span class="nico"><svg viewBox="0 0 24 24"><path d="M4 18l2.5-9 4 5 3-7 3.5 6L20 8v10H4z"/></svg></span>战绩</button>
+</div>
+
+<!-- ============ 悬挂矩阵 ============ -->
+<div class="sky-hanger-track" id="hangerTrack" style="display:none">
+  <button class="hanger-grip" id="hangerGrip"><span class="hg-chain"></span><b id="hangerCount">0</b></button>
+  <div class="hanger-items" id="hangerItems"></div>
 </div>
 
 <!-- ============ SHEETS ============ -->
@@ -1509,7 +1586,7 @@ body.slx-pixel-theme #gate{z-index:200}
 <script>
 (function(){
 "use strict";
-const APP_VER=20260806.1;
+const APP_VER=20260806.2;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -1624,10 +1701,13 @@ function pop(main,sub,sound){
 
 /* ============ TABS ============ */
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{
-  ac();
+  ac();if(!b.dataset.tab)return;
   document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id===b.dataset.tab));
   renderAll();staggerTab(b.dataset.tab);if(b.dataset.tab==='tabToday')insEmit('tab.enter',{text:S.tasks.filter(t=>!t.done).map(t=>t.title).join(' ')})}));
+
+/* ============ 入世面板 ============ */
+$('navFlow').addEventListener('click',()=>{ac();renderGrid();$('shFlow').classList.add('on')});
 
 /* ============ SHEETS generic ============ */
 document.querySelectorAll('.sheet').forEach(sh=>{
@@ -1671,7 +1751,9 @@ function doneTask(id){
   t.done=true;t.doneDay=todayStr();S.tasksDone++;save();
   vibe([60,80,60,80,140]);burst();sVictory();
   pop(pick(CHEERS),durLine+(t.reward?'奖励已到账：<b style="color:var(--gold)">'+esc(t.reward)+'</b><br>':'')+'「'+esc(t.title)+'」完成 · 累计 '+S.tasksDone+' 个','tick');
-  renderAll()}
+  const rowEl=document.querySelector('.tk-row[data-id="'+id+'"]');
+  if(rowEl){rowEl.classList.add('is-completed');setTimeout(renderAll,760)}
+  else renderAll()}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 
 const ICO={
@@ -1693,7 +1775,7 @@ function taskAgeSpan(t){
   const ts=t.createdTs||now();
   return '<span class="tk-age" data-mode="up" data-ts="'+ts+'">已 '+fmtDur(now()-ts)+'</span>'}
 function taskRow(t,showDone){
-  const d=document.createElement('div');
+  const d=document.createElement('div');d.dataset.id=t.id;
   d.className='card tk-row'+(t.tier==='悬着'&&showDone?' hangcard':'')+(!showDone?' done-row':'');
   if(t.tier==='悬着'&&showDone){const ov=document.createElement('div');ov.className='frame-ov';d.appendChild(ov)}
   const future=t.day>todayStr()&&t.tier!=='悬着';
@@ -1727,9 +1809,33 @@ function taskRow(t,showDone){
   return d}
 $('btnImportTask').addEventListener('click',()=>{
   $('lineText').value='';$('shLine').classList.add('on')});
+/* ============ 悬挂矩阵 ============ */
+let hangerPendulums=[];
+$('hangerGrip').addEventListener('click',()=>{
+  const tr=$('hangerTrack');tr.classList.toggle('is-expanded');
+  if(tr.classList.contains('is-expanded')){vibe(35);
+    hangerPendulums.forEach(pd=>{try{pd&&pd.kick&&pd.kick(1.8)}catch(e){}})}});
+function renderHanger(){
+  const tr=$('hangerTrack');if(!tr)return;
+  const hung=S.tasks.filter(t=>!t.done&&t.tier==='悬着');
+  $('hangerCount').textContent=hung.length;
+  tr.style.display=hung.length?'flex':'none';
+  if(!hung.length){tr.classList.remove('is-expanded')}
+  const box=$('hangerItems');box.innerHTML='';hangerPendulums=[];
+  hung.forEach(t=>{
+    const c=document.createElement('div');c.className='sky-hanger-item';
+    c.innerHTML='<div class="shi-t"></div><button class="shi-done">斩 · 放下</button>';
+    c.querySelector('.shi-t').textContent=t.title;
+    c.querySelector('.shi-done').addEventListener('click',e=>{
+      e.stopPropagation();
+      c.classList.add('is-dropped');vibe([40,60,90]);
+      setTimeout(()=>doneTask(t.id),780)});
+    box.appendChild(c);
+    try{const pd=ShenluFX.makePendulum(c,{gravity:8.4,spring:1.55,damping:.95,wind:.24});
+      if(pd)hangerPendulums.push(pd)}catch(e){}})}
 function renderTasks(){
   const today=todayStr();
-  const open=S.tasks.filter(t=>!t.done&&(t.day<=today||t.tier==='悬着'));
+  const open=S.tasks.filter(t=>!t.done&&t.day<=today&&t.tier!=='悬着');
   const bo=$('taskToday');bo.innerHTML='';
   if(!open.length)bo.innerHTML='<div class="empty">板上没事 · 想到什么就发一条<br>发布过的，到日子会自己浮上来</div>';
   else{const ord={'悬赏':0,'主线':1,'支线':2,'悬着':3};
@@ -1823,6 +1929,10 @@ const pctMem={};
 function lineCard(L){
   const d=document.createElement('div');d.className='card line-card';
   const p=Math.round(lineProgress(L)*100);
+  if(p>=100){d.classList.add('is-cleared');
+    if(!(pctMem[L.id]!==undefined&&pctMem[L.id]<100))d.classList.add('settled');
+    d.addEventListener('click',()=>{if(confirm('「'+L.title+'」已通关 · 移除此线？')){
+      S.lines=S.lines.filter(x=>x.id!==L.id);save();renderAll()}})}
   d.innerHTML='<div class="lt"><div class="n"></div><div class="p">'+p+'%</div></div>'
     +'<div class="pbar"><i style="width:'+p+'%"></i></div>';
   d.querySelector('.lt .n').textContent=L.title;
@@ -1939,12 +2049,11 @@ function taskCountdownRow(t){
   return r}
 function renderEvents(){
   const today=todayStr();
-  // 旧日程只读兼容：转任务提示后自然过期
-  S.events=S.events.filter(e=>e.date>=today);save();
+  // P0修复(Task Core V2)：渲染只过滤视图，永不修改存档
   const cdTasks=S.tasks.filter(t=>!t.done&&t.tier!=='悬着'&&(t.day>today||(t.day===today&&(t.at||true))))
     .filter(t=>t.day>=today)
     .sort((a,b)=>a.day===b.day?((a.at||'99')<(b.at||'99')?-1:1):(a.day<b.day?-1:1));
-  const legacy=S.events.slice().sort((a,b)=>a.date<b.date?-1:1);
+  const legacy=S.events.filter(e=>e.date>=today).sort((a,b)=>a.date<b.date?-1:1);
   $('secEv').style.display=(cdTasks.length||legacy.length)?'block':'none';
   const b1=$('evList');b1.innerHTML='';
   cdTasks.slice(0,5).forEach(t=>b1.appendChild(taskCountdownRow(t)));
@@ -2013,7 +2122,8 @@ function renderGrid(){
         vibe(40);sTick();
         pop(a.name+' ✓','累计第 '+(st.tapCount+1)+' 次','tick');
         renderAll();return}
-      if(!lit){S.active[a.id]=now();save();vibe(50);sTick();renderAll()}
+      if(!lit){S.active[a.id]=now();save();vibe(50);sTick();
+        $('shFlow').classList.remove('on');renderAll()}
       else{
         const dur=now()-S.active[a.id];
         delete S.active[a.id];
@@ -2054,6 +2164,7 @@ $('aDel').addEventListener('click',()=>{
 /* ============ LIVE on 今日 ============ */
 function renderLive(){
   const ids=Object.keys(S.active);
+  const nf=$('navFlow');if(nf)nf.classList.toggle('flow-live',ids.length>0);
   $('secLive').style.display=ids.length?'block':'none';
   const b=$('liveList');b.innerHTML='';
   ids.forEach(aid=>{
@@ -2079,7 +2190,7 @@ function startNight(){
   const nPts=S.timed.filter(l=>l.day===today).length+S.taps.filter(l=>l.day===today).length;
   const nTk=S.tasks.filter(t=>t.done&&t.doneDay===today).length;
   const ms=S.timed.filter(l=>l.day===today).reduce((s,l)=>s+(l.end-l.start),0);
-  $('nReport').innerHTML='今日战报：打点 <b>'+nPts+'</b> 次 · 完成任务 <b>'+nTk+'</b> 个'
+  $('nReport').innerHTML='今日战报：入世 <b>'+nPts+'</b> 次 · 完成任务 <b>'+nTk+'</b> 个'
     +(ms?' · 在线 <b>'+fmtDur(ms)+'</b>':'');
   const warmLine=pick(N_WARM);
   $('nWarm').innerHTML='<b>'+warmLine+'</b>';
@@ -2145,7 +2256,7 @@ function renderStats(){
     r.innerHTML='<div class="n"></div><div class="v"><b>'+st.count+'</b> 次 · 共 '+fmtDur(tot)
       +'<br>最快 '+fmtDur(st.best)+'</div>';
     r.querySelector('.n').textContent=a.name;box.appendChild(r)});
-  if(!any)box.innerHTML='<div class="empty">开始打点后这里会长出来</div>'}
+  if(!any)box.innerHTML='<div class="empty">开始入世后这里会长出来</div>'}
 function renderVoiceBtn(){$('btnVoice').textContent='语音陪伴：'+(S.voice?'开':'关')}
 $('btnVoice').addEventListener('click',()=>{
   S.voice=!S.voice;save();renderVoiceBtn();
@@ -2703,13 +2814,757 @@ function renderBodyLog(){
       {id:uid(),name:'去巴黎（周一晚出发·周二晚回）',date:'2026-08-10'});
     save()}
 
+/* ============ TASK CORE V2 · 影子迁移 (Sol模块原装焊接) ============ */
+/*
+ * Shenlu Task Core V2
+ * -------------------
+ * Lossless, idempotent migration from the current shenlu.html structures:
+ *   S.tasks / S.lines / S.events / S.acts
+ *   S.timed / S.taps / S.counts / S.active
+ *
+ * Integration target: paste inside the app's main IIFE, then run once after
+ * all seed blocks and before the first renderAll(). Legacy arrays remain in
+ * place during shadow mode; Task Core becomes the canonical model later.
+ */
+
+const TASK_CORE_SCHEMA = 2;
+
+function migrateLegacyTaskCore(S, env) {
+  env = env || {};
+  if (!S || typeof S !== 'object') throw new TypeError('migrateLegacyTaskCore: S must be an object');
+
+  if (S.taskCore && S.taskCore.schema === TASK_CORE_SCHEMA
+      && Array.isArray(S.taskCore.items) && Array.isArray(S.taskCore.records)) {
+    return { changed: false, core: S.taskCore, audit: validateTaskCoreMigration(S) };
+  }
+  if (S.taskCore && S.taskCore.schema != null && S.taskCore.schema !== TASK_CORE_SCHEMA) {
+    throw new Error('Unsupported existing taskCore schema: ' + S.taskCore.schema);
+  }
+
+  const nowFn = typeof env.now === 'function' ? env.now : Date.now;
+  const todayFn = typeof env.todayStr === 'function' ? env.todayStr : localTodayStr;
+  const migratedAt = Number(nowFn()) || Date.now();
+  const today = String(todayFn());
+  const timezone = env.timezone || 'Europe/Paris';
+
+  const tasks = Array.isArray(S.tasks) ? S.tasks : [];
+  const lines = Array.isArray(S.lines) ? S.lines : [];
+  const events = Array.isArray(S.events) ? S.events : [];
+  const acts = Array.isArray(S.acts) ? S.acts : [];
+  const timed = Array.isArray(S.timed) ? S.timed : [];
+  const taps = Array.isArray(S.taps) ? S.taps : [];
+  const counts = Array.isArray(S.counts) ? S.counts : [];
+  const active = S.active && typeof S.active === 'object' ? S.active : {};
+
+  const items = [];
+  const records = [];
+  const aliases = [];
+  const warnings = [];
+  const usedItemIds = new Set();
+  const usedRecordIds = new Set();
+  const actFirstByLegacyId = new Map();
+  const orphanByLegacyId = new Map();
+
+  function uniqueId(base, used) {
+    let id = base;
+    let n = 2;
+    while (used.has(id)) id = base + '~' + n++;
+    used.add(id);
+    return id;
+  }
+
+  function itemId(kind, legacyId, index) {
+    const token = legacyId == null || legacyId === '' ? String(index) : String(legacyId);
+    return uniqueId('tc:' + kind + ':' + encodeURIComponent(token) + ':' + index, usedItemIds);
+  }
+
+  function recordId(kind, index, suffix) {
+    const tail = suffix == null ? '' : ':' + String(suffix);
+    return uniqueId('tr:' + kind + ':' + index + tail, usedRecordIds);
+  }
+
+  function addAlias(kind, legacyId, legacyIndex, id) {
+    aliases.push({ kind, legacyId: legacyId == null ? null : legacyId, legacyIndex, itemId: id });
+  }
+
+  function makeSource(kind, legacyId, legacyIndex, obj, knownKeys, extraSource) {
+    const source = {
+      kind,
+      legacyId: legacyId == null ? null : legacyId,
+      legacyIndex
+    };
+    const extra = copyUnknown(obj, knownKeys);
+    if (extra) source.extra = extra;
+    if (extraSource && typeof extraSource === 'object') {
+      Object.keys(extraSource).forEach(function (key) { source[key] = cloneJson(extraSource[key]); });
+    }
+    return source;
+  }
+
+  function baseItem(opts) {
+    return {
+      id: opts.id,
+      title: opts.title == null ? '' : String(opts.title),
+      parentId: opts.parentId || null,
+      order: Number.isFinite(opts.order) ? opts.order : 0,
+
+      state: opts.state || 'active',                 // active | completed | retired
+      archivedAt: finiteOrNull(opts.archivedAt),    // archive is orthogonal to state
+      placement: opts.placement || 'board',          // board | hanging
+
+      tier: opts.tier == null ? null : opts.tier,    // 悬赏 | 主线 | 支线 | null
+      reward: opts.reward == null ? null : String(opts.reward),
+      note: opts.note == null ? null : String(opts.note),
+      trackAge: opts.trackAge === true,
+
+      progress: opts.progress || { metric: 'binary', target: 1, unit: null, rollup: null },
+      completion: opts.completion || { policy: 'manual' },
+      recurrence: opts.recurrence || { mode: 'once', rule: null, window: null },
+      time: opts.time || null,
+
+      createdAt: finiteOrNull(opts.createdAt),
+      updatedAt: finiteOrNull(opts.updatedAt),
+      completedAt: finiteOrNull(opts.completedAt),
+      retiredAt: finiteOrNull(opts.retiredAt),
+
+      source: opts.source || null
+    };
+  }
+
+  function baseRecord(opts) {
+    return {
+      id: opts.id,
+      itemId: opts.itemId,
+      kind: opts.kind,                               // completion | increment | session | transition
+      at: finiteOrNull(opts.at),
+      day: opts.day == null || opts.day === '' ? null : String(opts.day),
+      occurrenceKey: opts.occurrenceKey == null || opts.occurrenceKey === '' ? null : String(opts.occurrenceKey),
+      value: opts.value == null ? null : Number(opts.value),
+      unit: opts.unit == null ? null : String(opts.unit),
+      startedAt: finiteOrNull(opts.startedAt),
+      endedAt: finiteOrNull(opts.endedAt),
+      durationMs: finiteOrNull(opts.durationMs),
+      fromState: opts.fromState || null,
+      toState: opts.toState || null,
+      voidedAt: finiteOrNull(opts.voidedAt),
+      source: opts.source || null
+    };
+  }
+
+  function timePoint(date, time) {
+    if (date == null || date === '') return null;
+    return {
+      date: String(date),
+      time: time == null || time === '' ? null : String(time)
+    };
+  }
+
+  function schedule(opts) {
+    opts = opts || {};
+    const readyAt = opts.readyAt || null;
+    const dueAt = opts.dueAt || null;
+    const occursAt = opts.occursAt || null;
+    const reminders = Array.isArray(opts.reminders) ? opts.reminders : [];
+    if (!readyAt && !dueAt && !occursAt && !reminders.length) return null;
+    return { readyAt, dueAt, occursAt, timezone, reminders };
+  }
+
+  // ---------------------------------------------------------------------------
+  // 1) Single tasks: S.tasks
+  // ---------------------------------------------------------------------------
+  tasks.forEach(function (t, ti) {
+    t = t && typeof t === 'object' ? t : {};
+    const id = itemId('task', t.id, ti);
+    const hanging = t.tier === '悬着';
+    const tier = t.tier === '悬赏' || t.tier === '主线' || t.tier === '支线' ? t.tier : null;
+    const done = t.done === true;
+
+    items.push(baseItem({
+      id,
+      title: t.title,
+      order: ti,
+      state: done ? 'completed' : 'active',
+      placement: hanging ? 'hanging' : 'board',
+      tier,
+      reward: t.reward,
+      trackAge: t.noTime !== true,
+      progress: { metric: 'binary', target: 1, unit: null, rollup: null },
+      completion: { policy: 'manual' },
+      recurrence: { mode: 'once', rule: null, window: null },
+      // Legacy t.day currently does three jobs: board availability, end-of-day
+      // completion deadline, and (with t.at) an exact scheduled moment.
+      // Split those meanings now instead of carrying the conflation forward.
+      time: schedule({
+        readyAt: timePoint(t.day, null),
+        dueAt: timePoint(t.day, t.day ? '23:59:59' : null),
+        occursAt: t.at ? timePoint(t.day, t.at) : null
+      }),
+      createdAt: t.createdTs,
+      completedAt: null, // legacy only stores doneDay, not an exact completion timestamp
+      source: makeSource('task', t.id, ti, t,
+        ['id', 'tier', 'title', 'reward', 'done', 'day', 'at', 'createdTs', 'doneDay', 'durSec', 'noTime'],
+        {
+          legacyTier: t.tier == null ? null : t.tier,
+          legacyDoneDay: t.doneDay == null ? null : t.doneDay,
+          legacyDurSec: t.durSec == null ? null : t.durSec,
+          legacyNoTime: t.noTime === true
+        })
+    }));
+    addAlias('task', t.id, ti, id);
+
+    if (done) {
+      const durationMs = Number.isFinite(Number(t.durSec)) ? Number(t.durSec) * 1000 : null;
+      records.push(baseRecord({
+        id: recordId('task-completion', ti),
+        itemId: id,
+        kind: 'completion',
+        at: null,
+        day: t.doneDay,
+        occurrenceKey: t.doneDay || null,
+        value: 1,
+        unit: 'completion',
+        durationMs,
+        toState: 'completed',
+        source: makeSource('task-completion', t.id, ti, t,
+          ['id', 'tier', 'title', 'reward', 'done', 'day', 'at', 'createdTs', 'doneDay', 'durSec', 'noTime'])
+      }));
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // 2) Task lines: S.lines and nested stages
+  // Parent and stages are the same item species, connected by parentId.
+  // ---------------------------------------------------------------------------
+  lines.forEach(function (L, li) {
+    L = L && typeof L === 'object' ? L : {};
+    const stages = Array.isArray(L.stages) ? L.stages : [];
+    const parentId = itemId('line', L.id, li);
+    const legacyProgress = legacyLineProgress(L);
+    const parentDone = legacyProgress >= 1;
+
+    items.push(baseItem({
+      id: parentId,
+      title: L.title,
+      order: li,
+      state: parentDone ? 'completed' : 'active',
+      placement: 'board',
+      tier: null,
+      trackAge: false,
+      progress: { metric: 'children', target: null, unit: 'stage', rollup: 'mean' },
+      completion: { policy: 'children' },
+      recurrence: { mode: 'once', rule: null, window: null },
+      time: null,
+      source: makeSource('line', L.id, li, L, ['id', 'title', 'stages'], {
+        legacyProgress,
+        derivedCompleted: parentDone
+      })
+    }));
+    addAlias('line', L.id, li, parentId);
+
+    stages.forEach(function (s, si) {
+      s = s && typeof s === 'object' ? s : {};
+      const isCount = s.type === 'count';
+      const rawCount = finiteOrZero(s.count);
+      const rawTarget = finiteOrZero(s.target);
+      const unknownTarget = isCount && rawTarget <= 0;
+      const sid = itemId('stage', (L.id == null ? li : L.id) + ':' + si, si);
+
+      items.push(baseItem({
+        id: sid,
+        title: s.n,
+        parentId,
+        order: si,
+        state: s.done === true ? 'completed' : 'active',
+        placement: 'board',
+        tier: null,
+        note: s.note,
+        trackAge: false,
+        progress: isCount
+          ? { metric: 'count', target: rawTarget > 0 ? rawTarget : 1, unit: '次', rollup: null }
+          : { metric: 'binary', target: 1, unit: null, rollup: null },
+        completion: { policy: isCount && rawTarget > 0 ? 'threshold' : 'manual' },
+        recurrence: { mode: 'once', rule: null, window: null },
+        time: null,
+        source: makeSource('stage', null, si, s, ['n', 'type', 'done', 'count', 'target', 'note'], {
+          lineLegacyId: L.id == null ? null : L.id,
+          lineLegacyIndex: li,
+          legacyStageType: s.type == null ? null : s.type,
+          legacyCount: s.count == null ? null : s.count,
+          legacyTarget: s.target == null ? null : s.target,
+          unknownTarget
+        })
+      }));
+      addAlias('stage', (L.id == null ? li : L.id) + ':' + si, si, sid);
+
+      // Existing count stages only retain an aggregate count, not per-click timestamps.
+      if (isCount) {
+        records.push(baseRecord({
+          id: recordId('stage-count-snapshot', li, si),
+          itemId: sid,
+          kind: 'increment',
+          at: null,
+          day: null,
+          occurrenceKey: null,
+          value: rawCount,
+          unit: '次',
+          source: makeSource('stage-count-snapshot', null, si, s,
+            ['n', 'type', 'done', 'count', 'target', 'note'],
+            { lineLegacyId: L.id == null ? null : L.id, lineLegacyIndex: li, aggregateSnapshot: true })
+        }));
+      }
+
+      if (s.done === true) {
+        records.push(baseRecord({
+          id: recordId('stage-completion', li, si),
+          itemId: sid,
+          kind: 'completion',
+          at: null,
+          day: null,
+          occurrenceKey: null,
+          value: 1,
+          unit: 'completion',
+          toState: 'completed',
+          source: makeSource('stage-completion', null, si, s,
+            ['n', 'type', 'done', 'count', 'target', 'note'],
+            { lineLegacyId: L.id == null ? null : L.id, lineLegacyIndex: li })
+        }));
+      }
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // 3) Calendar events: S.events
+  // A legacy event is a one-off milestone with an occurrence time, not a
+  // separate species. It remains active in shadow migration; a later lifecycle
+  // reconciler may mark it completed after occursAt without deleting it.
+  // ---------------------------------------------------------------------------
+  events.forEach(function (e, ei) {
+    e = e && typeof e === 'object' ? e : {};
+    const id = itemId('event', e.id, ei);
+    items.push(baseItem({
+      id,
+      title: e.name,
+      order: ei,
+      state: 'active',
+      placement: 'board',
+      tier: null,
+      trackAge: false,
+      progress: { metric: 'milestone', target: 1, unit: null, rollup: null },
+      completion: { policy: 'at-time' },
+      recurrence: { mode: 'once', rule: null, window: null },
+      time: schedule({ occursAt: timePoint(e.date, null) }),
+      source: makeSource('event', e.id, ei, e, ['id', 'name', 'date'])
+    }));
+    addAlias('event', e.id, ei, id);
+  });
+
+  // ---------------------------------------------------------------------------
+  // 4) Repeatable action definitions: S.acts
+  // ---------------------------------------------------------------------------
+  acts.forEach(function (a, ai) {
+    a = a && typeof a === 'object' ? a : {};
+    const id = itemId('act', a.id, ai);
+    const metric = a.type === 'timed' ? 'duration' : 'count';
+    const unit = a.type === 'timed' ? 'ms' : '次';
+
+    items.push(baseItem({
+      id,
+      title: a.name,
+      order: ai,
+      state: 'active',
+      placement: 'board',
+      tier: null,
+      trackAge: false,
+      progress: { metric, target: null, unit, rollup: null },
+      completion: { policy: 'never' },
+      recurrence: { mode: 'repeatable', rule: null, window: 'day' },
+      time: null,
+      source: makeSource('act', a.id, ai, a, ['id', 'name', 'type'], {
+        legacyActType: a.type == null ? null : a.type
+      })
+    }));
+    addAlias('act', a.id, ai, id);
+
+    const key = legacyKey(a.id);
+    if (!actFirstByLegacyId.has(key)) actFirstByLegacyId.set(key, id);
+    else warnings.push('duplicate act id: ' + String(a.id) + '; logs follow the first definition, matching current S.acts.find behavior');
+  });
+
+  function ensureActItem(aid) {
+    const key = legacyKey(aid);
+    if (actFirstByLegacyId.has(key)) return actFirstByLegacyId.get(key);
+    if (orphanByLegacyId.has(key)) return orphanByLegacyId.get(key);
+
+    const oi = orphanByLegacyId.size;
+    const id = itemId('orphan-act', aid, oi);
+    items.push(baseItem({
+      id,
+      title: '已删除动作（' + String(aid) + '）',
+      order: acts.length + oi,
+      state: 'retired',
+      archivedAt: migratedAt,
+      placement: 'board',
+      tier: null,
+      trackAge: false,
+      progress: { metric: 'count', target: null, unit: '次', rollup: null },
+      completion: { policy: 'never' },
+      recurrence: { mode: 'repeatable', rule: null, window: 'day' },
+      time: null,
+      retiredAt: null,
+      source: { kind: 'orphan-act', legacyId: aid == null ? null : aid, legacyIndex: oi, nameUnavailable: true }
+    }));
+    addAlias('orphan-act', aid, oi, id);
+    orphanByLegacyId.set(key, id);
+    warnings.push('orphan action logs preserved for aid=' + String(aid) + '; original action name no longer exists in S.acts');
+    return id;
+  }
+
+  // ---------------------------------------------------------------------------
+  // 5) Action execution records: timed / taps / counts / active
+  // ---------------------------------------------------------------------------
+  timed.forEach(function (r, ri) {
+    r = r && typeof r === 'object' ? r : {};
+    const startedAt = finiteOrNull(r.start);
+    const endedAt = finiteOrNull(r.end);
+    const durationMs = startedAt != null && endedAt != null ? endedAt - startedAt : null;
+    records.push(baseRecord({
+      id: recordId('timed', ri),
+      itemId: ensureActItem(r.aid),
+      kind: 'session',
+      at: endedAt,
+      day: r.day,
+      occurrenceKey: r.day,
+      startedAt,
+      endedAt,
+      durationMs,
+      unit: 'ms',
+      source: makeSource('timed', r.aid, ri, r, ['aid', 'start', 'end', 'day'])
+    }));
+  });
+
+  taps.forEach(function (r, ri) {
+    r = r && typeof r === 'object' ? r : {};
+    records.push(baseRecord({
+      id: recordId('tap', ri),
+      itemId: ensureActItem(r.aid),
+      kind: 'increment',
+      at: r.ts,
+      day: r.day,
+      occurrenceKey: r.day,
+      value: 1,
+      unit: '次',
+      source: makeSource('tap', r.aid, ri, r, ['aid', 'ts', 'day'])
+    }));
+  });
+
+  counts.forEach(function (r, ri) {
+    r = r && typeof r === 'object' ? r : {};
+    records.push(baseRecord({
+      id: recordId('count', ri),
+      itemId: ensureActItem(r.aid),
+      kind: 'increment',
+      at: r.ts,
+      day: r.day,
+      occurrenceKey: r.day,
+      value: finiteOrZero(r.n),
+      unit: '次',
+      source: makeSource('count', r.aid, ri, r, ['aid', 'n', 'ts', 'day'])
+    }));
+  });
+
+  Object.keys(active).forEach(function (aid, ai) {
+    const startedAt = finiteOrNull(active[aid]);
+    records.push(baseRecord({
+      id: recordId('active-session', ai, encodeURIComponent(aid)),
+      itemId: ensureActItem(aid),
+      kind: 'session',
+      at: startedAt,
+      day: null, // S.active stores no day; do not fabricate one
+      occurrenceKey: null,
+      startedAt,
+      endedAt: null,
+      durationMs: null,
+      unit: 'ms',
+      source: { kind: 'active', legacyId: aid, legacyIndex: ai }
+    }));
+  });
+
+  const visibleCompletedTasks = tasks.reduce(function (n, t) { return n + (t && t.done === true ? 1 : 0); }, 0);
+  const completedLifetime = Number.isFinite(Number(S.tasksDone)) ? Number(S.tasksDone) : visibleCompletedTasks;
+  if (completedLifetime !== visibleCompletedTasks) {
+    warnings.push('S.tasksDone=' + completedLifetime + ' while retained completed S.tasks=' + visibleCompletedTasks + '; lifetime counter preserved verbatim');
+  }
+
+  const sourceCounts = {
+    tasks: tasks.length,
+    lines: lines.length,
+    stages: lines.reduce(function (n, L) { return n + (L && Array.isArray(L.stages) ? L.stages.length : 0); }, 0),
+    events: events.length,
+    acts: acts.length,
+    timed: timed.length,
+    taps: taps.length,
+    counts: counts.length,
+    active: Object.keys(active).length,
+    orphanActs: orphanByLegacyId.size
+  };
+
+  const core = {
+    schema: TASK_CORE_SCHEMA,
+    mode: 'shadow',
+    timezone,
+    items,
+    records,
+    aliases,
+    stats: {
+      completedLifetime,
+      retainedCompletedTasks: visibleCompletedTasks,
+      derivedCompletedLines: lines.reduce(function (n, L) { return n + (legacyLineProgress(L) >= 1 ? 1 : 0); }, 0)
+    },
+    audit: {
+      migratedAt,
+      migratedDay: today,
+      sourceCounts,
+      targetCounts: { items: items.length, records: records.length, aliases: aliases.length },
+      warnings
+    }
+  };
+
+  // Build completely first; mutate S only after construction succeeds.
+  S.taskCore = core;
+  const validation = validateTaskCoreMigration(S);
+  core.audit.validation = validation;
+  return { changed: true, core, audit: validation };
+}
+
+function validateTaskCoreMigration(S) {
+  const core = S && S.taskCore;
+  const errors = [];
+  const warnings = [];
+  if (!core || core.schema !== TASK_CORE_SCHEMA) {
+    return { ok: false, errors: ['taskCore schema ' + TASK_CORE_SCHEMA + ' not found'], warnings };
+  }
+  if (!Array.isArray(core.items)) errors.push('taskCore.items is not an array');
+  if (!Array.isArray(core.records)) errors.push('taskCore.records is not an array');
+  if (errors.length) return { ok: false, errors, warnings };
+
+  const itemIds = new Set();
+  core.items.forEach(function (it, i) {
+    if (!it || !it.id) errors.push('item[' + i + '] has no id');
+    else if (itemIds.has(it.id)) errors.push('duplicate item id: ' + it.id);
+    else itemIds.add(it.id);
+  });
+
+  const recordIds = new Set();
+  core.records.forEach(function (r, i) {
+    if (!r || !r.id) errors.push('record[' + i + '] has no id');
+    else if (recordIds.has(r.id)) errors.push('duplicate record id: ' + r.id);
+    else recordIds.add(r.id);
+    if (r && !itemIds.has(r.itemId)) errors.push('record[' + i + '] points to missing item: ' + r.itemId);
+  });
+
+  const expected = {
+    timed: Array.isArray(S.timed) ? S.timed.length : 0,
+    tap: Array.isArray(S.taps) ? S.taps.length : 0,
+    count: Array.isArray(S.counts) ? S.counts.length : 0,
+    active: S.active && typeof S.active === 'object' ? Object.keys(S.active).length : 0,
+    taskCompletion: Array.isArray(S.tasks) ? S.tasks.filter(function (t) { return t && t.done === true; }).length : 0,
+    stageCountSnapshot: Array.isArray(S.lines) ? S.lines.reduce(function (n, L) {
+      return n + (L && Array.isArray(L.stages) ? L.stages.filter(function (s) { return s && s.type === 'count'; }).length : 0);
+    }, 0) : 0,
+    stageCompletion: Array.isArray(S.lines) ? S.lines.reduce(function (n, L) {
+      return n + (L && Array.isArray(L.stages) ? L.stages.filter(function (s) { return s && s.done === true; }).length : 0);
+    }, 0) : 0
+  };
+
+  const actual = { timed: 0, tap: 0, count: 0, active: 0, taskCompletion: 0, stageCountSnapshot: 0, stageCompletion: 0 };
+  core.records.forEach(function (r) {
+    const k = r && r.source && r.source.kind;
+    if (k === 'timed') actual.timed++;
+    else if (k === 'tap') actual.tap++;
+    else if (k === 'count') actual.count++;
+    else if (k === 'active') actual.active++;
+    else if (k === 'task-completion') actual.taskCompletion++;
+    else if (k === 'stage-count-snapshot') actual.stageCountSnapshot++;
+    else if (k === 'stage-completion') actual.stageCompletion++;
+  });
+  Object.keys(expected).forEach(function (k) {
+    if (expected[k] !== actual[k]) errors.push('record parity failed for ' + k + ': expected ' + expected[k] + ', got ' + actual[k]);
+  });
+
+  // Verify every legacy line keeps exactly the same displayed progress.
+  try {
+    const index = buildTaskCoreIndex(core);
+    const lineAliases = Array.isArray(core.aliases) ? core.aliases.filter(function (a) { return a.kind === 'line'; }) : [];
+    const lines = Array.isArray(S.lines) ? S.lines : [];
+    lineAliases.forEach(function (a) {
+      const L = lines[a.legacyIndex];
+      if (!L) return;
+      const parent = index.itemById.get(a.itemId);
+      const oldP = legacyLineProgress(L);
+      const newP = taskCoreItemProgress(parent, index);
+      if (Math.abs(oldP - newP) > 1e-9) {
+        errors.push('line progress parity failed at S.lines[' + a.legacyIndex + ']: old=' + oldP + ', new=' + newP);
+      }
+    });
+  } catch (err) {
+    errors.push('line progress validation failed: ' + String(err && err.message || err));
+  }
+
+  if (core.stats && Number.isFinite(Number(S.tasksDone))
+      && core.stats.completedLifetime !== Number(S.tasksDone)) {
+    errors.push('S.tasksDone was not preserved exactly');
+  }
+
+  return {
+    ok: errors.length === 0,
+    errors,
+    warnings,
+    checkedAt: Date.now(),
+    itemCount: core.items.length,
+    recordCount: core.records.length
+  };
+}
+
+function buildTaskCoreIndex(core) {
+  const itemById = new Map();
+  const childrenByParent = new Map();
+  const recordsByItem = new Map();
+  const openSessionByItem = new Map();
+
+  (core.items || []).forEach(function (item) {
+    itemById.set(item.id, item);
+    if (item.parentId) {
+      if (!childrenByParent.has(item.parentId)) childrenByParent.set(item.parentId, []);
+      childrenByParent.get(item.parentId).push(item);
+    }
+  });
+  childrenByParent.forEach(function (list) { list.sort(function (a, b) { return a.order - b.order; }); });
+
+  (core.records || []).forEach(function (record) {
+    if (!recordsByItem.has(record.itemId)) recordsByItem.set(record.itemId, []);
+    recordsByItem.get(record.itemId).push(record);
+    if (record.kind === 'session' && record.startedAt != null && record.endedAt == null && record.voidedAt == null) {
+      openSessionByItem.set(record.itemId, record);
+    }
+  });
+
+  return { itemById, childrenByParent, recordsByItem, openSessionByItem };
+}
+
+function taskCoreItemProgress(item, index) {
+  if (!item) return 0;
+  const p = item.progress || {};
+  const metric = p.metric || 'none';
+
+  if (metric === 'binary' || metric === 'milestone') return item.state === 'completed' ? 1 : 0;
+
+  if (metric === 'count') {
+    const records = index.recordsByItem.get(item.id) || [];
+    const value = records.reduce(function (sum, r) {
+      return sum + (r.kind === 'increment' && r.voidedAt == null && Number.isFinite(Number(r.value)) ? Number(r.value) : 0);
+    }, 0);
+    return Number.isFinite(Number(p.target)) && Number(p.target) > 0 ? Math.min(value / Number(p.target), 1) : 0;
+  }
+
+  if (metric === 'duration') {
+    const records = index.recordsByItem.get(item.id) || [];
+    const value = records.reduce(function (sum, r) {
+      return sum + (r.kind === 'session' && r.voidedAt == null && Number.isFinite(Number(r.durationMs)) ? Number(r.durationMs) : 0);
+    }, 0);
+    return Number.isFinite(Number(p.target)) && Number(p.target) > 0 ? Math.min(value / Number(p.target), 1) : 0;
+  }
+
+  if (metric === 'children') {
+    const children = index.childrenByParent.get(item.id) || [];
+    if (!children.length) return 0;
+    const sum = children.reduce(function (n, child) { return n + taskCoreItemProgress(child, index); }, 0);
+    return sum / children.length;
+  }
+
+  return 0;
+}
+
+function legacyLineProgress(L) {
+  const stages = L && Array.isArray(L.stages) ? L.stages : [];
+  if (!stages.length) return 0;
+  let score = 0;
+  stages.forEach(function (s) {
+    s = s || {};
+    if (s.type === 'check') {
+      if (s.done === true) score += 1;
+    } else {
+      const target = finiteOrZero(s.target);
+      const count = finiteOrZero(s.count);
+      if (target > 0) score += Math.min(count / target, 1);
+      else if (count > 0) score += 1;
+    }
+  });
+  return score / stages.length;
+}
+
+function copyUnknown(obj, knownKeys) {
+  if (!obj || typeof obj !== 'object') return null;
+  const known = new Set(knownKeys || []);
+  const extra = {};
+  let any = false;
+  Object.keys(obj).forEach(function (key) {
+    if (!known.has(key)) {
+      extra[key] = cloneJson(obj[key]);
+      any = true;
+    }
+  });
+  return any ? extra : null;
+}
+
+function cloneJson(value) {
+  if (value == null || typeof value !== 'object') return value;
+  try { return JSON.parse(JSON.stringify(value)); }
+  catch (_) { return null; }
+}
+
+function finiteOrNull(value) {
+  const n = Number(value);
+  return value == null || value === '' || !Number.isFinite(n) ? null : n;
+}
+
+function finiteOrZero(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function legacyKey(value) {
+  return (value === null ? 'null' : typeof value) + ':' + String(value);
+}
+
+function localTodayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// Node-only export for tests. Ignored in the browser.
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    TASK_CORE_SCHEMA,
+    migrateLegacyTaskCore,
+    validateTaskCoreMigration,
+    buildTaskCoreIndex,
+    taskCoreItemProgress,
+    legacyLineProgress
+  };
+}
+
+
+const taskCoreMigration=migrateLegacyTaskCore(S,{now,todayStr,timezone:'Europe/Paris'});
+if(taskCoreMigration.changed)save();
+if(!taskCoreMigration.audit.ok)console.error('Task Core migration audit failed',taskCoreMigration.audit);
+
 /* ============ RENDER ALL / BOOT ============ */
 function renderAll(){
   $('dayNum').textContent=dayNum();
   const d=new Date();
   $('todayDate').textContent=d.getFullYear()+' / '+(d.getMonth()+1)+' / '+d.getDate()
     +' · '+['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
-  renderLive();renderTasks();renderLines();renderEvents();renderGrid();renderStats();renderWorkToday();renderBodyLog();renderEats();renderRecent();renderSleepAsk();renderInsights()}
+  renderLive();renderTasks();renderLines();renderEvents();renderHanger();renderGrid();renderStats();renderWorkToday();renderBodyLog();renderEats();renderRecent();renderSleepAsk();renderInsights()}
 
 
 /* ============ SELF UPDATER ============ */
