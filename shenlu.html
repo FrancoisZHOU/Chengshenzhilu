@@ -389,6 +389,16 @@ button:active{transform:scale(.94);transition-duration:.08s}
 .wake-motto{font-size:12.5px;letter-spacing:.14em;color:rgba(255,246,224,.8);
   margin-top:8px;text-shadow:0 1px 4px rgba(0,0,0,.6)}
 
+
+/* ===== 已完成任务降级 ===== */
+.tk-row.done-row{padding:7px 15px;opacity:.42;transform:scale(.97);
+  grid-template-columns:30px 1fr auto}
+.tk-row.done-row .tk-ico{width:30px;height:30px}
+.tk-row.done-row .tk-ico::after{filter:grayscale(.5)}
+.tk-row.done-row .tk-title{font-size:13px;font-weight:400;
+  text-decoration:line-through;text-decoration-color:rgba(255,215,0,.4);color:var(--ink-dim)}
+.tk-row.done-row .tk-sub{font-size:10px}
+
 #gate{position:fixed;inset:0;z-index:200;background:#0D0A11;display:none;
   flex-direction:column;align-items:center;justify-content:center;gap:26px}
 #gate.on{display:flex}
@@ -703,7 +713,7 @@ body.slx-pixel-theme #gate{z-index:200}
     </div>
   </div>
   <div class="sec">
-    <div class="sec-t">今日任务 <button class="mini" id="btnAddTask">＋ 发布</button></div>
+    <div class="sec-t">今日任务 <button class="mini" id="btnAddTask">粘贴导入</button></div>
     <div id="taskToday"></div>
   </div>
   <div class="sec" id="secLines0" style="display:none">
@@ -810,7 +820,7 @@ body.slx-pixel-theme #gate{z-index:200}
   <div class="field"><label>级别</label><div class="seg" id="tierSeg">
     <button data-v="悬赏" class="on">悬赏</button><button data-v="主线">主线</button><button data-v="支线">支线</button><button data-v="悬着">悬着</button></div></div>
   <div class="field"><label>任务</label><input id="tTitle" maxlength="40" placeholder="要拿下什么"></div>
-  <div class="field"><label>哪天的任务</label><input id="tDate" type="date"></div>
+  <div class="field" style="display:flex;gap:10px"><span style="flex:1"><label style="display:block;font-size:11px;color:var(--ink-dim);margin-bottom:6px;letter-spacing:.15em">哪天</label><input id="tDate" type="date"></span><span style="flex:1"><label style="display:block;font-size:11px;color:var(--ink-dim);margin-bottom:6px;letter-spacing:.15em">几点（可不填）</label><input id="tTime" type="time"></span></div>
   <div class="field"><label>奖励（完成时念回给你）</label><input id="tReward" maxlength="60" placeholder="例：睡前一集想看的片 / 什么都行"></div>
   <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="tSave">发布</button></div>
 </div></div>
@@ -1628,12 +1638,12 @@ function segVal(el){const b=el.querySelector('button.on');return b?b.dataset.v:n
 
 /* ============ TASKS ============ */
 function openTask(){$('tTitle').value='';$('tReward').value='';$('tDate').value=todayStr();$('shTask').classList.add('on')}
-$('btnAddTask').addEventListener('click',openTask);
+$('btnAddTask').addEventListener('click',()=>{$('lineText').value='';$('shLine').classList.add('on')});
 $('btnAddTask2').addEventListener('click',openTask);
 $('tSave').addEventListener('click',()=>{
   const title=$('tTitle').value.trim();if(!title){toast('写点什么吧');return}
   S.tasks.push({id:uid(),tier:segVal($('tierSeg'))||'悬赏',title,
-    reward:$('tReward').value.trim(),done:false,day:$('tDate').value||todayStr(),createdTs:now()});
+    reward:$('tReward').value.trim(),done:false,day:$('tDate').value||todayStr(),at:$('tTime').value||null,createdTs:now()});
   save();$('shTask').classList.remove('on');sTick();renderAll()});
 function burst(){
   const cx=innerWidth/2,cy=innerHeight/2;
@@ -1682,7 +1692,7 @@ function taskAgeSpan(t){
   return '<span class="tk-age" data-mode="up" data-ts="'+ts+'">已 '+fmtDur(now()-ts)+'</span>'}
 function taskRow(t,showDone){
   const d=document.createElement('div');
-  d.className='card tk-row'+(t.tier==='悬着'&&showDone?' hangcard':'');
+  d.className='card tk-row'+(t.tier==='悬着'&&showDone?' hangcard':'')+(!showDone?' done-row':'');
   if(t.tier==='悬着'&&showDone){const ov=document.createElement('div');ov.className='frame-ov';d.appendChild(ov)}
   const future=t.day>todayStr()&&t.tier!=='悬着';
   d.innerHTML=
@@ -1766,14 +1776,17 @@ $('lineSave').addEventListener('click',()=>{
     let day=todayStr(),tier='悬赏',reward='';
     const rm=l.match(/[|｜]\s*奖励[:：]\s*(.+)$/);
     if(rm){reward=rm[1].trim();l=l.replace(/[|｜]\s*奖励[:：].+$/,'').trim()}
+    let at=null;
     const dm=l.match(/^(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2})\s+/);
     if(dm){day=dm[1];
       if(day.includes('/')){const p=day.split('/');
         day=new Date().getFullYear()+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0')}
       l=l.slice(dm[0].length).trim()}
+    const am=l.match(/^(\d{1,2}:\d{2})\s+/);
+    if(am){at=am[1];l=l.slice(am[0].length).trim()}
     const tm=l.match(/^(悬赏|主线|支线|悬着)\s+/);
     if(tm){tier=tm[1];l=l.slice(tm[0].length).trim()}
-    if(l)newTasks.push({id:uid(),tier,title:l,reward,done:false,day,createdTs:now()})});
+    if(l)newTasks.push({id:uid(),tier,title:l,reward,done:false,day,at,createdTs:now()})});
   const okLines=newLines.filter(L=>L.stages.length);
   if(!okLines.length&&!newTasks.length){toast('没识别出内容，检查格式');return}
   let updated=0;
@@ -1906,24 +1919,47 @@ $('evSave').addEventListener('click',()=>{
 function evCountdown(e){
   const t=new Date(todayStr()+'T00:00:00'),d=new Date(e.date+'T00:00:00');
   return Math.round((d-t)/86400000)}
+function taskCountdownRow(t){
+  const r=document.createElement('div');r.className='ev-row';
+  const today=todayStr();
+  let cd='',color='var(--night)';
+  if(t.day>today){
+    const d=Math.round((new Date(t.day+'T00:00:00')-new Date(today+'T00:00:00'))/86400000);
+    cd='还有 '+d+' 天'+(t.at?' · '+t.at:'');color='#B4C2F5'}
+  else{
+    if(t.at){
+      const dl=new Date(t.day+'T'+t.at+':00').getTime();
+      if(now()<dl){cd='今天 '+t.at+' · 剩 '+fmtDur(dl-now());color='var(--gold)'}
+      else{cd='已过 '+fmtDur(now()-dl);color='#C97A6A'}}
+    else{cd='就是今天';color='var(--gold)'}}
+  r.innerHTML='<div class="ev-name"></div><div class="ev-cd" style="color:'+color+'">'+cd+'</div>';
+  r.querySelector('.ev-name').textContent=t.title;
+  return r}
 function renderEvents(){
-  S.events=S.events.filter(e=>evCountdown(e)>=-1);save();
-  const list=S.events.slice().sort((a,b)=>a.date<b.date?-1:1);
-  $('secEv').style.display=list.length?'block':'none';
+  const today=todayStr();
+  // 旧日程只读兼容：转任务提示后自然过期
+  S.events=S.events.filter(e=>e.date>=today);save();
+  const cdTasks=S.tasks.filter(t=>!t.done&&t.tier!=='悬着'&&(t.day>today||(t.day===today&&(t.at||true))))
+    .filter(t=>t.day>=today)
+    .sort((a,b)=>a.day===b.day?((a.at||'99')<(b.at||'99')?-1:1):(a.day<b.day?-1:1));
+  const legacy=S.events.slice().sort((a,b)=>a.date<b.date?-1:1);
+  $('secEv').style.display=(cdTasks.length||legacy.length)?'block':'none';
   const b1=$('evList');b1.innerHTML='';
-  list.slice(0,4).forEach(e=>{
+  cdTasks.slice(0,5).forEach(t=>b1.appendChild(taskCountdownRow(t)));
+  legacy.slice(0,3).forEach(e=>{
     const cd=evCountdown(e);
     const r=document.createElement('div');r.className='ev-row';
-    r.innerHTML='<div class="ev-name"></div><div class="ev-cd">'+(cd===0?'就是今天':cd<0?'昨天':'还有 '+cd+' 天')+'</div>';
+    r.innerHTML='<div class="ev-name"></div><div class="ev-cd">'+(cd===0?'就是今天':'还有 '+cd+' 天')+'</div>';
     r.querySelector('.ev-name').textContent=e.name;b1.appendChild(r)});
-  const b2=$('evAll');b2.innerHTML='';
-  if(!list.length)b2.innerHTML='<div class="empty">还没有日程</div>';
-  else list.forEach(e=>{
+  const b2=$('evAll');if(!b2)return;
+  b2.innerHTML='';
+  if(!legacy.length){b2.innerHTML='<div class="empty">带日期的任务自动出现在倒计时里<br>这里只剩旧日程（会自然到期退场）</div>'}
+  else legacy.forEach(e=>{
     const cd=evCountdown(e);
     const r=document.createElement('div');r.className='ev-row';
     r.innerHTML='<div class="ev-name"></div><span style="display:flex;gap:10px;align-items:center">'
       +'<button class="mini" style="padding:4px 9px" data-cal>⏰</button>'
-      +'<div class="ev-cd">'+(cd===0?'今天':cd<0?'昨天':cd+' 天')+'</div></span>';
+      +'<div class="ev-cd">'+(cd===0?'今天':cd+' 天')+'</div></span>';
     r.querySelector('.ev-name').textContent=e.name;
     r.querySelector('[data-cal]').addEventListener('click',ev=>{
       ev.stopPropagation();toCal(e.name,e.date)});
