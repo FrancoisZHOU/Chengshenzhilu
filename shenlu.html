@@ -797,6 +797,7 @@ body.slx-pixel-theme #gate{z-index:200}
     </div>
   </div>
   <div class="sec">
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前版 20260806.1）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnGate" style="width:100%;padding:13px;margin-bottom:8px">进门锁</button>
     <button class="mini" id="btnExport" style="width:100%;padding:13px;margin-bottom:8px">⚙ 存档 · 一键甩给Claude或网盘</button>
@@ -1508,6 +1509,7 @@ body.slx-pixel-theme #gate{z-index:200}
 <script>
 (function(){
 "use strict";
+const APP_VER=20260806.1;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2708,6 +2710,27 @@ function renderAll(){
   $('todayDate').textContent=d.getFullYear()+' / '+(d.getMonth()+1)+' / '+d.getDate()
     +' · '+['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
   renderLive();renderTasks();renderLines();renderEvents();renderGrid();renderStats();renderWorkToday();renderBodyLog();renderEats();renderRecent();renderSleepAsk();renderInsights()}
+
+
+/* ============ SELF UPDATER ============ */
+async function checkUpdate(silent){
+  try{
+    const r=await fetch(location.pathname+'?u='+Date.now(),{cache:'no-store'});
+    const txt=await r.text();
+    const m=txt.match(/APP_VER=([\d.]+)/);
+    if(!m){if(!silent)toast('版本信息读取失败');return}
+    const remote=parseFloat(m[1]);
+    if(remote>APP_VER){
+      if(silent){
+        toast('新版本已就绪 · 战绩页点🔄焕新');
+      }else{
+        if(confirm('发现新版本 '+m[1]+'（当前 '+APP_VER+'），立即焕新？数据不受影响')){
+          autoSnap(true);
+          location.reload(true)}}
+    }else{if(!silent)toast('已是最新版 · '+APP_VER)}
+  }catch(e){if(!silent)toast('检查失败 · 看看网络')}}
+$('btnUpdate').addEventListener('click',()=>checkUpdate(false));
+setTimeout(()=>checkUpdate(true),6000);
 
 /* ============ NIGHT MODE ============ */
 function applyNightByClock(){
