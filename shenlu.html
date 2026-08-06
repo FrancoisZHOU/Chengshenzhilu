@@ -868,7 +868,7 @@ body.slx-pixel-theme #gate{z-index:200}
     </div>
   </div>
   <div class="sec">
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前版 20260806.1）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnGate" style="width:100%;padding:13px;margin-bottom:8px">进门锁</button>
     <button class="mini" id="btnExport" style="width:100%;padding:13px;margin-bottom:8px">⚙ 存档 · 一键甩给Claude或网盘</button>
@@ -1586,7 +1586,7 @@ body.slx-pixel-theme #gate{z-index:200}
 <script>
 (function(){
 "use strict";
-const APP_VER=20260806.2;
+const APP_VER=20260806.4;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -1853,7 +1853,10 @@ setInterval(()=>{
       const dl=parseInt(el.dataset.dl);
       el.textContent=dl>now()?('剩 '+fmtDur(dl-now())):'到期';}
     else{const ts=parseInt(el.dataset.ts);if(!ts)return;
-      el.textContent='已 '+fmtDur(now()-ts)}})},1000);
+      el.textContent='已 '+fmtDur(now()-ts)}});
+  document.querySelectorAll('.live-el').forEach(el=>{
+    const ts=parseInt(el.dataset.ts);if(!ts)return;
+    el.textContent=fmtDur(now()-ts)})},1000);
 
 /* ============ QUEST LINES ============ */
 $('btnImportLine').addEventListener('click',()=>{$('lineText').value='';$('shLine').classList.add('on')});
@@ -2109,7 +2112,7 @@ function renderGrid(){
     let sub;
     const cntTot=S.counts.filter(c=>c.aid===a.id).reduce((s,c)=>s+c.n,0);
     const cntToday=S.counts.filter(c=>c.aid===a.id&&c.day===todayStr()).reduce((s,c)=>s+c.n,0);
-    if(lit)sub='进行中 · 拍一下结算';
+    if(lit)sub='<span class="live-el" data-ts="'+S.active[a.id]+'">'+fmtDur(now()-S.active[a.id])+'</span> · 拍一下结算';
     else if(a.type==='tap')sub='累计 '+st.tapCount+' 次';
     else if(a.type==='count')sub=cntTot?('今天 '+cntToday+' · 累计 '+cntTot):'拍一下计数';
     else sub=st.count?('累计 '+st.count+' 次'):'拍一下开始';
@@ -2170,7 +2173,9 @@ function renderLive(){
   ids.forEach(aid=>{
     const a=S.acts.find(x=>x.id===aid);if(!a)return;
     const d=document.createElement('div');d.className='card live-row';
-    d.innerHTML='<div class="live-dot"></div><div class="live-name"></div><button class="live-off">结算</button>';
+    d.innerHTML='<div class="live-dot"></div><div class="live-name"></div>'
+      +'<span class="live-el" data-ts="'+S.active[aid]+'" style="color:var(--gold);font-size:13px;font-variant-numeric:tabular-nums;margin-right:10px">'+fmtDur(now()-S.active[aid])+'</span>'
+      +'<button class="live-off">结算</button>';
     d.querySelector('.live-name').textContent=a.name;
     d.querySelector('.live-off').addEventListener('click',()=>{
       const st=actStats(aid);
@@ -2534,7 +2539,7 @@ function renderRecent(){
   const box=$('recentBox');box.innerHTML='';
   const items=[];
   const add=(arr,rec,ts,label)=>items.push({arr,rec,ts,label});
-  S.timed.forEach(r=>add(S.timed,r,r.end,'计时 · '+actName(r.aid)+' '+fmtDur(r.end-r.start)));
+  S.timed.forEach(r=>add(S.timed,r,r.end,'计时 · '+actName(r.aid)+' '+fmtDur(r.end-r.start)+'（'+fmtTime(r.start)+' → '+fmtTime(r.end)+'）'));
   S.taps.forEach(r=>add(S.taps,r,r.ts,'轻点 · '+actName(r.aid)));
   S.counts.forEach(r=>add(S.counts,r,r.ts,'计数 · '+actName(r.aid)+' +'+r.n));
   S.eats.forEach(r=>add(S.eats,r,r.ts,'燃料 · '+r.txt));
@@ -3584,6 +3589,7 @@ async function checkUpdate(silent){
           location.reload(true)}}
     }else{if(!silent)toast('已是最新版 · '+APP_VER)}
   }catch(e){if(!silent)toast('检查失败 · 看看网络')}}
+$('btnUpdate').textContent='🔄 检查更新（当前版 '+APP_VER+'）';
 $('btnUpdate').addEventListener('click',()=>checkUpdate(false));
 setTimeout(()=>checkUpdate(true),6000);
 
