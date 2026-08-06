@@ -369,10 +369,10 @@ button:active{transform:scale(.94);transition-duration:.08s}
   background-position:var(--gx,0%) var(--gy,0%);background-repeat:no-repeat}
 .tk-ico.gico{border:none;box-shadow:0 0 10px rgba(255,215,0,.2)}
 .tk-ico.gico svg{display:none}
-.title-img{max-width:230px;width:64vw;display:block;
-  filter:drop-shadow(0 0 16px rgba(255,215,0,.35))}
-.c-title-img{max-width:300px;width:76vw;display:block;margin:0 auto 8px;position:relative;
-  filter:drop-shadow(0 0 24px rgba(255,225,120,.5))}
+.title-img{max-width:320px;width:86vw;display:block;margin:0 auto;
+  mix-blend-mode:screen;filter:drop-shadow(0 0 14px rgba(255,215,0,.3))}
+.c-title-img{max-width:320px;width:82vw;display:block;margin:0 auto 4px;position:relative;
+  mix-blend-mode:screen;filter:drop-shadow(0 0 20px rgba(255,225,120,.45))}
 .cere.on .c-title-img{animation:titleDescend 1.35s cubic-bezier(.19,.9,.28,1.08) both}
 .hangcard{position:relative}
 .hangcard .frame-ov{position:absolute;left:-4%;right:-4%;top:-34%;bottom:-3%;
@@ -671,7 +671,7 @@ body.slx-pixel-theme #gate{z-index:200}
 
 <!-- ============ 今日 ============ -->
 <div id="tabToday" class="tab on">
-  <div class="hd"></div>
+  <div class="hd"><img class="title-img" src="ui_title.png" alt="成神之路"></div>
   <div class="day-big">
     <div class="day-halo"></div>
     <div class="day-n"><span id="dayNum">1</span><small>DAY</small></div>
@@ -957,7 +957,7 @@ body.slx-pixel-theme #gate{z-index:200}
 
 <div class="cere" id="cereM">
   <div class="halo"></div>
-  <div class="c-title">成神之路</div>
+  <img class="c-title-img" src="ui_title.png" alt="成神之路">
   <div class="c-eyebrow">欢 迎 回 到 这 个 世 界</div>
   <div class="c-day"><span id="cDay">1</span><small> DAY</small></div>
   <div class="wake-label" style="position:relative">连 续 觉 醒</div>
