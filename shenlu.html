@@ -369,10 +369,11 @@ button:active{transform:scale(.94);transition-duration:.08s}
   background-position:var(--gx,0%) var(--gy,0%);background-repeat:no-repeat}
 .tk-ico.gico{border:none;box-shadow:0 0 10px rgba(255,215,0,.2)}
 .tk-ico.gico svg{display:none}
-.title-img{max-width:320px;width:86vw;display:block;margin:0 auto;
-  mix-blend-mode:screen;filter:drop-shadow(0 0 14px rgba(255,215,0,.3))}
-.c-title-img{max-width:320px;width:82vw;display:block;margin:0 auto 4px;position:relative;
-  mix-blend-mode:screen;filter:drop-shadow(0 0 20px rgba(255,225,120,.45))}
+.title-img{max-width:196px;width:52vw;display:block;
+  animation:imgBreath 5.5s ease-in-out infinite}
+@keyframes imgBreath{0%,100%{filter:drop-shadow(0 0 7px rgba(255,215,0,.25))}50%{filter:drop-shadow(0 0 18px rgba(255,215,0,.6))}}
+.c-title-img{max-width:280px;width:72vw;display:block;margin:0 auto 4px;position:relative;
+  filter:drop-shadow(0 0 20px rgba(255,225,120,.45))}
 .cere.on .c-title-img{animation:titleDescend 1.35s cubic-bezier(.19,.9,.28,1.08) both}
 .hangcard{position:relative}
 .hangcard .frame-ov{position:absolute;left:-4%;right:-4%;top:-34%;bottom:-3%;
