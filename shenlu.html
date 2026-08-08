@@ -118,6 +118,8 @@ button{font-family:inherit}
   color:#241A05;border-radius:11px;padding:8px 17px;font-size:13px;
   font-weight:700;letter-spacing:.1em;flex:none;
   box-shadow:0 2px 8px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.5)}
+.tk-undone{background:none;border:1px solid rgba(168,180,196,.35);color:var(--ink-dim);
+  border-radius:10px;padding:7px 10px;font-size:12px;letter-spacing:.05em;margin-left:6px}
 .tk-cal{background:none;border:1px solid rgba(255,215,0,.35);color:var(--gold);
   border-radius:10px;width:34px;height:34px;padding:0;flex:none;
   display:flex;align-items:center;justify-content:center}
@@ -145,6 +147,7 @@ button{font-family:inherit}
   0%{transform:translateY(-50%) rotate(-15deg) scale(3);opacity:0;filter:blur(4px)}
   50%{opacity:1;filter:blur(0)}
   100%{transform:translateY(-50%) rotate(-15deg) scale(1);opacity:.85;box-shadow:0 0 15px rgba(212,175,55,.4)}}
+.tk-row.retired-row::after{content:none !important}
 .tk-row.done-row::after{content:'已斩获';position:absolute;right:12px;top:50%;
   transform:translateY(-50%) rotate(-12deg);color:#D4AF37;font-size:11px;font-weight:700;
   letter-spacing:.18em;border:1px solid rgba(212,175,55,.6);padding:2px 6px;border-radius:5px;opacity:.55}
@@ -205,6 +208,8 @@ button{font-family:inherit}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px}
 .act{background:var(--card);border:1px solid var(--line);border-radius:16px;
   padding:18px 14px;text-align:center;position:relative;transition:all .25s}
+.act.dragging{transform:scale(1.06);border-color:var(--gold);z-index:5;
+  box-shadow:0 8px 24px rgba(0,0,0,.55),0 0 14px rgba(255,215,0,.25);transition:transform .15s}
 .act .nm{font-size:16px;font-weight:500;letter-spacing:.05em}
 .act .st{font-size:11px;color:var(--ink-dim);margin-top:7px;letter-spacing:.05em;
   font-variant-numeric:tabular-nums}
@@ -371,8 +376,37 @@ button:active{transform:scale(.94)}
 .burst-p{position:fixed;width:7px;height:7px;border-radius:50%;
   background:var(--gold);pointer-events:none;z-index:70;
   box-shadow:0 0 8px var(--gold)}
+/* ===== 归阶金光:达成的事化作金阶上的一块金砖 ===== */
+.ascend-light{position:fixed;left:50%;bottom:30vh;width:14vw;max-width:64px;height:26vh;
+  transform:translateX(-50%);pointer-events:none;z-index:69;
+  background-image:url('fx-light.png'),linear-gradient(180deg,var(--gold-bright) 0%,rgba(255,215,0,.5) 35%,rgba(255,215,0,0) 100%);
+  background-size:100% 100%,30% 100%;background-repeat:no-repeat;background-position:center;
+  mix-blend-mode:screen;
+  opacity:0;animation:ascend 1.3s cubic-bezier(.25,.6,.3,1) forwards}
+.ascend-light.big{width:20vw;max-width:96px;height:34vh;
+  animation:ascend 2.4s cubic-bezier(.25,.6,.3,1) forwards}
+@keyframes ascend{
+  0%{opacity:0;transform:translateX(-50%) translateY(6vh) scaleY(.4)}
+  12%{opacity:1}
+  70%{opacity:.95}
+  100%{opacity:0;transform:translateX(-50%) translateY(-30vh) scaleY(1.15)}}
+.ascend-light.big{animation-name:ascend-big}
+@keyframes ascend-big{
+  0%{opacity:0;transform:translateX(-50%) translateY(8vh) scaleY(.35)}
+  10%{opacity:1}
+  75%{opacity:1}
+  100%{opacity:0;transform:translateX(-50%) translateY(-42vh) scaleY(1.2)}}
+.pix-spark{position:fixed;width:5px;height:5px;pointer-events:none;z-index:70;
+  background:var(--gold-bright);box-shadow:0 0 6px var(--gold)}
+.line-wash{position:fixed;inset:0;pointer-events:none;z-index:68;opacity:0;
+  background:radial-gradient(ellipse at 50% 30%,rgba(190,255,220,.13),rgba(255,215,0,.07) 45%,transparent 75%);
+  animation:washfade 1.6s ease forwards}
+@keyframes washfade{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+/* ===== 静置熄火:刺激自然死亡,UI不消失 ===== */
+body.calm .day-halo,body.calm .flowdot,body.calm .act.lit,body.calm .live-dot{animation-play-state:paused}
+body.calm .slx-motion-button{opacity:.35}
 @media (prefers-reduced-motion:reduce){
-  .tk-hang,.pbar i::after,.day-n span,.act.lit{animation:none}}
+  .tk-hang,.pbar i::after,.day-n span,.act.lit,.ascend-light,.line-wash{animation:none}}
 
 
 /* ===== 夜间态 ===== */
@@ -810,7 +844,7 @@ body.slx-pixel-theme #gate{z-index:200}
 <div class="sheet" id="shFlow"><div class="sheet-in">
   <h3>入 世 · 引 擎 矩 阵</h3>
   <div style="font-size:13px;color:var(--ink-dim);letter-spacing:.08em;margin:-6px 0 4px">触碰入阵 · 再触碰结算 · 可同时亮多个</div>
-  <div class="grid" id="actGrid" style="padding:16px 0"></div>
+  <div class="grid" id="actGrid" style="padding:16px 0 calc(64px + env(safe-area-inset-bottom))"></div>
 </div></div>
 
 <!-- ============ 任务 ============ -->
@@ -870,6 +904,7 @@ body.slx-pixel-theme #gate{z-index:200}
   <div class="sec">
     <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
+    <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 山涧古筝</button>
     <button class="mini" id="btnGate" style="width:100%;padding:13px;margin-bottom:8px">进门锁</button>
     <button class="mini" id="btnExport" style="width:100%;padding:13px;margin-bottom:8px">⚙ 存档 · 一键甩给Claude或网盘</button>
     <button class="mini" id="btnRestore" style="width:100%;padding:13px;margin-bottom:8px">📥 读档 · 从备份文件恢复</button>
@@ -885,6 +920,14 @@ body.slx-pixel-theme #gate{z-index:200}
   <button data-tab="tabTask"><span class="nico"><svg viewBox="0 0 24 24"><path d="M4 20l6.5-6.5M20 4l-9.5 9.5M14.5 4H20v5.5M4 14.5V20h5.5"/></svg></span>任务</button>
   <button data-tab="tabStat"><span class="nico"><svg viewBox="0 0 24 24"><path d="M4 18l2.5-9 4 5 3-7 3.5 6L20 8v10H4z"/></svg></span>战绩</button>
 </div>
+
+<div class="sheet" id="shUndone"><div class="sheet-in">
+  <h3>未 达 成 · 落 档</h3>
+  <div style="font-size:13px;color:var(--ink-dim);margin-bottom:12px" id="undoneTaskName"></div>
+  <div class="field"><label>为什么没达成（写给未来复盘的自己）</label>
+    <textarea id="undoneReason" maxlength="200" placeholder="例：货没到 / 计划变了 / 优先级让位给…"></textarea></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="undoneSave">落档</button></div>
+</div></div>
 
 <!-- ============ 悬挂矩阵 ============ -->
 <div class="sky-hanger-track" id="hangerTrack" style="display:none">
@@ -1039,6 +1082,9 @@ body.slx-pixel-theme #gate{z-index:200}
   <div class="sh-btns"><button class="b-dim" data-close>取消</button>
     <button class="b-dim" id="aDel" style="color:#C96A5A;display:none">删除</button>
     <button class="b-gold" id="aSave">保存</button></div>
+  <div class="sh-btns" id="aMoveRow" style="display:none;margin-top:10px">
+    <button class="b-dim" id="aMoveUp">◀ 前移</button>
+    <button class="b-dim" id="aMoveDn">后移 ▶</button></div>
 </div></div>
 
 <!-- ============ POP & CEREMONIES ============ -->
@@ -1586,7 +1632,7 @@ body.slx-pixel-theme #gate{z-index:200}
 <script>
 (function(){
 "use strict";
-const APP_VER=20260806.4;
+const APP_VER=20260808.1;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -1694,7 +1740,7 @@ function pop(main,sub,sound){
   $('popMain').textContent=main;$('popSub').innerHTML=sub||'';
   const p=$('pop');p.classList.add('on');
   requestAnimationFrame(()=>requestAnimationFrame(()=>p.classList.add('show')));
-  if(sound==='ding')sDing();else if(sound==='off')sOff();else sTick();
+  if(sound==='ding')sDing();else if(sound==='off')sOff();else if(sound==='mute'){}else sTick();
   clearTimeout(p._t);
   p._t=setTimeout(()=>{p.classList.remove('show');
     setTimeout(()=>p.classList.remove('on'),450)},sound==='ding'?2600:1900)}
@@ -1724,9 +1770,28 @@ $('btnAddTask').addEventListener('click',()=>{$('lineText').value='';$('shLine')
 $('btnAddTask2').addEventListener('click',openTask);
 $('tSave').addEventListener('click',()=>{
   const title=$('tTitle').value.trim();if(!title){toast('写点什么吧');return}
-  S.tasks.push({id:uid(),tier:segVal($('tierSeg'))||'悬赏',title,
-    reward:$('tReward').value.trim(),done:false,day:$('tDate').value||todayStr(),at:$('tTime').value||null,createdTs:now()});
-  save();$('shTask').classList.remove('on');sTick();renderAll()});
+  const nt={id:uid(),tier:segVal($('tierSeg'))||'悬赏',title,
+    reward:$('tReward').value.trim(),done:false,day:$('tDate').value||todayStr(),at:$('tTime').value||null,createdTs:now()};
+  S.tasks.push(nt);TC.liveCreate(nt);
+  save();$('shTask').classList.remove('on');vibe(40);renderAll()});
+function ascendLight(big){
+  const l=document.createElement('div');
+  l.className='ascend-light'+(big?' big':'');
+  document.body.appendChild(l);
+  setTimeout(()=>l.remove(),big?2500:1300);
+  const n=big?12:6,cx=innerWidth/2,cy=innerHeight*0.66;
+  for(let i=0;i<n;i++){
+    const p=document.createElement('div');p.className='pix-spark';
+    p.style.left=cx+'px';p.style.top=cy+'px';
+    document.body.appendChild(p);
+    const ang=-Math.PI/2+(Math.random()-.5)*1.6,dist=40+Math.random()*80;
+    p.animate([
+      {transform:'translate(0,0)',opacity:1},
+      {transform:'translate('+Math.cos(ang)*dist+'px,'+Math.sin(ang)*dist+'px)',opacity:0}
+    ],{duration:600+Math.random()*500,easing:'cubic-bezier(.2,.7,.4,1)'});
+    setTimeout(()=>p.remove(),1200)}
+  if(big){const w=document.createElement('div');w.className='line-wash';
+    document.body.appendChild(w);setTimeout(()=>w.remove(),1700)}}
 function burst(){
   const cx=innerWidth/2,cy=innerHeight/2;
   for(let i=0;i<16;i++){
@@ -1748,13 +1813,28 @@ function doneTask(id){
     const dl=new Date(t.day+'T23:59:59').getTime();
     if(now()<dl)durLine+=' · 还剩 <b style="color:var(--gold)">'+fmtDur(dl-now())+'</b>';
     durLine+='<br>'}
-  t.done=true;t.doneDay=todayStr();S.tasksDone++;save();
-  vibe([60,80,60,80,140]);burst();sVictory();
-  pop(pick(CHEERS),durLine+(t.reward?'奖励已到账：<b style="color:var(--gold)">'+esc(t.reward)+'</b><br>':'')+'「'+esc(t.title)+'」完成 · 累计 '+S.tasksDone+' 个','tick');
+  t.done=true;t.doneDay=todayStr();S.tasksDone++;TC.complete(t);save();
+  vibe([60,80,60,80,140]);ascendLight(false);sVictory();
+  pop(pick(CHEERS),durLine+(t.reward?'奖励已到账：<b style="color:var(--gold)">'+esc(t.reward)+'</b><br>':'')+'「'+esc(t.title)+'」完成 · 累计 '+S.tasksDone+' 个','mute');
   const rowEl=document.querySelector('.tk-row[data-id="'+id+'"]');
   if(rowEl){rowEl.classList.add('is-completed');setTimeout(renderAll,760)}
   else renderAll()}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+let undoneId=null;
+function openUndone(id){
+  const t=S.tasks.find(x=>x.id===id);if(!t)return;
+  undoneId=id;$('undoneTaskName').textContent='「'+t.title+'」';
+  $('undoneReason').value='';$('shUndone').classList.add('on')}
+$('undoneSave').addEventListener('click',()=>{
+  const t=S.tasks.find(x=>x.id===undoneId);if(!t)return;
+  const reason=$('undoneReason').value.trim();
+  if(!reason){toast('理由写一句，未来的你要用');return}
+  t.retired=true;t.retireReason=reason;t.retiredDay=todayStr();
+  TC.retire(t,reason);save();
+  $('shUndone').classList.remove('on');
+  vibe(45);sOff();
+  pop('已落档','「'+esc(t.title)+'」未达成 · 理由已记入档案','off');
+  renderAll()});
 
 const ICO={
  cal:'<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>',
@@ -1790,7 +1870,7 @@ function taskRow(t,showDone){
       +(showDone&&!t.done?taskAgeSpan(t):'')
       +'<div class="tk-btns">'
         +(showDone?'<button class="tk-cal" data-cal>'+ICO.cal+'</button>':'')
-        +(showDone&&!future?'<button class="tk-done">提交</button>':'')
+        +(showDone&&!future?'<button class="tk-done">达成</button><button class="tk-undone">未达成</button>':'')
       +'</div>'
     +'</div>';
   d.querySelector('.tk-title').textContent=t.title;
@@ -1798,13 +1878,16 @@ function taskRow(t,showDone){
   if(ageEl)ageEl.addEventListener('click',e=>{
     e.stopPropagation();
     if(confirm('这条任务不计时？（等于删掉它的时间数据）')){
-      t.noTime=true;save();renderAll()}});
+      t.noTime=true;TC.patch(t);save();renderAll()}});
   const calBtn=d.querySelector('[data-cal]');
   if(calBtn)calBtn.addEventListener('click',e=>{e.stopPropagation();toCal(t.title,t.day)});
   const doneBtn=d.querySelector('.tk-done');
   if(doneBtn)doneBtn.addEventListener('click',()=>doneTask(t.id));
+  const unBtn=d.querySelector('.tk-undone');
+  if(unBtn)unBtn.addEventListener('click',e=>{e.stopPropagation();openUndone(t.id)});
   if(!showDone){d.style.opacity=.45;
     d.addEventListener('click',()=>{if(confirm('删除这条已完成任务？')){
+      TC.archive(t.id);
       S.tasks=S.tasks.filter(x=>x.id!==t.id);save();renderAll()}})}
   return d}
 $('btnImportTask').addEventListener('click',()=>{
@@ -1817,7 +1900,7 @@ $('hangerGrip').addEventListener('click',()=>{
     hangerPendulums.forEach(pd=>{try{pd&&pd.kick&&pd.kick(1.8)}catch(e){}})}});
 function renderHanger(){
   const tr=$('hangerTrack');if(!tr)return;
-  const hung=S.tasks.filter(t=>!t.done&&t.tier==='悬着');
+  const hung=S.tasks.filter(t=>!t.done&&!t.retired&&t.tier==='悬着');
   $('hangerCount').textContent=hung.length;
   tr.style.display=hung.length?'flex':'none';
   if(!hung.length){tr.classList.remove('is-expanded')}
@@ -1835,16 +1918,28 @@ function renderHanger(){
       if(pd)hangerPendulums.push(pd)}catch(e){}})}
 function renderTasks(){
   const today=todayStr();
-  const open=S.tasks.filter(t=>!t.done&&t.day<=today&&t.tier!=='悬着');
+  const open=S.tasks.filter(t=>!t.done&&!t.retired&&t.day<=today&&t.tier!=='悬着');
   const bo=$('taskToday');bo.innerHTML='';
   if(!open.length)bo.innerHTML='<div class="empty">板上没事 · 想到什么就发一条<br>发布过的，到日子会自己浮上来</div>';
   else{const ord={'悬赏':0,'主线':1,'支线':2,'悬着':3};
     open.slice().sort((a,b)=>(ord[a.tier]||0)-(ord[b.tier]||0)).forEach(t=>bo.appendChild(taskRow(t,true)))}
   const all=$('taskAll');all.innerHTML='';
   if(!S.tasks.length)all.innerHTML='<div class="empty">还没有任务</div>';
-  else{S.tasks.filter(t=>!t.done).slice().sort((a,b)=>a.day<b.day?-1:1)
+  else{S.tasks.filter(t=>!t.done&&!t.retired).slice().sort((a,b)=>a.day<b.day?-1:1)
       .forEach(t=>all.appendChild(taskRow(t,true)));
-    S.tasks.filter(t=>t.done).slice(-8).reverse().forEach(t=>all.appendChild(taskRow(t,false)))}}
+    S.tasks.filter(t=>t.done).slice(-8).reverse().forEach(t=>all.appendChild(taskRow(t,false)));
+    S.tasks.filter(t=>t.retired).slice(-5).reverse().forEach(t=>{
+      const d=document.createElement('div');d.className='card tk-row done-row retired-row';
+      d.style.opacity=.4;
+      d.innerHTML='<div class="tk-main"><div class="tk-title"></div>'
+        +'<div class="tk-sub"><span>未达成 · '+(t.retiredDay||'')+'</span></div>'
+        +'<div class="tk-sub" style="color:var(--ink-dim);font-size:11px"></div></div>';
+      d.querySelector('.tk-title').textContent=t.title;
+      d.querySelectorAll('.tk-sub')[1].textContent=t.retireReason||'';
+      d.addEventListener('click',()=>{if(confirm('从档案移除「'+t.title+'」？(taskCore留底)')){
+        TC.archive(t.id);
+        S.tasks=S.tasks.filter(x=>x.id!==t.id);save();renderAll()}});
+      all.appendChild(d)})}}
 
 setInterval(()=>{
   if(document.visibilityState!=='visible')return;
@@ -1910,9 +2005,9 @@ $('lineSave').addEventListener('click',()=>{
       old.stages=L.stages;updated++}
     else S.lines.push(L)});
   newTasks.forEach(t=>{
-    const old=S.tasks.find(x=>!x.done&&x.title===t.title);
-    if(old){old.tier=t.tier;old.day=t.day;if(t.reward)old.reward=t.reward;updated++}
-    else S.tasks.push(t)});
+    const old=S.tasks.find(x=>!x.done&&!x.retired&&x.title===t.title);
+    if(old){old.tier=t.tier;old.day=t.day;if(t.reward)old.reward=t.reward;updated++;TC.patch(old)}
+    else{S.tasks.push(t);TC.liveCreate(t)}});
   save();$('shLine').classList.remove('on');
   vibe([50,70,50]);sDing();
   const parts=[];
@@ -1958,8 +2053,8 @@ function lineCard(L){
         s.done=!s.done;save();
         if(s.done){vibe(60);
           const np=Math.round(lineProgress(L)*100);
-          if(np>=100){burst();sVictory();pop('任务线通关','「'+esc(L.title)+'」100% 完成','tick')}
-          else pop('推进','「'+esc(L.title)+'」→ '+np+'%','off')}
+          if(np>=100){ascendLight(true);sVictory();pop('任务线通关','「'+esc(L.title)+'」100% 完成','mute')}
+          else pop('推进','「'+esc(L.title)+'」→ '+np+'%','mute')}
         renderAll()})}
     else{
       r.innerHTML='<div class="cb" style="border-style:dashed">'+(s.done?'✓':'')+'</div>'
@@ -1970,8 +2065,8 @@ function lineCard(L){
       r.querySelector('.cnt button').addEventListener('click',e=>{
         e.stopPropagation();s.count++;vibe(45);
         if(s.target&&s.count>=s.target)s.done=true;
-        save();sTick();
-        pop(s.n+' +1','累计 '+s.count+(s.target?' / '+s.target:''),'tick');
+        save();
+        pop(s.n+' +1','累计 '+s.count+(s.target?' / '+s.target:''),'mute');
         renderAll()})}
     const nb=r.querySelector('[data-note]');
     if(nb)nb.addEventListener('click',e=>{
@@ -2030,7 +2125,7 @@ $('evSave').addEventListener('click',()=>{
   const n=$('evName').value.trim(),d=$('evDate').value;
   if(!n||!d){toast('名字和日期都要');return}
   S.events.push({id:uid(),name:n,date:d});save();
-  $('shEv').classList.remove('on');sTick();renderAll()});
+  $('shEv').classList.remove('on');vibe(40);renderAll()});
 function evCountdown(e){
   const t=new Date(todayStr()+'T00:00:00'),d=new Date(e.date+'T00:00:00');
   return Math.round((d-t)/86400000)}
@@ -2053,7 +2148,7 @@ function taskCountdownRow(t){
 function renderEvents(){
   const today=todayStr();
   // P0修复(Task Core V2)：渲染只过滤视图，永不修改存档
-  const cdTasks=S.tasks.filter(t=>!t.done&&t.tier!=='悬着'&&(t.day>today||(t.day===today&&(t.at||true))))
+  const cdTasks=S.tasks.filter(t=>!t.done&&!t.retired&&t.tier!=='悬着'&&(t.day>today||(t.day===today&&(t.at||true))))
     .filter(t=>t.day>=today)
     .sort((a,b)=>a.day===b.day?((a.at||'99')<(b.at||'99')?-1:1):(a.day<b.day?-1:1));
   const legacy=S.events.filter(e=>e.date>=today).sort((a,b)=>a.date<b.date?-1:1);
@@ -2102,6 +2197,50 @@ function feedbackTimed(a,dur,st){
   if(st.best!==null&&dur<st.best)lines.push('<b style="color:var(--gold)">个人纪录！</b>历史最快');
   lines.push('今天第 '+(st.todayCount+1)+' 次 · 累计第 '+(st.count+1)+' 次');
   return lines.join('<br>')}
+let agDrag={el:null,moved:false,timer:null,suppressClick:false};
+function attachActGestures(d,a){
+  d.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    agDrag.el=null;agDrag.moved=false;agDrag.suppressClick=false;
+    const sx=e.clientX,sy=e.clientY;
+    agDrag.timer=setTimeout(()=>{
+      agDrag.el=d;d.classList.add('dragging');vibe(60);
+      try{d.setPointerCapture(e.pointerId)}catch(_){}},500);
+    const mv=ev=>{
+      if(!agDrag.el){
+        if(Math.abs(ev.clientX-sx)+Math.abs(ev.clientY-sy)>12)clearTimeout(agDrag.timer);
+        return}
+      if(Math.abs(ev.clientX-sx)+Math.abs(ev.clientY-sy)>14)agDrag.moved=true;
+      if(!agDrag.moved)return;
+      const t=document.elementFromPoint(ev.clientX,ev.clientY);
+      const cell=t&&t.closest?t.closest('.act'):null;
+      if(cell&&cell!==d&&cell.parentNode===d.parentNode){
+        const cells=[...d.parentNode.querySelectorAll('.act')];
+        if(cells.indexOf(d)<cells.indexOf(cell))cell.after(d);
+        else cell.before(d);
+        vibe(20)}};
+    const up=()=>{
+      clearTimeout(agDrag.timer);
+      d.removeEventListener('pointermove',mv);
+      d.removeEventListener('pointerup',up);
+      d.removeEventListener('pointercancel',up);
+      if(agDrag.el){
+        d.classList.remove('dragging');
+        agDrag.suppressClick=true;
+        setTimeout(()=>agDrag.suppressClick=false,350);
+        if(agDrag.moved){
+          const order=[...d.parentNode.querySelectorAll('.act')].map(x=>x.dataset.aid);
+          S.acts.sort((x,y)=>order.indexOf(x.id)-order.indexOf(y.id));
+          save();vibe(40)}
+        else{openActSheet(a.id)}
+        agDrag.el=null}};
+    d.addEventListener('pointermove',mv);
+    d.addEventListener('pointerup',up);
+    d.addEventListener('pointercancel',up)});
+  d.addEventListener('click',e=>{
+    if(agDrag.suppressClick){e.stopImmediatePropagation();e.preventDefault()}},true);
+  d.addEventListener('contextmenu',e=>e.preventDefault());
+  d.addEventListener('touchmove',e=>{if(agDrag.el)e.preventDefault()},{passive:false})}
 function renderGrid(){
   const g=$('actGrid');g.innerHTML='';
   S.acts.forEach(a=>{
@@ -2122,8 +2261,8 @@ function renderGrid(){
       if(a.type==='count'){openCount(a);return}
       if(a.type==='tap'){
         S.taps.push({aid:a.id,ts:now(),day:todayStr()});save();
-        vibe(40);sTick();
-        pop(a.name+' ✓','累计第 '+(st.tapCount+1)+' 次','tick');
+        vibe(40);
+        pop(a.name+' ✓','累计第 '+(st.tapCount+1)+' 次','mute');
         renderAll();return}
       if(!lit){S.active[a.id]=now();save();vibe(50);sTick();
         $('shFlow').classList.remove('on');renderAll()}
@@ -2135,10 +2274,8 @@ function renderGrid(){
         save();vibe([50,70,50]);
         pop(a.name+' · '+fmtDur(dur),feedbackTimed(a,dur,st),'off');
         renderAll()}});
-    let pt=null;
-    d.addEventListener('touchstart',()=>{pt=setTimeout(()=>{openActSheet(a.id)},750)});
-    d.addEventListener('touchend',()=>clearTimeout(pt));
-    d.addEventListener('touchmove',()=>clearTimeout(pt));
+    d.dataset.aid=a.id;
+    attachActGestures(d,a);
     g.appendChild(d)});
   const add=document.createElement('button');add.className='act-edit';
   add.textContent='＋ 加一个动作格子（长按格子可编辑）';
@@ -2151,6 +2288,7 @@ function openActSheet(id){
   $('aTypeSeg').querySelectorAll('button').forEach(b=>
     b.classList.toggle('on',b.dataset.v===(a?a.type:'timed')));
   $('aDel').style.display=a?'block':'none';
+  $('aMoveRow').style.display=a?'flex':'none';
   $('shAct').classList.add('on')}
 $('aSave').addEventListener('click',()=>{
   const name=$('aName').value.trim();if(!name){toast('起个名');return}
@@ -2158,6 +2296,13 @@ $('aSave').addEventListener('click',()=>{
   if(editActId){const a=S.acts.find(x=>x.id===editActId);a.name=name;a.type=type}
   else S.acts.push({id:uid(),name,type});
   save();$('shAct').classList.remove('on');renderAll()});
+function moveAct(dir){
+  const i=S.acts.findIndex(x=>x.id===editActId);if(i<0)return;
+  const j=i+dir;if(j<0||j>=S.acts.length){vibe(30);return}
+  [S.acts[i],S.acts[j]]=[S.acts[j],S.acts[i]];
+  save();vibe(40);renderGrid()}
+$('aMoveUp').addEventListener('click',()=>moveAct(-1));
+$('aMoveDn').addEventListener('click',()=>moveAct(1));
 $('aDel').addEventListener('click',()=>{
   if(confirm('删除这个格子？（历史数据保留）')){
     S.acts=S.acts.filter(x=>x.id!==editActId);
@@ -2191,6 +2336,7 @@ $('btnSleep').addEventListener('click',()=>{ac();startNight()});
 function startNight(){
   S.sleep.start=now();save();
   document.body.classList.add('night');
+  setTimeout(()=>BGM.sync(),300);
   const today=todayStr();
   const nPts=S.timed.filter(l=>l.day===today).length+S.taps.filter(l=>l.day===today).length;
   const nTk=S.tasks.filter(t=>t.done&&t.doneDay===today).length;
@@ -2205,6 +2351,7 @@ function startNight(){
   sLull();vibe([80,120,200])}
 $('nWake').addEventListener('click',()=>{ac();wakeUp()});
 function wakeUp(){
+  setTimeout(()=>BGM.sync(),800);
   let slept=null;
   if(S.sleep.start){slept=now()-S.sleep.start;
     if(slept<900000){slept=null;S.sleep.start=null;save()}
@@ -2262,6 +2409,129 @@ function renderStats(){
       +'<br>最快 '+fmtDur(st.best)+'</div>';
     r.querySelector('.n').textContent=a.name;box.appendChild(r)});
   if(!any)box.innerHTML='<div class="empty">开始入世后这里会长出来</div>'}
+/* ---- 山涧古筝 · 三场景无缝环境音引擎 ---- */
+if(S.bgm===undefined)S.bgm=true;
+const BGM={
+  tracks:{
+    day:['bgm.mp3','bgm2.mp3','bgm3.mp3','bgm4.mp3','bgm5.mp3','bgm6.mp3','bgm7.mp3','bgm8.mp3'],
+    night:['bgm-night.mp3','bgm-night2.mp3','bgm-night3.mp3','bgm-night4.mp3'],
+    dawn:['bgm-dawn.mp3','bgm-dawn2.mp3','bgm-dawn3.mp3','bgm-dawn4.mp3']},
+  vols:{day:0.22,night:0.16,dawn:0.20},
+  envTracks:{day:'env-day.mp3',dawn:'env-day.mp3',night:'env-night.mp3'},
+  envVols:{day:0.10,dawn:0.10,night:0.06},
+  env:null,envName:null,
+  cur:null,curName:null,nightT:null,dead:new Set(),lastSrc:null,
+  poolFor(name){
+    if(name!=='day')return this.tracks[name];
+    const h=new Date().getHours();
+    let p=this.tracks.day.slice();
+    if(h>=5&&h<10)p=p.concat(this.tracks.dawn);
+    else if(h>=22||h<5)p=p.concat(this.tracks.night);
+    return p},
+  pick(name){
+    const pool=this.poolFor(name).filter(u=>!this.dead.has(u));
+    if(!pool.length)return null;
+    let cand=pool.filter(u=>u!==this.lastSrc);
+    if(!cand.length)cand=pool;
+    return cand[Math.floor(Math.random()*cand.length)]},
+  mk(name){
+    const url=this.pick(name);if(!url)return null;
+    const a=new Audio(url);a.preload='auto';a.volume=0;a._src=url;
+    a.addEventListener('error',()=>this.dead.add(url),{once:true});
+    return a},
+  fade(a,to,ms,then){
+    if(a._ft)clearInterval(a._ft);
+    const from=a.volume,t0=Date.now();
+    a._ft=setInterval(()=>{
+      const k=Math.min((Date.now()-t0)/ms,1);
+      a.volume=from+(to-from)*k;
+      if(k>=1){clearInterval(a._ft);a._ft=null;if(then)then()}},50)},
+  attachLoop(a,name){
+    a.addEventListener('timeupdate',()=>{
+      if(!a.duration||a._nx)return;
+      if(a.duration-a.currentTime<3.2){
+        const b=this.mk(name);if(!b){a._nx=true;return}
+        a._nx=b;this.lastSrc=b._src;
+        b.play().then(()=>{
+          this.fade(b,this.vols[name],2800);
+          this.fade(a,0,2800,()=>a.pause());
+          if(this.cur===a){this.cur=b;this.attachLoop(b,name)}
+        }).catch(()=>{a._nx=null})}})},
+  scene(){
+    if(document.body.classList.contains('night'))return 'night';
+    if($('cereM').classList.contains('on'))return 'dawn';
+    return 'day'},
+  envSync(sc){
+    let url=this.envTracks[sc];
+    if(sc==='day'){const h=new Date().getHours();
+      url=(h>=21||h<6)?this.envTracks.night:this.envTracks.day}
+    if(this.env&&this.envName===url&&!this.env.paused)return;
+    this.envStop(1200);
+    if(!url||this.dead.has(url))return;
+    const a=new Audio(url);a.loop=true;a.volume=0;a.preload='auto';
+    a.addEventListener('error',()=>this.dead.add(url),{once:true});
+    this.env=a;this.envName=url;
+    a.play().then(()=>this.fade(a,this.envVols[sc],3000))
+      .catch(()=>{if(this.env===a){this.env=null;this.envName=null}})},
+  envStop(ms){
+    if(this.env){const a=this.env;this.fade(a,0,ms||800,()=>a.pause());
+      this.env=null;this.envName=null}},
+  sync(){
+    if(!S.bgm||document.hidden){this.stop(600);return}
+    const sc=this.scene();
+    this.envSync(sc);
+    if(this.curName===sc&&this.cur&&!this.cur.paused)return;
+    this.stop(1400);
+    const a=this.mk(sc);if(!a){this.curName=null;return}
+    this.cur=a;this.curName=sc;this.lastSrc=a._src;
+    a.play().then(()=>{
+      this.fade(a,this.vols[sc],2400);this.attachLoop(a,sc);
+      clearTimeout(this.nightT);
+      if(sc==='night')this.nightT=setTimeout(()=>{
+        if(this.curName==='night')this.stop(8000)},180000)
+    }).catch(()=>{if(this.cur===a){this.cur=null;this.curName=null}})},
+  stop(ms){
+    clearTimeout(this.nightT);
+    this.envStop(ms);
+    if(this.cur){const a=this.cur;this.fade(a,0,ms||800,()=>a.pause());
+      if(a._nx&&a._nx!==true){const b=a._nx;this.fade(b,0,ms||800,()=>b.pause())}
+      this.cur=null;this.curName=null}}
+};
+function renderBgmBtn(){$('btnBgm').textContent='🎵 山涧古筝：'+(S.bgm?'开':'关')}
+$('btnBgm').addEventListener('click',()=>{
+  S.bgm=!S.bgm;save();renderBgmBtn();
+  if(S.bgm){BGM.sync();toast('山涧古筝 · 起')}
+  else{BGM.stop();toast('已静音')}});
+renderBgmBtn();
+document.addEventListener('click',()=>BGM.sync(),{capture:true});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)BGM.stop(500);else BGM.sync()});
+/* ---- 天光层:并入动态背景,像素世界随现实时辰呼吸 ---- */
+(function skyTint(){
+  let el=document.getElementById('skyTint');
+  if(!el){el=document.createElement('div');el.id='skyTint';
+    el.style.cssText='position:fixed;inset:0;z-index:1;pointer-events:none;transition:background 60s linear';
+    document.body.insertBefore(el,document.body.firstChild.nextSibling)}
+  function apply(){
+    if(document.body.classList.contains('night')){el.style.background='rgba(0,0,0,0)';return}
+    const h=new Date().getHours();let c='rgba(0,0,0,0)';
+    if(h>=22||h<5)c='rgba(8,10,30,.45)';
+    else if(h<7)c='rgba(255,170,80,.12)';
+    else if(h<10)c='rgba(255,220,150,.05)';
+    else if(h<17)c='rgba(0,0,0,0)';
+    else if(h<20)c='rgba(255,140,70,.12)';
+    else c='rgba(20,16,50,.28)';
+    el.style.background=c}
+  apply();setInterval(apply,60000)})();
+/* ---- 静置熄火:20秒无交互,装饰动效歇息,一触即醒 ---- */
+let calmT=null;
+function calmReset(){
+  document.body.classList.remove('calm');
+  clearTimeout(calmT);
+  calmT=setTimeout(()=>document.body.classList.add('calm'),20000)}
+['pointerdown','scroll','keydown'].forEach(ev=>
+  document.addEventListener(ev,calmReset,{passive:true,capture:true}));
+calmReset();
 function renderVoiceBtn(){$('btnVoice').textContent='语音陪伴：'+(S.voice?'开':'关')}
 $('btnVoice').addEventListener('click',()=>{
   S.voice=!S.voice;save();renderVoiceBtn();
@@ -2309,8 +2579,8 @@ $('btnAddEat').addEventListener('click',()=>{
 $('eatSave').addEventListener('click',()=>{
   const txt=$('eatTxt').value.trim();if(!txt){toast('写一口');return}
   S.eats.push({ts:now(),day:todayStr(),txt});save();
-  $('shEat').classList.remove('on');sTick();vibe(40);
-  pop('燃料入账 · '+fmtTime(now()),esc(txt),'tick');
+  $('shEat').classList.remove('on');vibe(40);
+  pop('燃料入账 · '+fmtTime(now()),esc(txt),'mute');
   renderAll()});
 function renderEats(){
   const b=$('eatToday');b.innerHTML='';
@@ -2338,7 +2608,7 @@ let lastMoodRec=null;
     b.addEventListener('click',()=>{
       const rec={ts:now(),day:todayStr(),label:l};
       S.moods.push(rec);save();lastMoodRec=rec;
-      vibe(40);sTick();
+      vibe(40);
       $('moodNote').value='';$('shMoodNote').classList.add('on')});
     c.appendChild(b)})})();
 $('moodNoteSave').addEventListener('click',()=>{
@@ -2353,8 +2623,8 @@ $('tpSave').addEventListener('click',()=>{
   const rec={ts:now(),day:todayStr(),place:$('tpPlace').value.trim()||null,
     mode:segVal($('tpModeSeg'))||'其他',lat:null,lng:null};
   S.trips.push(rec);save();
-  $('shTrip').classList.remove('on');sTick();vibe(40);
-  pop('出行已打卡 · '+fmtTime(now()),(rec.place?esc(rec.place)+' · ':'')+rec.mode,'tick');
+  $('shTrip').classList.remove('on');vibe(40);
+  pop('出行已打卡 · '+fmtTime(now()),(rec.place?esc(rec.place)+' · ':'')+rec.mode,'mute');
   if(navigator.geolocation)navigator.geolocation.getCurrentPosition(p=>{
     rec.lat=Math.round(p.coords.latitude*1e5)/1e5;
     rec.lng=Math.round(p.coords.longitude*1e5)/1e5;save()},
@@ -2379,8 +2649,8 @@ $('envSaveM').addEventListener('click',()=>{
   const t=parseFloat($('envT').value),h=parseInt($('envH').value);
   if(isNaN(t)&&isNaN(h)){toast('至少填一个');return}
   S.envs.push({ts:now(),day:todayStr(),t:isNaN(t)?null:t,h:isNaN(h)?null:h,lat:null,lng:null});
-  save();$('shEnv').classList.remove('on');sTick();
-  pop('环境已入流 · '+fmtTime(now()),(isNaN(t)?'':t+'°C ')+(isNaN(h)?'':'湿度'+h+'%'),'tick');
+  save();$('shEnv').classList.remove('on');vibe(40);
+  pop('环境已入流 · '+fmtTime(now()),(isNaN(t)?'':t+'°C ')+(isNaN(h)?'':'湿度'+h+'%'),'mute');
   renderAll()});
 
 $('btnMoney').addEventListener('click',()=>{
@@ -2421,7 +2691,7 @@ function unlockLedger(){
   $('btnLedgerUnlock').style.display='none';
   $('btnLedgerImport').style.display='inline-block';
   $('ledgerList').style.display='block';
-  renderLedger();sTick()}
+  renderLedger()}
 $('btnLedgerImport').addEventListener('click',()=>{
   $('ledgerText').value='';$('shLedger').classList.add('on')});
 $('ledgerSave').addEventListener('click',()=>{
@@ -2478,7 +2748,7 @@ $('gateIn').addEventListener('input',()=>{
   const v=$('gateIn').value.toLowerCase();
   if(S.pin&&v.length>=S.pin.length){
     if(v===S.pin.toLowerCase()){S.lastUnlock=now();save();
-      $('gate').classList.remove('on');vibe(50);sTick()}
+      $('gate').classList.remove('on');vibe(50)}
     else{$('gateIn').value='';vibe([60,60,60])}}});
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'&&gateNeeded())showGate();
@@ -2608,7 +2878,7 @@ function showPoke(){
       $('poke').classList.remove('on');vibe(40);
       pop('收到 · 已入流',esc(a),'tick');renderAll()};
   }
-  $('poke').classList.add('on');vibe([50,60,50]);sTick();speak(q)}
+  $('poke').classList.add('on');vibe([50,60,50]);speak(q)}
 $('pokeSkip').addEventListener('click',()=>{$('poke').classList.remove('on')});
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'&&Math.random()<0.4)
@@ -2664,7 +2934,7 @@ function showEcho(it,evt,payload){
   it.shown++;it.lastShownAt=now();
   S.insightRuntime.lastSurfaceAt=now();S.insightRuntime.inlineShown++;
   save();
-  $('shEcho').classList.add('on');vibe([40,60]);sTick()}
+  $('shEcho').classList.add('on');vibe([40,60])}
 $('echoUse').addEventListener('click',()=>{
   if(curEcho){curEcho.level++;curEcho.misses=0;
     curEcho.cooldownUntil=now()+Math.max(3,curEcho.level*3)*86400000;
@@ -2735,7 +3005,7 @@ $('nWeightSave').addEventListener('click',e=>{
   S.body.weights=S.body.weights.filter(x=>x.day!==todayStr());
   S.body.weights.push({day:todayStr(),kg,ts:now()});save();
   $('nWeight').value='';$('nWeight').placeholder=kg+' kg ✓ 已入账';
-  sTick();vibe(40)});
+  vibe(40)});
 function renderChips(){
   const c=$('cChips');c.innerHTML='';
   const today=todayStr();
@@ -2747,7 +3017,7 @@ function renderChips(){
       S.body.feels=S.body.feels.filter(f=>f.day!==today);
       S.body.feels.push({day:today,label:l,ts:now()});save();
       c.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
-      sTick();vibe(35)});
+      vibe(35)});
     c.appendChild(b)})}
 function renderSleepAsk(){
   const today=todayStr();
@@ -2759,7 +3029,7 @@ function renderSleepAsk(){
     const b=document.createElement('button');b.textContent=l;
     b.addEventListener('click',()=>{
       S.body.feels.push({day:today,label:l,ts:now()});save();
-      vibe(35);sTick();pop('睡感已入流',l,'tick');renderAll()});
+      vibe(35);pop('睡感已入流',l,'mute');renderAll()});
     c.appendChild(b)})}
 function renderWorkToday(){
   const b=$('workToday');b.innerHTML='';
@@ -3345,6 +3615,7 @@ function validateTaskCoreMigration(S) {
   const core = S && S.taskCore;
   const errors = [];
   const warnings = [];
+  const diverged = !!(core && core.divergedAt); // 双写上线后允许合法分叉,数量对账降为跳过
   if (!core || core.schema !== TASK_CORE_SCHEMA) {
     return { ok: false, errors: ['taskCore schema ' + TASK_CORE_SCHEMA + ' not found'], warnings };
   }
@@ -3393,7 +3664,10 @@ function validateTaskCoreMigration(S) {
     else if (k === 'stage-completion') actual.stageCompletion++;
   });
   Object.keys(expected).forEach(function (k) {
-    if (expected[k] !== actual[k]) errors.push('record parity failed for ' + k + ': expected ' + expected[k] + ', got ' + actual[k]);
+    if (expected[k] !== actual[k]) {
+      if (diverged) warnings.push('post-divergence count drift for ' + k + ': legacy ' + expected[k] + ', core ' + actual[k]);
+      else errors.push('record parity failed for ' + k + ': expected ' + expected[k] + ', got ' + actual[k]);
+    }
   });
 
   // Verify every legacy line keeps exactly the same displayed progress.
@@ -3417,7 +3691,8 @@ function validateTaskCoreMigration(S) {
 
   if (core.stats && Number.isFinite(Number(S.tasksDone))
       && core.stats.completedLifetime !== Number(S.tasksDone)) {
-    errors.push('S.tasksDone was not preserved exactly');
+    if (diverged) warnings.push('completedLifetime drift (legacy counter moved on)');
+    else errors.push('S.tasksDone was not preserved exactly');
   }
 
   return {
@@ -3561,7 +3836,74 @@ if (typeof module !== 'undefined' && module.exports) {
 
 const taskCoreMigration=migrateLegacyTaskCore(S,{now,todayStr,timezone:'Europe/Paris'});
 if(taskCoreMigration.changed)save();
-if(!taskCoreMigration.audit.ok)console.error('Task Core migration audit failed',taskCoreMigration.audit);
+if(!taskCoreMigration.audit.ok&&!S.taskCore.divergedAt)console.error('Task Core migration audit failed',taskCoreMigration.audit);
+
+/* ---- TC 任务域双写层（第二波第一刀）---- */
+const TC={
+  core(){return S.taskCore},
+  touch(){const c=this.core();if(c&&!c.divergedAt)c.divergedAt=now()},
+  aliasOf(legacyId){const c=this.core();if(!c)return null;
+    const a=c.aliases.find(a=>a.kind==='task'&&a.legacyId===legacyId);
+    return a?a.itemId:null},
+  item(id){const c=this.core();return c?c.items.find(x=>x.id===id):null},
+  liveCreate(t){const c=this.core();if(!c||this.aliasOf(t.id))return;
+    const iid='tc:task:'+t.id+':live';
+    c.items.push({id:iid,title:t.title,parentId:null,order:0,
+      state:t.done?'completed':(t.retired?'retired':'active'),archivedAt:null,
+      placement:t.tier==='悬着'?'hanging':'board',
+      tier:t.tier==='悬着'?null:(t.tier||null),reward:t.reward||null,note:t.retireReason||null,
+      trackAge:t.noTime?false:true,
+      progress:{metric:'binary',target:1,unit:null,rollup:null},
+      completion:{policy:'manual'},
+      recurrence:{mode:'once',rule:null,window:null},
+      time:{readyAt:{date:t.day||null,time:null},
+        dueAt:{date:t.day||null,time:'23:59:59'},
+        occursAt:t.at?{date:t.day||null,time:t.at}:null,
+        timezone:'Europe/Paris',reminders:[]},
+      createdAt:t.createdTs||now(),updatedAt:null,
+      completedAt:null,retiredAt:t.retired?now():null,
+      source:{kind:'task',legacyId:t.id,legacyIndex:-1,extra:{live:true}}});
+    c.aliases.push({kind:'task',legacyId:t.id,itemId:iid});
+    if(t.done)this._pushCompletion(iid,t);
+    this.touch()},
+  _pushCompletion(iid,t){const c=this.core();
+    c.records.push({id:'tr:live:'+uid(),itemId:iid,kind:'completion',
+      at:now(),day:t.doneDay||todayStr(),occurrenceKey:t.doneDay||todayStr(),
+      value:null,unit:null,startedAt:null,endedAt:null,
+      durationMs:t.durSec?t.durSec*1000:null,
+      fromState:'active',toState:'completed',voidedAt:null,
+      source:{kind:'task-completion',live:true}})},
+  complete(t){const c=this.core();if(!c)return;
+    let iid=this.aliasOf(t.id);if(!iid){this.liveCreate(t);return}
+    const it=this.item(iid);if(!it)return;
+    it.state='completed';it.completedAt=now();it.updatedAt=now();
+    this._pushCompletion(iid,t);this.touch()},
+  retire(t,reason){const c=this.core();if(!c)return;
+    let iid=this.aliasOf(t.id);if(!iid){this.liveCreate(t);iid=this.aliasOf(t.id)}
+    const it=this.item(iid);if(!it)return;
+    it.state='retired';it.retiredAt=now();it.updatedAt=now();
+    it.note=reason||it.note;
+    c.records.push({id:'tr:live:'+uid(),itemId:iid,kind:'transition',
+      at:now(),day:todayStr(),occurrenceKey:todayStr(),
+      value:null,unit:null,startedAt:null,endedAt:null,durationMs:null,
+      fromState:'active',toState:'retired',voidedAt:null,
+      source:{kind:'task-retire',reason:reason||null,live:true}});
+    this.touch()},
+  archive(legacyId){const it=this.item(this.aliasOf(legacyId));
+    if(it){it.archivedAt=now();it.updatedAt=now();this.touch()}},
+  patch(t){const it=this.item(this.aliasOf(t.id));if(!it)return;
+    it.title=t.title;it.reward=t.reward||null;
+    it.tier=t.tier==='悬着'?null:(t.tier||null);
+    it.placement=t.tier==='悬着'?'hanging':'board';
+    it.trackAge=t.noTime?false:true;
+    it.time.readyAt.date=t.day||null;it.time.dueAt.date=t.day||null;
+    it.time.occursAt=t.at?{date:t.day||null,time:t.at}:null;
+    it.updatedAt=now();this.touch()}
+};
+/* 启动对账：把双写上线前遗留的legacy新任务补进taskCore（幂等） */
+(function tcReconcile(){if(!S.taskCore)return;let n=0;
+  S.tasks.forEach(t=>{if(!TC.aliasOf(t.id)){TC.liveCreate(t);n++}});
+  if(n){save();}})();
 
 /* ============ RENDER ALL / BOOT ============ */
 function renderAll(){
