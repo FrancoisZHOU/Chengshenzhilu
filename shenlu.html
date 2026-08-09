@@ -274,6 +274,12 @@ button{font-family:inherit}
   box-shadow:-10px 10px 30px rgba(0,0,0,.6),inset 0 0 15px rgba(255,215,0,.05);
   padding:10px;max-height:62vh;overflow-y:auto;overflow-x:hidden}
 .sky-hanger-item{position:relative;width:148px;padding:13px 12px;margin:26px auto 6px;
+  border:1px solid transparent !important;
+  background:
+    linear-gradient(110deg,rgba(212,175,55,.16) 0%,rgba(212,175,55,.045) 56%,rgba(10,8,14,.93) 100%) padding-box,
+    linear-gradient(135deg,rgba(212,175,55,.55),rgba(232,235,228,.10) 42%,rgba(212,175,55,.20)) border-box !important;
+  box-shadow:0 8px 22px rgba(0,0,0,.34),0 0 22px rgba(212,175,55,.15),
+    inset 0 1px 0 rgba(255,255,230,.06) !important;
   background:linear-gradient(160deg,#2A2114,#120D08);border:1px solid var(--gold-dim);
   border-radius:12px;color:var(--gold-bright);opacity:0;transform:scale(.8);transition:all .3s ease}
 .sky-hanger-track.is-expanded .sky-hanger-item{opacity:1;transform:scale(1)}
@@ -893,10 +899,13 @@ body.slx-pixel-theme #gate{z-index:200}
    放置于全部样式之后,覆盖 slx-gold-glass 金框(保留其模糊与降级职责)
    ================================================================ */
 body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row{
-  --u-rgb:77,164,220;--u-wash:.14;--u-line:.42;--u-glow:0;--u-lift:8px;--u-seam:.55}
-.tk-row.urg-urgent{--u-rgb:177,75,142;--u-wash:.26;--u-line:.74;--u-glow:.18;--u-lift:12px;--u-seam:.95}
-.tk-row.urg-normal{--u-rgb:77,164,220;--u-wash:.14;--u-line:.42;--u-glow:0;--u-lift:8px;--u-seam:.55}
-.tk-row.urg-low{--u-rgb:79,155,122;--u-wash:.10;--u-line:.30;--u-glow:0;--u-lift:5px;--u-seam:.34}
+  --u-rgb:77,164,220;--u-wash:.14;--u-line:.42;--u-glow:.13;--u-lift:8px;--u-seam:.55}
+body.slx-pixel-theme .tk-row.slx-gold-glass.urg-urgent,.tk-row.urg-urgent{
+  --u-rgb:177,75,142;--u-wash:.26;--u-line:.74;--u-glow:.22;--u-lift:12px;--u-seam:.95}
+body.slx-pixel-theme .tk-row.slx-gold-glass.urg-normal,.tk-row.urg-normal{
+  --u-rgb:77,164,220;--u-wash:.14;--u-line:.42;--u-glow:.13;--u-lift:8px;--u-seam:.55}
+body.slx-pixel-theme .tk-row.slx-gold-glass.urg-low,.tk-row.urg-low{
+  --u-rgb:79,155,122;--u-wash:.10;--u-line:.30;--u-glow:.11;--u-lift:5px;--u-seam:.34}
 body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-normal,.tk-row.urg-low{
   border:1px solid transparent !important;
   background:
@@ -1226,7 +1235,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   <div class="field"><label>任务</label><input id="tdTitle" maxlength="120"></div>
   <div class="field"><label>处理优先级</label><div class="seg" id="tdUrg">
     <button data-v="low">从容</button><button data-v="normal">一般</button><button data-v="urgent">紧急</button></div></div>
-  <div class="field"><label>血统</label><div class="seg" id="tdTier">
+  <div class="field"><label>类型</label><div class="seg" id="tdTier">
     <button>悬赏</button><button>主线</button><button>支线</button><button>悬着</button></div></div>
   <div class="field"><label>日期</label><input type="date" id="tdDate"></div>
   <div class="field"><label>时刻(可空)</label><input type="time" id="tdTime"></div>
@@ -1870,7 +1879,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260811.4;
+const APP_VER=20260811.5;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -5082,8 +5091,14 @@ const URGENT={
         const days=Math.max(1,Math.ceil((now()-(t.createdTs||now()))/86400000));
         meta='<span class="tk-hangtag">悬着</span> 已挂 '+days+' 天'}
       else meta=t.tier+' · '+(t.day===todayStr()?'今天':t.day.slice(5))+(t.at?' '+t.at:'');
-      d.innerHTML='<div class="t"></div><div class="m">'+meta+'</div>';
+      d.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
+        +'<div style="flex:1;min-width:0"><div class="t"></div><div class="m">'+meta+'</div></div>'
+        +'<button class="ud-seal" style="width:34px;height:34px;border-radius:9px;border:none;flex:0 0 34px;'
+        +'background:linear-gradient(150deg,#F6DC8A,#D4AF37 55%,#8A6B1F);color:#241A05;font-size:16px;font-weight:800;'
+        +'box-shadow:0 2px 7px rgba(0,0,0,.45)">✓</button></div>';
       d.querySelector('.t').textContent=t.title;
+      d.querySelector('.ud-seal').addEventListener('click',e=>{e.stopPropagation();
+        doneTask(t.id)});   // 抽屉直接办妥,refresh经renderAll自动联动
       d.addEventListener('click',()=>{this.retract('nav');
         document.querySelector('.nav button[data-tab="tabToday"]').click();
         setTimeout(()=>{const row=document.querySelector('.tk-row[data-id="'+t.id+'"]');
