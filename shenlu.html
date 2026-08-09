@@ -1771,7 +1771,7 @@ body.slx-pixel-theme #gate{z-index:200}
 <script>
 (function(){
 "use strict";
-const APP_VER=20260810.7;
+const APP_VER=20260811.1;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -1948,9 +1948,44 @@ seg($('tierSeg'));seg($('aTypeSeg'));
 function segVal(el){const b=el.querySelector('button.on');return b?b.dataset.v:null}
 
 /* ============ TASKS ============ */
+/* 直录协议(20260809):Claude生成→粘贴标题框→自动归类,零手选
+   标签:#急/#紧急/#从容/#缓 · #主线/#悬赏/#支线/#悬着 · #今天/#明天/#后天/#MM-DD/#YYYY-MM-DD · #HH:MM */
+function parseQuickTask(){
+  const inp=$('tTitle');let t=inp.value;
+  if(!/^#/.test(t))return;
+  let urg=null,tier=null,date=null,time=null,hit=false;
+  const pad=n=>String(n).padStart(2,'0');
+  const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  for(;;){
+    const m=t.match(/^#(\S+)\s+/);if(!m)break;
+    const tag=m[1];let ok=true;
+    if(tag==='急'||tag==='紧急')urg='urgent';
+    else if(tag==='从容'||tag==='缓')urg='low';
+    else if(['主线','悬赏','支线','悬着'].includes(tag))tier=tag;
+    else if(tag==='今天')date=todayStr();
+    else if(tag==='明天'){const d=new Date();d.setDate(d.getDate()+1);date=dstr(d)}
+    else if(tag==='后天'){const d=new Date();d.setDate(d.getDate()+2);date=dstr(d)}
+    else if(/^\d{4}-\d{2}-\d{2}$/.test(tag))date=tag;
+    else if(/^\d{2}-\d{2}$/.test(tag))date=new Date().getFullYear()+'-'+tag;
+    else if(/^\d{1,2}:\d{2}$/.test(tag))time=tag.length===4?'0'+tag:tag;
+    else ok=false;
+    if(!ok)break;
+    hit=true;t=t.slice(m[0].length)}
+  if(!hit)return;
+  inp.value=t;
+  if(urg)$('urgSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===urg));
+  if(tier==='悬着'){$('tHang').checked=true}
+  else if(tier){$('tHang').checked=false;
+    const ts=$('tierSeg');if(ts)ts.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.textContent.trim()===tier))}
+  if(date)$('tDate').value=date;
+  if(time&&$('tTime'))$('tTime').value=time;
+  const bits=[urg==='urgent'?'紧急':urg==='low'?'从容':null,tier,date===todayStr()?'今天':date,time].filter(Boolean);
+  toast('直录 · '+bits.join(' · '));vibe(30)}
 function openTask(){$('tTitle').value='';$('tReward').value='';$('tDate').value=todayStr();$('tHang').checked=false;
   $('urgSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v==='normal'));
   $('shTask').classList.add('on')}
+$('tTitle').addEventListener('input',parseQuickTask);
+$('tTitle').addEventListener('paste',()=>setTimeout(parseQuickTask,30));
 $('btnAddTask').addEventListener('click',()=>{$('lineText').value='';$('shLine').classList.add('on')});
 $('btnAddTask2').addEventListener('click',openTask);
 $('lcConfirm').addEventListener('click',()=>{
@@ -2757,7 +2792,7 @@ const BGM={
     day:Array.from({length:16},(_,i)=>'bgm'+(i?i+1:'')+'.mp3'),
     night:Array.from({length:8},(_,i)=>'bgm-night'+(i?i+1:'')+'.mp3'),
     dawn:Array.from({length:8},(_,i)=>'bgm-dawn'+(i?i+1:'')+'.mp3')},
-  vols:{day:0.55,night:0.40,dawn:0.50,sleep:0.34},
+  vols:{day:0.72,night:0.52,dawn:0.65,sleep:0.44},
   cur:null,curName:null,nightT:null,dead:new Set(),lastSrc:null,
   poolFor(name){
     if(name==='sleep')return this.tracks.night;
@@ -2835,7 +2870,8 @@ $('btnBgm').addEventListener('click',()=>{
 renderBgmBtn();
 document.addEventListener('click',()=>BGM.sync(),{capture:true});
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden)BGM.stop(500);else BGM.sync()});
+  /* 熄屏/后台续播(董事长令 20260809);回前台仅校准时辰场景 */
+  if(!document.hidden)BGM.sync()});
 /* ---- 天光层:并入动态背景,像素世界随现实时辰呼吸 ---- */
 (function skyTint(){
   let el=document.getElementById('skyTint');
@@ -4729,7 +4765,7 @@ const CHIME={
     if(!this.buf)return false;
     const c=ac();if(!c||c.state!=='running')return false;
     const ix=side>0?(2+Math.floor(Math.random()*2)):(Math.floor(Math.random()*2));
-    let gain=0.30+energy*0.55;
+    let gain=(0.30+energy*0.55)*0.9;
     if(isNightMute()||URGENT.nightManual)gain*=0.65;
     if(URGENT.voiceActive)gain*=0.7;
     if(now()<this.gustUntil)gain*=0.35;               // 铃串期间物理击作陪衬
@@ -4745,7 +4781,7 @@ const CHIME={
       let ix;do{ix=Math.floor(Math.random()*this.PENT.length)}while(ix===lastIx);
       lastIx=ix;
       const prog=i/nS;
-      let g=(0.26+Math.random()*0.30)*(0.65+0.35*energy)*(1-prog*0.35); // 串尾渐弱
+      let g=(0.26+Math.random()*0.30)*(0.65+0.35*energy)*(1-prog*0.35)*0.9; // 串尾渐弱 · 总量-10%
       if(night)g*=0.65;
       this.play(this.PENT[ix],g,t);
       t+=(span/nS)*(0.45+Math.random()*1.1);          // 错落时值,风的手不匀
