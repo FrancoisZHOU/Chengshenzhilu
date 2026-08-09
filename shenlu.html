@@ -1255,7 +1255,6 @@ body.slx-pixel-theme #gate{z-index:200}
   <div class="urg-drawer" id="urgDrawer">
     <div class="ud-head">紧急事项<span id="udCount"></span></div>
     <div class="ud-list" id="udList"></div>
-    <div class="ud-btns"><button id="udLater">稍后提醒</button><button id="udMute">今天不再自动弹出</button></div>
   </div>
 </div>
 <div class="urg-hint" id="urgHint">轻拨查看</div>
@@ -1772,7 +1771,7 @@ body.slx-pixel-theme #gate{z-index:200}
 <script>
 (function(){
 "use strict";
-const APP_VER=20260810.6;
+const APP_VER=20260810.7;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -4716,7 +4715,10 @@ const CHIME={
       c.decodeAudioData(arr.buffer,b=>{this.buf=b;this.loading=false},()=>{this.loading=false})}
     catch(e){this.loading=false}},
   PENT:[0.8409,0.9439,1.0,1.1225,1.2599,1.4983],  // 宫商角徵羽近旁音列(倍率)
+  soundEndAt:0,
   play(rate,gain,when,pan){const c=ac();if(!c||!this.buf||c.state!=='running')return false;
+    const startMs=now()+Math.max(0,((when||c.currentTime)-c.currentTime)*1000);
+    this.soundEndAt=Math.max(this.soundEndAt,startMs+1800);   // 可闻尾长~1.8s
     const src=c.createBufferSource();src.buffer=this.buf;
     src.playbackRate.value=rate*(1+(Math.random()*0.012-0.006)); // ±0.6%微差拍闪烁
     const g=c.createGain();g.gain.value=gain;
@@ -4844,9 +4846,7 @@ const URGENT={
       if(_c&&_c.state==='running')this.strikesLeft--}
     chimeStrike(v,side);
     /* 无语音场景:铃声衰减完后1.5秒缩回 */
-    if(this.expanded&&!this.engaged&&!this.voiceActive&&!this._tVoice&&!this._tRetract){
-      clearTimeout(this._tSettle);
-      this._tSettle=setTimeout(()=>this.retract('settle'),480+1500)}},
+    this._scheduleSettle(false)},
   /* ---- 弹出/缩回 ---- */
   open(auto){
     this.ensureBell();
@@ -4865,13 +4865,12 @@ const URGENT={
     setTimeout(()=>{ // 70ms反向脉冲,制造真实相对碰撞
       if(this.bell){this.bell.kick(auto?2.15:1.2);this.tongue.kick(auto?-2.85:-1.5)}
       CHIME.load();
-      CHIME.gust(auto?0.75:0.45)},70);                    // 归家吱呀=一串清脆
+      CHIME.gust(auto?0.75:0.45);
+      setTimeout(()=>this._scheduleSettle(false),140)},70); // 归家吱呀=一串清脆;缩回锚定声尾
     if(auto){
       const n=this.count();
       if(!isNightMute()&&n>0){
-        this._tVoice=setTimeout(()=>this._speakUrgent(n),760)}
-      else{ // 夜间免语音:兜底缩回(若物理静止无碰撞)
-        this._tSettle=setTimeout(()=>{if(this.expanded&&!this.engaged)this.retract('settle')},2600+1500)}}
+        this._tVoice=setTimeout(()=>this._speakUrgent(n),760)}}
   },
   openManual(kickV){
     if(this.expanded)return;
@@ -4887,10 +4886,13 @@ const URGENT={
     this._clearTimers();
     $('urgDock').classList.remove('expanded');
     if(this.bell){this.bell.kick(-0.62);this.tongue.kick(0.78)} // 正常不达发声阈值
-    this.pendingAudio=null;
-    if(reason==='later'){this.sessionLater=true}
-    if(reason==='mute'){S.urgentMuteDay=todayStr();save();
-      toast('今天不再自动弹出 · 铃仍可手动拨看')}},
+    this.pendingAudio=null},
+  _scheduleSettle(afterVoice){
+    if(!this.expanded||this.engaged)return;
+    if(!afterVoice&&(this.voiceActive||this._tVoice))return;  // 语音在途由语音尾接管
+    clearTimeout(this._tSettle);clearTimeout(this._tRetract);this._tRetract=null;
+    const wait=Math.max(1500,(CHIME.soundEndAt||0)-now()+1500);
+    this._tSettle=setTimeout(()=>{if(this.expanded&&!this.engaged)this.retract('settle')},wait)},
   _clearTimers(){clearTimeout(this._tVoice);clearTimeout(this._tRetract);
     clearTimeout(this._tSettle);clearTimeout(this._tIdle);
     this._tVoice=this._tRetract=this._tSettle=this._tIdle=null},
@@ -4902,9 +4904,7 @@ const URGENT={
     this.voiceActive=true;
     BGM.duck(0.45,180);
     const done=()=>{this.voiceActive=false;BGM.unduck(800);
-      if(this.expanded&&!this.engaged){
-        clearTimeout(this._tRetract);
-        this._tRetract=setTimeout(()=>this.retract('voice-end'),1500)}};
+      this._scheduleSettle(true)};
     let blob=null;
     if(n<=9)blob=await TTSC.get('urgent-'+nn+'-vivi2');
     if(blob){
@@ -4912,11 +4912,11 @@ const URGENT={
       catch(err){ // 冷启动自动播放被拦:记补播窗
         this.voiceActive=false;BGM.unduck(200);
         this.pendingAudio={n,ts:now()};
-        this._tSettle=setTimeout(()=>{if(this.expanded&&!this.engaged)this.retract('settle')},2600+1500)}
+        this._scheduleSettle(true)}
       return}
     const ok=Voice.say(urgentText(n),100,{rate:1.0,pitch:0.96,vol:0.85,onEnd:done});
     if(!ok){this.voiceActive=false;BGM.unduck(200);
-      this._tSettle=setTimeout(()=>{if(this.expanded&&!this.engaged)this.retract('settle')},2600+1500)}},
+      this._scheduleSettle(true)}},
   _creakOnTouch(){ // 冷启动首触:补那声归家吱呀(12秒窗;缩回态也响,铃在门口)
     if(!this._needCreak)return;
     if(now()-(this._openAt||0)>12000){this._needCreak=false;return}
@@ -4936,7 +4936,6 @@ const URGENT={
   /* ---- 触发 ---- */
   autoOpen(src){
     if(this.expanded||this.engaged)return;
-    if(this.sessionLater||this.mutedToday())return;
     if($('cereM').classList.contains('on'))return; // 晨仪式:并入播报,不叠抽屉
     if(this.locked()){this.pendingGate=true;return}  // PIN解锁后再弹
     this.open(true)},
@@ -4998,8 +4997,6 @@ const URGENT={
     URGENT._retryPendingAudio();
     if(URGENT.expanded)URGENT.engage()},{passive:true});
   $('udList').addEventListener('scroll',()=>{if(URGENT.expanded)URGENT._resetIdle()},{passive:true});
-  $('udLater').addEventListener('click',()=>URGENT.retract('later'));
-  $('udMute').addEventListener('click',()=>URGENT.retract('mute'));
   /* 抽屉区域外任何操作→立即缩回,不挡手 */
   document.addEventListener('pointerdown',e=>{
     URGENT._creakOnTouch();
