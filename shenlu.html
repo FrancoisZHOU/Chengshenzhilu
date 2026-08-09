@@ -1772,7 +1772,7 @@ body.slx-pixel-theme #gate{z-index:200}
 <script>
 (function(){
 "use strict";
-const APP_VER=20260810.3;
+const APP_VER=20260810.4;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -4738,12 +4738,12 @@ const URGENT={
   locked(){return $('gate').classList.contains('on')||(typeof gateNeeded==='function'&&gateNeeded())},
   refresh(){
     const dock=$('urgDock'),n=this.count();
-    if(!n){dock.classList.add('hide');
-      if(this.expanded)this._collapse();return}
-    dock.classList.remove('hide');
+    dock.classList.remove('hide');            // 门口风铃常驻(董事长令:归家吱呀)
     $('urgKnot').textContent=n>9?'9+':n;
-    $('udCount').textContent='当前有 '+n+' 件需要优先查看';
+    $('urgKnot').style.display=n?'flex':'none';
+    $('udCount').textContent=n?('当前有 '+n+' 件需要优先查看'):'门庭清净 · 无紧要事项';
     const box=$('udList');box.innerHTML='';
+    if(!n)return;
     if(this.locked()){const d=document.createElement('div');d.className='ud-lock';
       d.textContent='解锁后查看';box.appendChild(d);return}
     this.items().forEach(t=>{
@@ -4789,7 +4789,7 @@ const URGENT={
   open(auto){
     this.ensureBell();
     if(this.expanded)return;
-    if(auto&&S.pk)S.pk.urgLastOpen=now();
+    if(auto&&S.pk&&this.count()>0)S.pk.urgLastOpen=now();
     this.expanded=true;this.engaged=false;
     this._clearTimers();
     const dock=$('urgDock');dock.classList.remove('hide');
@@ -4860,7 +4860,6 @@ const URGENT={
   /* ---- 触发 ---- */
   autoOpen(src){
     if(this.expanded||this.engaged)return;
-    if(!this.count())return;
     if(this.sessionLater||this.mutedToday())return;
     if($('cereM').classList.contains('on'))return; // 晨仪式:并入播报,不叠抽屉
     if(this.locked()){this.pendingGate=true;return}  // PIN解锁后再弹
@@ -4884,7 +4883,7 @@ const URGENT={
     setTimeout(()=>h.classList.remove('on'),2500)},
   boot(){
     this.refresh();
-    if(!$('urgDock').classList.contains('hide'))this.ensureBell();
+    this.ensureBell();
     setTimeout(()=>this.autoOpen('cold'),500);
     setTimeout(()=>this.maybeHint(),6500);
     setTimeout(()=>{ttsWarmup()},8000);
