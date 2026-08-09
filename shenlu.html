@@ -202,18 +202,18 @@ button{font-family:inherit}
 .tk-row.urg-flashin{animation:urgFlash .7s ease-out 1}
 .tk-tier{cursor:pointer}
 /* ---- 抽屉 · 右下非模态 ---- */
-.urg-dock{position:fixed;right:0;bottom:calc(88px + env(safe-area-inset-bottom));z-index:39;
-  width:min(84vw,320px);display:flex;align-items:flex-end;
-  transform:translateX(calc(100% - 48px));
+.urg-dock{position:fixed;left:0;top:30vh;z-index:39;
+  width:min(84vw,320px);display:flex;flex-direction:row-reverse;align-items:flex-start;
+  transform:translateX(calc(-100% + 48px));
   transition:transform .38s cubic-bezier(.32,.72,0,1)}
 .urg-dock.expanded{transform:translateX(0)}
 .urg-dock.hide{display:none}
 .urg-bellzone{position:relative;width:54px;height:96px;flex:0 0 54px;
-  touch-action:none;cursor:grab;z-index:2;margin-bottom:4px}
+  touch-action:none;cursor:grab;z-index:2;margin-top:4px}
 .urg-drawer{flex:1;max-height:min(46dvh,420px);display:flex;flex-direction:column;
   background:linear-gradient(165deg,rgba(32,22,38,.97),rgba(20,14,26,.97));
-  border:1px solid rgba(177,75,142,.32);border-right:none;border-radius:16px 0 0 16px;
-  box-shadow:-6px 8px 30px rgba(0,0,0,.5);overflow:hidden;min-width:0}
+  border:1px solid rgba(177,75,142,.32);border-left:none;border-radius:0 16px 16px 0;
+  box-shadow:6px 8px 30px rgba(0,0,0,.5);overflow:hidden;min-width:0}
 .ud-head{padding:12px 14px 8px;font-size:14px;color:var(--ink);letter-spacing:.08em;
   border-bottom:1px solid rgba(177,75,142,.18)}
 .ud-head span{display:block;font-size:11px;color:var(--ink-dim);margin-top:3px;letter-spacing:.05em}
@@ -249,7 +249,7 @@ button{font-family:inherit}
   background:radial-gradient(circle at 35% 30%,#D077B4,#8A3A6E 75%);
   color:#FFF;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;
   box-shadow:0 0 6px rgba(177,75,142,.5);pointer-events:none}
-.urg-hint{position:fixed;z-index:39;right:58px;bottom:calc(122px + env(safe-area-inset-bottom));white-space:nowrap;font-size:11px;
+.urg-hint{position:fixed;z-index:39;left:58px;top:calc(30vh + 34px);white-space:nowrap;font-size:11px;
   color:var(--ink-dim);background:rgba(20,14,26,.92);border:1px solid rgba(177,75,142,.25);
   border-radius:8px;padding:5px 9px;opacity:0;transition:opacity .4s;pointer-events:none}
 .urg-hint.on{opacity:1}
@@ -1772,7 +1772,7 @@ body.slx-pixel-theme #gate{z-index:200}
 <script>
 (function(){
 "use strict";
-const APP_VER=20260810.4;
+const APP_VER=20260810.5;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -4695,10 +4695,12 @@ async function ttsWarmup(){ /* N=1~9 九条预合成,断网可用 */
 const STRIKE_ANGLE=0.19,MIN_SPEED=0.48,STRIKE_COOLDOWN=160;
 function chimeStrike(velocity,side){
   const c=ac();if(!c)return;
+  if(c.state!=='running'){URGENT._needCreak=true;return}  // 音频锁着:不白耗,留待首触补鸣
   const energy=clamp((Math.abs(velocity)-0.45)/3.2,0,1);
-  let g=0.004+energy*0.026;
+  let g=0.012+energy*0.055;
   if(isNightMute()||URGENT.nightManual)g*=0.65;
   if(URGENT.voiceActive)g*=0.7;
+  g=Math.min(g,0.065);
   const det=side>0?6:-6; // 左右碰壁±6音分微偏防复读
   const t0=c.currentTime;
   [[784,'sine',1.00,0.48],[1174.7,'triangle',0.36,0.34],[1760,'sine',0.12,0.20]].forEach(p=>{
@@ -4779,7 +4781,8 @@ const URGENT={
     this._armSide=side;this._lastStrike=tnow;
     if(this.autoLimited){
       if(this.strikesLeft<=0)return;
-      this.strikesLeft--}
+      const _c=ac();
+      if(_c&&_c.state==='running')this.strikesLeft--}
     chimeStrike(v,side);
     /* 无语音场景:铃声衰减完后1.5秒缩回 */
     if(this.expanded&&!this.engaged&&!this.voiceActive&&!this._tVoice&&!this._tRetract){
@@ -4789,6 +4792,9 @@ const URGENT={
   open(auto){
     this.ensureBell();
     if(this.expanded)return;
+    this._openAt=now();
+    const _c=ac();
+    this._needCreak=!_c||_c.state!=='running';
     if(auto&&S.pk&&this.count()>0)S.pk.urgLastOpen=now();
     this.expanded=true;this.engaged=false;
     this._clearTimers();
@@ -4850,6 +4856,13 @@ const URGENT={
     const ok=Voice.say(urgentText(n),100,{rate:1.0,pitch:0.96,vol:0.55,onEnd:done});
     if(!ok){this.voiceActive=false;BGM.unduck(200);
       this._tSettle=setTimeout(()=>{if(this.expanded&&!this.engaged)this.retract('settle')},2600+1500)}},
+  _creakOnTouch(){ // 冷启动首触:补那声归家吱呀(12秒窗;缩回态也响,铃在门口)
+    if(!this._needCreak)return;
+    if(now()-(this._openAt||0)>12000){this._needCreak=false;return}
+    this._needCreak=false;
+    const c=ac();if(!c)return;
+    this.ensureBell();
+    setTimeout(()=>{if(this.bell){this.bell.kick(1.7);this.tongue.kick(-2.1)}},60)},
   _retryPendingAudio(){ // 5秒内首触且抽屉仍展开→补播;逾期或已缩回→作废
     const p=this.pendingAudio;if(!p)return;
     this.pendingAudio=null;
@@ -4909,9 +4922,9 @@ const URGENT={
     URGENT.autoLimited=false;              // 用户上手,解除≤4声限
     if(dist<6){ // 点击:切抽屉
       if(URGENT.expanded)URGENT.retract('tap');else URGENT.openManual();return}
-    if(dx<=-22){ // 向左拉出
-      if(!URGENT.expanded)URGENT.openManual(clamp(-vx/330,-2.6,2.6));return}
-    if(URGENT.expanded&&dx>=22){URGENT.retract('swipe');return}
+    if(dx>=22){ // 向右拉出(2号位:左缘)
+      if(!URGENT.expanded)URGENT.openManual(clamp(vx/330,-2.6,2.6));return}
+    if(URGENT.expanded&&dx<=-22){URGENT.retract('swipe');return}
     /* 6–22px:纯拨铃,力度定音量;快甩按速度kick */
     const power=clamp(vx/300,-3.2,3.2)||((dx>0?1:-1)*0.9);
     if(URGENT.bell){URGENT.bell.kick(power*0.72);URGENT.tongue.kick(-power*1.28)}},{passive:true});
@@ -4925,11 +4938,12 @@ const URGENT={
   $('udMute').addEventListener('click',()=>URGENT.retract('mute'));
   /* 抽屉区域外任何操作→立即缩回,不挡手 */
   document.addEventListener('pointerdown',e=>{
+    URGENT._creakOnTouch();
     if(URGENT.expanded&&!$('urgDock').contains(e.target))URGENT.retract('outside')},{passive:true,capture:true});
-  /* 切后台再切回:照弹,无冷却无上限 */
+  /* 切后台再切回:先唤音频,照弹,无冷却无上限 */
   document.addEventListener('visibilitychange',()=>{
     if(document.visibilityState==='hidden'){if(URGENT.expanded)URGENT._collapse()}
-    else setTimeout(()=>URGENT.autoOpen('resume'),450)});
+    else{ac();setTimeout(()=>URGENT.autoOpen('resume'),450)}});
 })();
 
 /* ============ SELF UPDATER ============ */
