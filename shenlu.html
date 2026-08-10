@@ -1874,7 +1874,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260811.7;
+const APP_VER=20260811.8;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2226,10 +2226,9 @@ function taskRow(t,showDone){
   const d=document.createElement('div');d.dataset.id=t.id;
   const _st=stateOf(t);
   const _ug=_st==='urgent'?'urgent':_st==='relaxed'?'low':_st==='hanging'?'hang':'normal';
-  d.className='card tk-row urg-'+_ug+(t.hang&&showDone?' hangcard':'')+(!showDone?' done-row':'');
+  d.className='card tk-row urg-'+_ug+(!showDone?' done-row':''); // 旧画框造型退役,悬着=横卡+金气候
   if(_ug==='urgent'&&t.urgency&&t.urgency._flash){delete t.urgency._flash;
     d.classList.add('urg-flashin');setTimeout(()=>d.classList.remove('urg-flashin'),760)}
-  if(t.hang&&showDone){const ov=document.createElement('div');ov.className='frame-ov';d.appendChild(ov)}
   const future=t.day>todayStr()&&!t.hang;
   const metaBits=[];
   if(_st==='urgent')metaBits.push('<span class="tk-urgtag">紧急</span>');
