@@ -187,7 +187,7 @@ button{font-family:inherit}
 
 /* ===== 批③ 紧急事项系统 · urgency三轴之温度 ===== */
 :root{--urg:#B14B8E;--urg-low:#4F9B7A;--urg-norm:#4DA4DC} /* #B14B8E 三方定稿 2026-08-09:Sol宪法关通过·Gemini三项全裁通过(小尺寸色相区分/夜间强度/11%洗色红线) */
-.tk-row.urg-low::before,.tk-row.urg-normal::before,.tk-row.urg-urgent::before,.tk-row.urg-hang::before{
+.tk-row.urg-low::before,.tk-row.urg-normal::before,.tk-row.urg-urgent::before,.tk-row.st-hang::before{
   content:'';position:absolute;left:0;top:0;bottom:0;border-radius:16px 0 0 16px;pointer-events:none}
 .tk-row.urg-low::before{width:3px;background:var(--urg-low);opacity:.85}
 .tk-row.urg-normal::before{width:3px;background:var(--urg-norm);opacity:.85}
@@ -906,9 +906,9 @@ body.slx-pixel-theme .tk-row.slx-gold-glass.urg-normal,.tk-row.urg-normal{
   --u-rgb:77,164,220;--u-wash:.14;--u-line:.42;--u-glow:.13;--u-lift:8px;--u-seam:.55}
 body.slx-pixel-theme .tk-row.slx-gold-glass.urg-low,.tk-row.urg-low{
   --u-rgb:79,155,122;--u-wash:.10;--u-line:.30;--u-glow:.11;--u-lift:5px;--u-seam:.34}
-body.slx-pixel-theme .tk-row.slx-gold-glass.urg-hang,.tk-row.urg-hang{
+body.slx-pixel-theme .tk-row.slx-gold-glass.st-hang,.tk-row.st-hang{
   --u-rgb:212,175,55;--u-wash:.16;--u-line:.56;--u-glow:.14;--u-lift:9px;--u-seam:.72}
-body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-normal,.tk-row.urg-low,.tk-row.urg-hang{
+body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-normal,.tk-row.urg-low,.tk-row.st-hang{
   border:1px solid transparent !important;
   background:
     linear-gradient(110deg,
@@ -925,7 +925,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
     inset 0 1px 0 rgba(255,255,255,.05) !important}
 .tk-row.urg-low{filter:saturate(.92)}
 /* 左侧条退役→顶缘温度缝 */
-.tk-row.urg-low::before,.tk-row.urg-normal::before,.tk-row.urg-urgent::before,.tk-row.urg-hang::before{
+.tk-row.urg-low::before,.tk-row.urg-normal::before,.tk-row.urg-urgent::before,.tk-row.st-hang::before{
   content:'';position:absolute;left:14px;right:14px;top:0;bottom:auto;
   width:auto;height:2px;border-radius:0;box-shadow:none;opacity:1;
   background:linear-gradient(90deg,transparent,
@@ -1874,7 +1874,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260811.8;
+const APP_VER=20260811.9;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2225,9 +2225,9 @@ function taskAgeSpan(t){
 function taskRow(t,showDone){
   const d=document.createElement('div');d.dataset.id=t.id;
   const _st=stateOf(t);
-  const _ug=_st==='urgent'?'urgent':_st==='relaxed'?'low':_st==='hanging'?'hang':'normal';
-  d.className='card tk-row urg-'+_ug+(!showDone?' done-row':''); // 旧画框造型退役,悬着=横卡+金气候
-  if(_ug==='urgent'&&t.urgency&&t.urgency._flash){delete t.urgency._flash;
+  const _cls=_st==='urgent'?'urg-urgent':_st==='relaxed'?'urg-low':_st==='hanging'?'st-hang':'urg-normal';
+  d.className='card tk-row '+_cls+(!showDone?' done-row':''); // 旧画框造型退役,悬着=横卡+金气候
+  if(_st==='urgent'&&t.urgency&&t.urgency._flash){delete t.urgency._flash;
     d.classList.add('urg-flashin');setTimeout(()=>d.classList.remove('urg-flashin'),760)}
   const future=t.day>todayStr()&&!t.hang;
   const metaBits=[];
