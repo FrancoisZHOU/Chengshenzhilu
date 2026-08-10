@@ -196,8 +196,8 @@ button{font-family:inherit}
 .tk-row.urg-urgent{background:linear-gradient(90deg,rgba(177,75,142,.11),rgba(177,75,142,.03) 40%,transparent 70%),var(--card)}
 .tk-urgtag{font-size:10px;letter-spacing:.15em;color:var(--urg);
   border:1px solid rgba(177,75,142,.28);border-radius:4px;padding:1px 5px;margin-left:6px}
-.tk-hangtag{font-size:10px;letter-spacing:.12em;color:var(--gold-dim);
-  border:1px solid rgba(196,154,67,.3);border-radius:4px;padding:1px 5px;margin-left:6px}
+.tk-hangtag{font-size:10px;letter-spacing:.12em;color:#E8C96A;
+  border:1px solid rgba(222,182,60,.5);border-radius:4px;padding:1px 5px;margin-left:6px}
 @keyframes urgFlash{0%{box-shadow:0 0 0 0 rgba(177,75,142,.55)}100%{box-shadow:0 0 26px 14px rgba(177,75,142,0)}}
 .tk-row.urg-flashin{animation:urgFlash .7s ease-out 1}
 .tk-tier{cursor:pointer}
@@ -899,15 +899,15 @@ body.slx-pixel-theme #gate{z-index:200}
    放置于全部样式之后,覆盖 slx-gold-glass 金框(保留其模糊与降级职责)
    ================================================================ */
 body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row{
-  --u-rgb:77,164,220;--u-wash:.14;--u-line:.42;--u-glow:.13;--u-lift:8px;--u-seam:.55}
+  --u-rgb:77,164,220;--u-wash:.24;--u-line:.62;--u-glow:.20;--u-lift:8px;--u-seam:.75}
 body.slx-pixel-theme .tk-row.slx-gold-glass.urg-urgent,.tk-row.urg-urgent{
-  --u-rgb:177,75,142;--u-wash:.26;--u-line:.74;--u-glow:.22;--u-lift:12px;--u-seam:.95}
+  --u-rgb:186,70,148;--u-wash:.38;--u-line:.92;--u-glow:.32;--u-lift:12px;--u-seam:1}
 body.slx-pixel-theme .tk-row.slx-gold-glass.urg-normal,.tk-row.urg-normal{
-  --u-rgb:77,164,220;--u-wash:.14;--u-line:.42;--u-glow:.13;--u-lift:8px;--u-seam:.55}
+  --u-rgb:77,164,220;--u-wash:.24;--u-line:.62;--u-glow:.20;--u-lift:8px;--u-seam:.75}
 body.slx-pixel-theme .tk-row.slx-gold-glass.urg-low,.tk-row.urg-low{
-  --u-rgb:79,155,122;--u-wash:.10;--u-line:.30;--u-glow:.11;--u-lift:5px;--u-seam:.34}
+  --u-rgb:82,168,130;--u-wash:.19;--u-line:.50;--u-glow:.17;--u-lift:5px;--u-seam:.55}
 body.slx-pixel-theme .tk-row.slx-gold-glass.st-hang,.tk-row.st-hang{
-  --u-rgb:212,175,55;--u-wash:.16;--u-line:.56;--u-glow:.14;--u-lift:9px;--u-seam:.72}
+  --u-rgb:224,184,62;--u-wash:.36;--u-line:.90;--u-glow:.30;--u-lift:11px;--u-seam:1}
 body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-normal,.tk-row.urg-low,.tk-row.st-hang{
   border:1px solid transparent !important;
   background:
@@ -964,7 +964,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   display:flex;align-items:center;justify-content:center;
   transition:transform .12s}
 .tk-seal:active{transform:translateY(2px) scale(.96)}
-.tk-row.done-row{min-height:0;padding:10px 14px;--u-wash:.075;--u-line:.22;--u-glow:0;--u-seam:.28;--u-lift:3px}
+.tk-row.done-row{min-height:0;padding:10px 14px;--u-wash:.12;--u-line:.30;--u-glow:0;--u-seam:.4;--u-lift:3px}
 </style>
 </head>
 <body>
@@ -1874,7 +1874,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260811.9;
+const APP_VER=20260812.1;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
