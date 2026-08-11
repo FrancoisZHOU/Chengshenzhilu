@@ -1086,7 +1086,8 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
     </div>
   </div>
   <div class="sec">
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新</button>
+    <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260812.2）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1874,7 +1875,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260812.1;
+const APP_VER=20260812.2;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -3119,6 +3120,66 @@ calmReset();
     if(S.sfxMode!=='off'){_lastDoneS=0;playTaskComplete('light')}}));
   paintSfx();
   paint()})();
+
+/* ============ DRIVE AUTO BACKUP ============ */
+const DRIVE_CLIENT_ID='783857816433-953oblm2al9098nf76fdbavqneb3otuc.apps.googleusercontent.com';
+let driveToken=null,driveTokenClient=null,driveBusy=false;
+function driveStatus(t,bad){const b=$('btnDrive');if(b){b.textContent='☁ Drive自动存档：'+t;b.style.color=bad?'#C97A6A':''}}
+function loadGIS(cb){
+  if(window.google&&window.google.accounts){cb();return}
+  const s=document.createElement('script');
+  s.src='https://accounts.google.com/gsi/client';
+  s.onload=cb;s.onerror=()=>driveStatus('脚本加载失败·看网络',1);
+  document.head.appendChild(s)}
+function driveInit(interactive){
+  loadGIS(()=>{try{
+    if(!driveTokenClient)driveTokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:DRIVE_CLIENT_ID,
+      scope:'https://www.googleapis.com/auth/drive.file',
+      callback:function(resp){
+        if(resp&&resp.access_token){driveToken=resp.access_token;
+          S.driveEnabled=true;save();driveStatus('已连接');driveUpload(true)}
+        else driveStatus('未授权',1)}});
+    driveTokenClient.requestAccessToken({prompt:interactive?'consent':''});
+  }catch(e){driveStatus('初始化失败',1)}})}
+async function driveUpload(force){
+  if(!S.driveEnabled)return;
+  if(!driveToken){return}
+  if(driveBusy)return;driveBusy=true;
+  try{
+    const json=JSON.stringify(S);
+    if(!S.driveFileId){
+      const q=await fetch("https://www.googleapis.com/drive/v3/files?q=name%3D'shenlu_backup.json'%20and%20trashed%3Dfalse&fields=files(id)",
+        {headers:{Authorization:'Bearer '+driveToken}});
+      if(q.status===401){driveToken=null;driveBusy=false;driveInit(false);return}
+      const qj=await q.json();
+      if(qj.files&&qj.files[0])S.driveFileId=qj.files[0].id}
+    const meta={name:'shenlu_backup.json',mimeType:'application/json'};
+    const boundary='shenluB'+Date.now();
+    const body='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'
+      +JSON.stringify(meta)+'\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'
+      +json+'\r\n--'+boundary+'--';
+    const url=S.driveFileId
+      ?'https://www.googleapis.com/upload/drive/v3/files/'+S.driveFileId+'?uploadType=multipart'
+      :'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+    const r=await fetch(url,{method:S.driveFileId?'PATCH':'POST',
+      headers:{Authorization:'Bearer '+driveToken,'Content-Type':'multipart/related; boundary='+boundary},body:body});
+    if(r.status===401){driveToken=null;driveInit(false)}
+    else if(r.ok){const j=await r.json();if(j.id)S.driveFileId=j.id;
+      S.driveLastBackup=now();save();
+      driveStatus('已连接 · 最近 '+fmtTime(now()))}
+    else driveStatus('上传失败 '+r.status,1)
+  }catch(e){driveStatus('网络波动·稍后自动重试',1)}
+  driveBusy=false}
+$('btnDrive').addEventListener('click',()=>{
+  if(!S.driveEnabled||!driveToken)driveInit(true);
+  else if(confirm('关闭Drive自动存档？（本地数据不受影响）')){
+    S.driveEnabled=false;save();driveStatus('已关闭')}});
+setInterval(()=>{if(S.driveEnabled&&driveToken&&document.visibilityState==='visible')driveUpload(false)},10*60000);
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'&&S.driveEnabled&&driveToken)driveUpload(true)});
+if(S.driveEnabled){setTimeout(()=>driveInit(false),4500);driveStatus('连接中…')}
+
 function renderVoiceBtn(){$('btnVoice').textContent='语音陪伴：'+(S.voice?'开':'关')}
 $('btnVoice').addEventListener('click',()=>{
   S.voice=!S.voice;save();renderVoiceBtn();
