@@ -337,6 +337,25 @@ button{font-family:inherit}
 .stg.done .sn{color:var(--ink-dim);text-decoration:line-through}
 .stg .cnt{display:flex;align-items:center;gap:9px}
 .stg .cnt b{font-size:15px;color:var(--gold);font-variant-numeric:tabular-nums;min-width:20px;text-align:center}
+/* v4统一任务卡:子项内嵌 */
+.tk-items{margin-top:7px;display:flex;flex-direction:column;gap:1px}
+.tk-it{display:flex;align-items:center;gap:9px;padding:4px 0;font-size:13px}
+.tk-it .cb2{width:19px;height:19px;border:1.5px solid #4A3A5C;border-radius:6px;flex:none;
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:#9A8AB5}
+.tk-it.done .cb2{background:var(--gold);border-color:var(--gold);color:#241A05}
+.tk-it .n2{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tk-it.done .n2{color:var(--ink-dim);text-decoration:line-through}
+.tk-it .cnt2{display:flex;align-items:center;gap:7px}
+.tk-it .cnt2 b{color:var(--gold);font-variant-numeric:tabular-nums;font-size:13px}
+.tk-it .cnt2 button{width:29px;height:29px;border-radius:8px;background:none;border:1px solid #4A3A5C;color:var(--gold);font-size:15px}
+.tk-donecollapse{font-size:12px;color:var(--ink-dim);padding:2px 0 2px 28px}
+.tk-pmini{height:4px;background:#251C30;border-radius:2px;overflow:hidden;margin-top:7px}
+.tk-pmini i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-deep),var(--gold) 70%,#7FE8C8 115%)}
+.tk-frac{font-size:12px;color:var(--gold);font-variant-numeric:tabular-nums}
+/* 远方任务:淡而在场,停动效,四色随透明度自然降饱和 */
+.tk-future{opacity:.55}
+.tk-future *{animation:none !important}
+.tk-datebadge{color:#B4C2F5}
 .stg .cnt button{width:32px;height:32px;border-radius:9px;background:none;
   border:1px solid var(--gold-dim);color:var(--gold);font-size:16px}
 .linedel{background:none;border:none;color:#5A3A38;font-size:12px;letter-spacing:.1em;padding:6px 0 0}
@@ -1005,10 +1024,6 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
     <div class="sec-t">今日任务 <button class="mini" id="btnAddTask">粘贴导入</button></div>
     <div id="taskToday"></div>
   </div>
-  <div class="sec" id="secLines0" style="display:none">
-    <div class="sec-t">任 务 线</div>
-    <div id="lineToday"></div>
-  </div>
   <div class="sec" id="secEv" style="display:none">
     <div class="sec-t">日 程 倒 计 时</div>
     <div class="card" id="evList"></div>
@@ -1039,12 +1054,6 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
       <button class="mini" id="btnImportTask">粘贴导入</button>
       <button class="mini" id="btnAddTask2">＋ 手动发布</button></span></div>
     <div id="taskAll"></div>
-  </div>
-  <div class="sec">
-    <div class="sec-t">任务线 <span>
-      <button class="mini" id="btnImportLine">粘贴导入</button>
-      <button class="mini" id="btnAddLine">＋ 手建</button></span></div>
-    <div id="lineAll"></div>
   </div>
   <div class="sec">
     <div class="sec-t">日程 <span>
@@ -1087,7 +1096,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260812.2）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260813.1）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1135,15 +1144,6 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 </div>
 
 <!-- ============ SHEETS ============ -->
-<div class="sheet" id="shLineClose"><div class="sheet-in">
-  <h3 id="lcTitle">按当前进度结束？</h3>
-  <div class="hint" id="lcProgress"></div>
-  <div class="hint" id="lcRemaining" style="margin-top:8px"></div>
-  <div class="field" style="margin-top:10px"><label>补一句说明（可不填）</label>
-    <input id="lcNote" maxlength="60" placeholder="例：缺货 / 临时不需要 / 下次再买"></div>
-  <div class="sh-btns"><button class="b-dim" data-close>继续处理</button><button class="b-gold" id="lcConfirm">按现状结束</button></div>
-</div></div>
-
 <div class="sheet" id="shTask"><div class="sheet-in">
   <h3>发布任务</h3>
 
@@ -1154,15 +1154,18 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 </div></div>
 
 <div class="sheet" id="shLine"><div class="sheet-in">
-  <h3>粘贴导入（任务 + 任务线 · 一个框全吃）</h3>
-  <div class="hint">#开头 = 任务线，下面各行是阶段（行尾 ×数字 = 计数阶段）<br>普通行 = 任务板任务：日期 级别 任务 | 奖励:xxx（日期级别可省）<br>可以混着粘，空行隔开。Claude返回的块直接全选粘贴。</div>
-  <div class="field"><textarea id="lineText" placeholder="#招工视频
-初剪
-精剪
-面试 ×5
+  <h3>粘贴导入（所有任务 · 一个框全吃）</h3>
+  <div class="hint">每行一个任务：#急 / #悬着 / #长期 / #日期 任务 | 奖励:xxx（标签全可省）<br>任务下一行起可挂子项：- 清单项 · 1. 阶段 · 行尾 ×数字 = 计数<br>Claude返回的块直接全选粘贴，空行分隔任务。</div>
+  <div class="field"><textarea id="lineText" placeholder="#急 修理制冰机 | 奖励:一杯精酿
 
-2026-08-06 主线 收货验货入库 | 奖励:一集剧
-补垃圾袋"></textarea></div>
+#长期 招工视频
+1. [x] 初剪
+2. 精剪
+3. 面试 ×5
+
+仓库拿货
+- 大盒子
+- Coca"></textarea></div>
   <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="lineSave">全部入库</button></div>
 </div></div>
 
@@ -1875,7 +1878,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260812.2;
+const APP_VER=20260813.1;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -1953,6 +1956,29 @@ if(!S.migrations.taskTypeV3){
   S.migrations.taskTypeV3={at:now(),from:'tier-v2',to:'semantic-state-v3',ok:ok};
   save();
   setTimeout(()=>{try{toast('任务体系已归一 · 历史记录完整保留')}catch(_){}} ,1400);
+}
+/* 迁移v4:任务线全线退役(董事长令20260813)。不自动转任务——起底清单交Claude出粘贴块,需要的变任务,其余随线消失 */
+if(!S.migrations.lineRetireV4){
+  try{localStorage.setItem('shenlu_before_line_retire_v4',localStorage.getItem(KEY)||'')}catch(_){}
+  const _ls=Array.isArray(S.lines)?S.lines:[];
+  if(_ls.length){
+    S._linesArchive=_ls;
+    let dump='【任务线起底 · 全选复制发给Claude】\nClaude会出一个粘贴块:需要的变任务,其余随任务线一起消失。\n\n';
+    _ls.forEach(L=>{
+      dump+=(L.closure?'〔已收官〕':'■ ')+L.title+'\n';
+      (L.stages||[]).forEach(s=>{
+        if(s.type==='count')dump+='  '+(s.done?'✓':'□')+' '+s.n+' ×'+(s.target||'?')+' 当前'+(s.count||0)+'\n';
+        else dump+='  '+(s.done?'✓':'□')+' '+s.n+'\n';
+        if(s.note)dump+='    ('+String(s.note).replace(/\n/g,' / ')+')\n'});
+      dump+='\n'});
+    S._linesDump=dump;
+    setTimeout(()=>{try{
+      $('noteTitle').textContent='任务线已退役 · 起底清单';
+      $('noteText').value=dump;
+      $('shNote').classList.add('on')}catch(_){}},1800)}
+  S.lines=[];
+  S.migrations.lineRetireV4={at:now(),archived:_ls.length,ok:true};
+  save();
 }
 if(S.bgmVol===undefined)S.bgmVol=1.0;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -2126,13 +2152,6 @@ $('tTitle').addEventListener('input',parseQuickTask);
 $('tTitle').addEventListener('paste',()=>setTimeout(parseQuickTask,30));
 $('btnAddTask').addEventListener('click',()=>{$('lineText').value='';$('shLine').classList.add('on')});
 $('btnAddTask2').addEventListener('click',openTask);
-$('lcConfirm').addEventListener('click',()=>{
-  const L=S.lines.find(x=>x.id===lineCloseId);if(!L)return;
-  lineClosure(L,'partial',$('lcNote').value.trim()||null);
-  $('shLineClose').classList.remove('on');
-  vibe(45);sOff();
-  pop('已按现状结束','完成 '+L.closure.doneCount+' / '+L.closure.totalCount+' 项 · '+L.closure.remaining.length+' 项已留在记录中','off');
-  renderAll()});
 $('tSave').addEventListener('click',()=>{
   const title=$('tTitle').value.trim();if(!title){toast('写点什么吧');return}
   const nt={id:uid(),title,
@@ -2223,6 +2242,50 @@ function taskAgeSpan(t){
     return '<span class="tk-age" data-mode="down" data-dl="'+dl+'" style="color:#B4C2F5 !important;text-shadow:0 0 8px rgba(140,153,216,.5)">剩 '+fmtDur(dl-now())+'</span>'}
   const ts=t.createdTs||now();
   return '<span class="tk-age" data-mode="up" data-ts="'+ts+'">已 '+fmtDur(now()-ts)+'</span>'}
+function tkSubRow(t,s){
+  const sdone=subDone(s);
+  const r=document.createElement('div');r.className='tk-it'+(sdone?' done':'');
+  const num=t.ordered?String(t.items.indexOf(s)+1):'';
+  let inner='<span class="cb2">'+(sdone?'✓':num)+'</span><span class="n2"></span>';
+  if(s.type==='count')inner+='<span class="cnt2"><b>'+(s.count||0)+(s.target?'/'+s.target:'')+'</b><button>＋</button></span>';
+  r.innerHTML=inner;
+  r.querySelector('.n2').textContent=s.n;
+  if(s.type==='count'){
+    r.querySelector('.cnt2 button').addEventListener('click',e=>{e.stopPropagation();
+      s.count=(s.count||0)+1;
+      if(s.target>0&&s.count>=s.target)s.done=true;
+      save();
+      if(taskAllDone(t)){doneTask(t.id);return}   /* 末子项达标=整卡自动收官,子项音被全礼吸收 */
+      vibe(25);renderAll()});
+    r.addEventListener('click',e=>e.stopPropagation())}
+  else r.addEventListener('click',e=>{e.stopPropagation();
+    s.done=!s.done;save();
+    if(s.done){
+      if(taskAllDone(t)){doneTask(t.id);return}
+      vibe(28);sTick()}                            /* 子项=微礼:轻震+短击,无金光无奖励不计数 */
+    renderAll()});
+  return r}
+function tkRenderItems(card,t){
+  const main=card.querySelector('.tk-main');if(!main)return;
+  const pr=taskProgress(t);
+  if(pr&&pr.tot){
+    const f=document.createElement('span');f.className='tk-frac';f.textContent=pr.done+'/'+pr.tot;
+    const meta=card.querySelector('.tk-meta');if(meta)meta.appendChild(f);
+    const pb=document.createElement('div');pb.className='tk-pmini';
+    pb.innerHTML='<i style="width:'+Math.round(pr.done/Math.max(pr.tot,1)*100)+'%"></i>';
+    main.appendChild(pb)}
+  const box=document.createElement('div');box.className='tk-items';
+  const items=t.items;
+  if(items.length<=4)items.forEach(s=>box.appendChild(tkSubRow(t,s)));
+  else{
+    const doneN=items.filter(subDone).length;
+    if(doneN){const dc=document.createElement('div');dc.className='tk-donecollapse';
+      dc.textContent='✓ 已完成 '+doneN+' 项';box.appendChild(dc)}
+    const inc=items.filter(s=>!subDone(s));
+    inc.slice(0,3).forEach(s=>box.appendChild(tkSubRow(t,s)));
+    if(inc.length>3){const more=document.createElement('div');more.className='tk-donecollapse';
+      more.textContent='… 另有 '+(inc.length-3)+' 项';box.appendChild(more)}}
+  main.appendChild(box)}
 function taskRow(t,showDone){
   const d=document.createElement('div');d.dataset.id=t.id;
   const _st=stateOf(t);
@@ -2231,12 +2294,13 @@ function taskRow(t,showDone){
   if(_st==='urgent'&&t.urgency&&t.urgency._flash){delete t.urgency._flash;
     d.classList.add('urg-flashin');setTimeout(()=>d.classList.remove('urg-flashin'),760)}
   const future=t.day>todayStr()&&!t.hang;
+  if(future&&!t.done)d.classList.add('tk-future');   /* 远方任务:淡而可见可推进(董事长令:远方也需今天的积淀) */
   const metaBits=[];
   if(_st==='urgent')metaBits.push('<span class="tk-urgtag">紧急</span>');
   else if(_st==='relaxed')metaBits.push('<span class="tk-urgtag" style="color:var(--urg-low);border-color:rgba(79,155,122,.28)">长期</span>');
   else if(_st==='hanging')metaBits.push('<span class="tk-hangtag">悬着</span>');
   if(showDone){
-    if(future)metaBits.push('<span>'+t.day.slice(5)+' 启程</span>');
+    if(future)metaBits.push('<span class="tk-datebadge">'+t.day.slice(5)+'</span>');
     else if(!t.hang)metaBits.push('<span>'+(t.day===todayStr()?'今天':t.day.slice(5))+(t.at?' '+t.at:'')+'</span>');
   }else{
     metaBits.push(t.durSec?'<span>用时 '+fmtDur(t.durSec*1000)+' ✓</span>':'<span>✓ 已完成</span>')}
@@ -2248,9 +2312,10 @@ function taskRow(t,showDone){
     +'</div>'
     +'<div class="tk-side2">'
       +(showDone&&!t.done?taskAgeSpan(t):'')
-      +(showDone&&!t.done&&!future?'<button class="tk-seal" title="达成">✓</button>':'')
+      +(showDone&&!t.done?'<button class="tk-seal" title="达成">✓</button>':'')
     +'</div>';
   d.querySelector('.tk-title').textContent=t.title;
+  if(showDone&&!t.done&&t.items&&t.items.length)tkRenderItems(d,t);
   const ageEl=d.querySelector('.tk-age');
   if(ageEl)ageEl.addEventListener('click',e=>e.stopPropagation()); // 时龄只读;不计时入详情层
   const seal=d.querySelector('.tk-seal');
@@ -2296,11 +2361,22 @@ $('btnImportTask').addEventListener('click',()=>{
   $('lineText').value='';$('shLine').classList.add('on')});
 /* ============ 悬挂矩阵 ============ */
 let hangerPendulums=[];
+let hangerIdleT=null;
+function hangerRetract(){clearTimeout(hangerIdleT);hangerIdleT=null;
+  const tr=$('hangerTrack');if(tr)tr.classList.remove('is-expanded')}
+function hangerArm(){clearTimeout(hangerIdleT);hangerIdleT=setTimeout(hangerRetract,4000)}
 $('hangerGrip').addEventListener('click',()=>{
   const tr=$('hangerTrack');tr.classList.toggle('is-expanded');
   if(tr.classList.contains('is-expanded')){vibe(35);
     ac();RAIL.load();setTimeout(()=>RAIL.play(),60);
-    hangerPendulums.forEach(pd=>{try{pd&&pd.kick&&pd.kick(1.8)}catch(e){}})}});
+    hangerPendulums.forEach(pd=>{try{pd&&pd.kick&&pd.kick(1.8)}catch(e){}});
+    hangerArm()}                                  /* 展开即上闲置钟:4s无互动自动收敛 */
+  else hangerRetract()});
+$('hangerTrack').addEventListener('click',()=>{   /* 轨内任何互动重置闲置钟 */
+  if($('hangerTrack').classList.contains('is-expanded'))hangerArm()});
+document.addEventListener('click',e=>{            /* 点轨外区域立即回缩(对齐紧急栏;区别:永不自动弹出) */
+  const tr=$('hangerTrack');
+  if(tr&&tr.classList.contains('is-expanded')&&!tr.contains(e.target))hangerRetract()},true);
 function renderHanger(){
   const tr=$('hangerTrack');if(!tr)return;
   const hung=S.tasks.filter(t=>!t.done&&!t.retired&&t.hang===true);
@@ -2310,8 +2386,12 @@ function renderHanger(){
   const box=$('hangerItems');box.innerHTML='';hangerPendulums=[];
   hung.forEach(t=>{
     const c=document.createElement('div');c.className='sky-hanger-item';
-    c.innerHTML='<div class="shi-t"></div><div style="display:flex;gap:6px"><button class="shi-done">办妥</button><button class="shi-done" data-release style="opacity:.75">放下此事</button></div>';
+    const na=nextItemOf(t);
+    c.innerHTML='<div class="shi-t"></div>'
+      +(na?'<div class="shi-na" style="font-size:11px;color:#C9B37E;opacity:.85;margin:-3px 0 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>':'')
+      +'<div style="display:flex;gap:6px"><button class="shi-done">办妥</button><button class="shi-done" data-release style="opacity:.75">放下此事</button></div>';
     c.querySelector('.shi-t').textContent=t.title;
+    if(na)c.querySelector('.shi-na').textContent='▶ '+na;
     c.querySelector('.shi-done:not([data-release])').addEventListener('click',e=>{
       e.stopPropagation();
       c.classList.add('is-dropped');vibe([40,60,90]);
@@ -2340,7 +2420,10 @@ function renderTasks(){
       return ((a.at||'~')<(b.at||'~'))?-1:1}).forEach(t=>bo.appendChild(taskRow(t,true)))}
   const all=$('taskAll');all.innerHTML='';
   if(!S.tasks.length)all.innerHTML='<div class="empty">还没有任务</div>';
-  else{S.tasks.filter(t=>!t.done&&!t.retired).slice().sort((a,b)=>a.day<b.day?-1:1)
+  else{const so2={urgent:0,hanging:1,normal:2,relaxed:3};
+    S.tasks.filter(t=>!t.done&&!t.retired).slice().sort((a,b)=>{
+      if((a.day||'')!==(b.day||''))return (a.day||'')<(b.day||'')?-1:1;
+      return (so2[stateOf(a)]??2)-(so2[stateOf(b)]??2)})
       .forEach(t=>all.appendChild(taskRow(t,true)));
     S.tasks.filter(t=>t.done).slice(-8).reverse().forEach(t=>all.appendChild(taskRow(t,false)));
     S.tasks.filter(t=>t.retired).slice(-5).reverse().forEach(t=>{
@@ -2368,215 +2451,113 @@ setInterval(()=>{
     const ts=parseInt(el.dataset.ts);if(!ts)return;
     el.textContent=fmtDur(now()-ts)})},1000);
 
-/* ============ QUEST LINES ============ */
-$('btnImportLine').addEventListener('click',()=>{$('lineText').value='';$('shLine').classList.add('on')});
-$('btnAddLine').addEventListener('click',()=>{$('lineText').value='';$('shLine').classList.add('on')});
+/* ============ 统一直录协议 v4 · 任务=唯一实体,子项内嵌 ============ */
+/* 任务线全线退役(董事长令20260813)。#只表语义/时间标签;缩进或-/1.行=子项 */
+function taskProgress(t){
+  if(!t.items||!t.items.length)return null;
+  let done=0,tot=0;
+  t.items.forEach(s=>{
+    if(s.type==='count'){if(s.target>0){tot++;if(s.count>=s.target)done++}}
+    else{tot++;if(s.done)done++}});
+  return {done,tot}}
+function subDone(s){return s.type==='count'?(s.target>0&&s.count>=s.target):!!s.done}
+function taskAllDone(t){const p=taskProgress(t);return !!p&&p.tot>0&&p.done>=p.tot}
+function nextItemOf(t){
+  if(!t||!t.items||!t.items.length)return null;
+  const s=t.items.find(x=>!subDone(x)&&!(x.type==='count'&&!(x.target>0)));
+  return s?s.n:null}
 $('lineSave').addEventListener('click',()=>{
   const raw=$('lineText').value;
   if(!raw.trim()){toast('先粘贴或输入');return}
-  const newLines=[],newTasks=[];
-  let cur=null;
+  const newTasks=[];let cur=null;
+  const pad=n=>String(n).padStart(2,'0');
+  const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
   raw.split('\n').forEach(rl=>{
+    if(!rl.trim()){cur=null;return}
+    const indented=/^[\s\u3000]/.test(rl);
     let l=rl.trim();
-    if(!l){cur=null;return}
-    if(l.startsWith('#')){
-      /* 直录协议:#急/#主线/#今天… 已知标签=任务行;其余#=任务线头 */
-      const KN=/^#(急|紧急|从容|缓|宽松|长期|先挂着|主线|悬赏|支线|悬着|今天|明天|后天|\d{4}-\d{2}-\d{2}|\d{2}-\d{2}|\d{1,2}:\d{2})\s+/;
-      if(KN.test(l)){
-        let st=null,day=todayStr(),at=null;
-        const pad=n=>String(n).padStart(2,'0');
-        const dstr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
-        for(;;){const m=l.match(/^#(\S+)\s+/);if(!m)break;const tg=m[1];let ok=true;
-          if(tg==='急'||tg==='紧急')st='urgent';
-          else if(tg==='从容'||tg==='缓'||tg==='宽松'||tg==='长期')st='relaxed';
-          else if(tg==='悬着'||tg==='先挂着')st='hanging';
-          else if(['主线','悬赏','支线'].includes(tg)){/* 旧标签剥离,零作用 */}
-          else if(tg==='今天')day=todayStr();
-          else if(tg==='明天'){const d=new Date();d.setDate(d.getDate()+1);day=dstr(d)}
-          else if(tg==='后天'){const d=new Date();d.setDate(d.getDate()+2);day=dstr(d)}
-          else if(/^\d{4}-\d{2}-\d{2}$/.test(tg))day=tg;
-          else if(/^\d{2}-\d{2}$/.test(tg))day=new Date().getFullYear()+'-'+tg;
-          else if(/^\d{1,2}:\d{2}$/.test(tg))at=tg.length===4?'0'+tg:tg;
-          else ok=false;
-          if(!ok)break;l=l.slice(m[0].length)}
-        let reward='';
-        const rm2=l.match(/[|｜]\s*奖励[:：]\s*(.+)$/);
-        if(rm2){reward=rm2[1].trim();l=l.replace(/[|｜]\s*奖励[:：].+$/,'').trim()}
-        if(l.trim()){
-          const nt={id:uid(),title:l.trim(),reward,done:false,day,at,createdTs:now()};
-          applySemanticState(nt,st||'normal');
-          if(st==='urgent')nt.urgency._flash=1;
-          newTasks.push(nt)}
-        return}
-      cur={id:uid(),title:l.replace(/^#+\s*/,'')||'任务线',stages:[]};
-      newLines.push(cur);return}
-    if(cur){
+    const bullet=/^[-*•·]\s+/.test(l);
+    const numbered=/^\d+[.、)]\s+/.test(l);
+    if(cur&&(indented||bullet||numbered||l.startsWith('>'))){
+      /* ---- 子项行 ---- */
       if(l.startsWith('>')){
-        const last=cur.stages[cur.stages.length-1];
+        const last=cur.items&&cur.items[cur.items.length-1];
         if(last)last.note=(last.note?last.note+'\n':'')+l.replace(/^>\s?/,'');
         return}
-      l=l.replace(/^[-*•·]\s*/,'');
-      const m=l.match(/[×x*]\s*(\d+|\?)\s*$/i);
-      if(m){const tg=m[1]==='?'?0:parseInt(m[1]);
-        cur.stages.push({n:l.replace(/[×x*]\s*(\d+|\?)\s*$/i,'').trim(),type:'count',count:0,target:tg,done:false})}
-      else cur.stages.push({n:l,type:'check',done:false});
+      if(numbered)cur.ordered=true;
+      l=l.replace(/^[-*•·]\s+/,'').replace(/^\d+[.、)]\s+/,'');
+      let sdone=false;
+      const xm=l.match(/^\[( |x|X)?\]\s*/);
+      if(xm){sdone=/x/i.test(xm[1]||'');l=l.slice(xm[0].length)}
+      const cm=l.match(/[×x*]\s*(\d+|\?)\s*(?:@(\d+))?\s*$/i);
+      cur.items=cur.items||[];
+      if(cm){const tg=cm[1]==='?'?0:parseInt(cm[1]);
+        const c0=cm[2]?parseInt(cm[2]):0;
+        cur.items.push({n:l.replace(/[×x*]\s*(\d+|\?)\s*(?:@\d+)?\s*$/i,'').trim(),
+          type:'count',count:c0,target:tg,done:tg>0&&c0>=tg})}
+      else if(l.trim())cur.items.push({n:l.trim(),type:'check',done:sdone});
       return}
-    // task line
-    let day=todayStr(),reward='';
+    /* ---- 根任务行 ---- */
+    let st=null,day=todayStr(),at=null,reward='';
+    for(;;){const m=l.match(/^#(\S+)\s*/);if(!m)break;const tg=m[1];let ok=true;
+      if(tg==='急'||tg==='紧急')st='urgent';
+      else if(tg==='从容'||tg==='缓'||tg==='宽松'||tg==='长期')st='relaxed';
+      else if(tg==='悬着'||tg==='先挂着')st='hanging';
+      else if(['主线','悬赏','支线'].includes(tg)){/* 旧标签剥离 */}
+      else if(tg==='今天')day=todayStr();
+      else if(tg==='明天'){const d=new Date();d.setDate(d.getDate()+1);day=dstr(d)}
+      else if(tg==='后天'){const d=new Date();d.setDate(d.getDate()+2);day=dstr(d)}
+      else if(/^\d{4}-\d{2}-\d{2}$/.test(tg))day=tg;
+      else if(/^\d{2}-\d{2}$/.test(tg))day=new Date().getFullYear()+'-'+tg;
+      else if(/^\d{1,2}:\d{2}$/.test(tg))at=tg.length===4?'0'+tg:tg;
+      else ok=false;
+      if(!ok){l=l.replace(/^#+\s*/,'');break}  /* 未知#=旧任务线头兼容:剥#当标题 */
+      l=l.slice(m[0].length)}
     const rm=l.match(/[|｜]\s*奖励[:：]\s*(.+)$/);
     if(rm){reward=rm[1].trim();l=l.replace(/[|｜]\s*奖励[:：].+$/,'').trim()}
-    let at=null;
     const dm=l.match(/^(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2})\s+/);
-    if(dm){day=dm[1];
-      if(day.includes('/')){const p=day.split('/');
-        day=new Date().getFullYear()+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0')}
-      l=l.slice(dm[0].length).trim()}
+    if(dm){let dd=dm[1];
+      if(dd.includes('/')){const p=dd.split('/');
+        dd=new Date().getFullYear()+'-'+p[0].padStart(2,'0')+'-'+p[1].padStart(2,'0')}
+      day=dd;l=l.slice(dm[0].length).trim()}
     const am=l.match(/^(\d{1,2}:\d{2})\s+/);
     if(am){at=am[1];l=l.slice(am[0].length).trim()}
-    let _hang=false;
     const tm=l.match(/^(悬赏|主线|支线|悬着)\s+/);
-    if(tm){if(tm[1]==='悬着')_hang=true;l=l.slice(tm[0].length).trim()}  // 旧前缀剥离
-    if(l){const nt={id:uid(),title:l,reward,done:false,day,at,createdTs:now()};
-      applySemanticState(nt,_hang?'hanging':'normal');
-      newTasks.push(nt)}});
-  const okLines=newLines.filter(L=>L.stages.length);
-  if(!okLines.length&&!newTasks.length){toast('没识别出内容，检查格式');return}
-  let updated=0;
-  okLines.forEach(L=>{
-    const old=S.lines.find(x=>x.title===L.title);
-    if(old){
-      L.stages.forEach(s=>{
-        const os=old.stages.find(o=>o.n===s.n&&o.type===s.type);
-        if(os){s.done=os.done;if(s.type==='count')s.count=os.count}});
-      old.stages=L.stages;updated++}
-    else S.lines.push(L)});
-  let nUrg=0;
+    if(tm){if(tm[1]==='悬着'&&!st)st='hanging';l=l.slice(tm[0].length).trim()}
+    if(!l.trim()){cur=null;return}
+    cur={id:uid(),title:l.trim(),reward,done:false,day,at,createdTs:now()};
+    applySemanticState(cur,st||'normal');
+    if(st==='urgent')cur.urgency._flash=1;
+    newTasks.push(cur)});
+  if(!newTasks.length){toast('没识别出内容，检查格式');return}
+  let updated=0,nUrg=0;
   newTasks.forEach(t=>{
     if(t.urgency&&t.urgency.level==='urgent')nUrg++;
     const old=S.tasks.find(x=>!x.done&&!x.retired&&x.title===t.title);
-    if(old){old.day=t.day;if(t.reward)old.reward=t.reward;
+    if(old){
+      old.day=t.day;if(t.at)old.at=t.at;if(t.reward)old.reward=t.reward;
       if(t.urgency)old.urgency=t.urgency;
       old.hang=t.hang===true;
+      if(t.items&&t.items.length){
+        /* 生长协议:同名再粘贴带子项=原卡长出/更新结构,旧勾选与计数保留 */
+        const oldItems=old.items||[];
+        t.items.forEach(s=>{const os=oldItems.find(o=>o.n===s.n&&o.type===s.type);
+          if(os){if(s.type==='count'){s.count=Math.max(s.count||0,os.count||0);
+              s.done=s.target>0&&s.count>=s.target}
+            else if(!s.done)s.done=!!os.done;
+            if(os.note&&!s.note)s.note=os.note}});
+        old.items=t.items;old.ordered=t.ordered===true}
       updated++;TC.patch(old)}
     else{S.tasks.push(t);TC.liveCreate(t)}});
   if(nUrg)sUrgOn();
   save();$('shLine').classList.remove('on');
   vibe([50,70,50]);sDing();
   const parts=[];
-  if(okLines.length)parts.push('任务线 <b style="color:var(--gold)">'+okLines.length+'</b> 条');
-  if(newTasks.length)parts.push('任务 <b style="color:var(--gold)">'+newTasks.length+'</b> 条');
+  parts.push('任务 <b style="color:var(--gold)">'+newTasks.length+'</b> 条');
   if(nUrg)parts.push('紧急 <b style="color:var(--urg)">'+nUrg+'</b> 条');
   if(updated)parts.push('其中更新 '+updated+' 条');
   pop('全部入库',parts.join(' · '),'ding');
   renderAll()});
-function lineProgress(L){
-  const tot=L.stages.length;if(!tot)return 0;
-  let sc=0;
-  L.stages.forEach(s=>{
-    if(s.type==='check'){if(s.done)sc++}
-    else{if(s.target>0)sc+=Math.min(s.count/s.target,1);else if(s.count>0)sc+=1}});
-  return sc/tot}
-const pctMem={};
-function lineClosure(L,mode,note){
-  const rem=[];L.stages.forEach((st,i)=>{if(!st.done)rem.push({order:i,title:st.n,type:st.type||'check',count:st.count??null,target:st.target??null})});
-  const tot=L.stages.length,done=tot-rem.length;
-  L.closure={mode,at:now(),day:todayStr(),progress:tot?done/tot:0,doneCount:done,totalCount:tot,remaining:rem,note:note||null};
-  save()}
-function lineArchiveCard(L){
-  const d=document.createElement('div');d.className='card line-card';d.style.opacity='.82';
-  const c=L.closure,p=Math.round(c.progress*100);
-  let html='<div class="lt"><div class="n"></div><div class="p">'+p+'%</div></div>'
-    +'<div style="font-size:12px;color:var(--ink-dim);margin-top:4px">'
-    +(c.mode==='complete'?'达成':'按现状结束')+' · '+c.day+' · 完成 '+c.doneCount+' / '+c.totalCount+' 项'
-    +(c.remaining.length?'<br>未完成：'+c.remaining.map(r=>r.title).map(t=>t.replace(/</g,'&lt;')).join('、'):'')
-    +(c.note?'<br>说明：'+String(c.note).replace(/</g,'&lt;'):'')+'</div>';
-  d.innerHTML=html;
-  d.querySelector('.lt .n').textContent=L.title;
-  const del=document.createElement('button');del.className='linedel';del.textContent='从列表移除';
-  del.addEventListener('click',()=>{if(confirm('从列表移除「'+L.title+'」？记录不受影响')){
-    S.lines=S.lines.filter(x=>x.id!==L.id);save();renderAll()}});
-  d.appendChild(del);
-  return d}
-let lineCloseId=null;
-function openLineClose(L){
-  lineCloseId=L.id;
-  const rem=L.stages.filter(st=>!st.done),tot=L.stages.length,done=tot-rem.length;
-  $('lcTitle').textContent='按当前进度结束？';
-  $('lcProgress').textContent='已完成 '+done+' / '+tot+' 项（'+Math.round(tot?done/tot*100:0)+'%）';
-  $('lcRemaining').innerHTML='以下 '+rem.length+' 项会以未完成状态留在记录中<br>'+rem.map(r=>'· '+String(r.n).replace(/</g,'&lt;')).join('<br>');
-  $('lcNote').value='';
-  $('shLineClose').classList.add('on')}
-function lineCard(L){
-  if(L.closure)return lineArchiveCard(L);
-  const d=document.createElement('div');d.className='card line-card';
-  const p=Math.round(lineProgress(L)*100);
-  if(p>=100){d.classList.add('is-cleared');
-    if(!(pctMem[L.id]!==undefined&&pctMem[L.id]<100))d.classList.add('settled');
-    d.addEventListener('click',()=>{if(confirm('「'+L.title+'」达成收官？（记录将保留）')){
-      lineClosure(L,'complete',null);ascendLight(true);sVictory();
-      pop('任务线达成','「'+esc(L.title)+'」100% 完成','mute');renderAll()}})}
-  d.innerHTML='<div class="lt"><div class="n"></div><div class="p">'+p+'%</div></div>'
-    +'<div class="pbar"><i style="width:'+p+'%"></i></div>';
-  d.querySelector('.lt .n').textContent=L.title;
-  const prev=pctMem[L.id];
-  if(prev!==undefined&&prev!==p){
-    const el=d.querySelector('.lt .p');
-    const t0=performance.now(),dur=600;
-    (function roll(t){
-      const k=Math.min((t-t0)/dur,1);
-      el.textContent=Math.round(prev+(p-prev)*k)+'%';
-      if(k<1)requestAnimationFrame(roll)})(t0)}
-  pctMem[L.id]=p;
-  L.stages.forEach((s,si)=>{
-    const r=document.createElement('div');r.className='stg'+(s.done?' done':'');
-    const noteBtn=s.note?'<button class="mini" style="padding:4px 8px;flex:none" data-note>📋</button>':'';
-    if(s.type==='check'){
-      r.innerHTML='<div class="cb">'+(s.done?'✓':'')+'</div><div class="sn"></div>'+noteBtn;
-      r.querySelector('.sn').textContent=s.n;
-      r.querySelector('.sn').addEventListener('click',()=>{
-        s.done=!s.done;save();
-        if(s.done){vibe(60);
-          const np=Math.round(lineProgress(L)*100);
-          if(np>=100){pop('已到 100%','「'+esc(L.title)+'」点卡片正式达成','mute')}
-          else pop('推进','「'+esc(L.title)+'」→ '+np+'%','mute')}
-        renderAll()})}
-    else{
-      r.innerHTML='<div class="cb" style="border-style:dashed">'+(s.done?'✓':'')+'</div>'
-        +'<div class="sn"></div><div class="cnt"><b>'+s.count+'</b>'
-        +(s.target?'<span style="font-size:11px;color:var(--ink-dim)">/'+s.target+'</span>':'')
-        +'<button>＋</button></div>'+noteBtn;
-      r.querySelector('.sn').textContent=s.n;
-      r.querySelector('.cnt button').addEventListener('click',e=>{
-        e.stopPropagation();s.count++;vibe(45);
-        if(s.target&&s.count>=s.target)s.done=true;
-        save();
-        pop(s.n+' +1','累计 '+s.count+(s.target?' / '+s.target:''),'mute');
-        renderAll()})}
-    const nb=r.querySelector('[data-note]');
-    if(nb)nb.addEventListener('click',e=>{
-      e.stopPropagation();
-      $('noteTitle').textContent=s.n;
-      $('noteText').value=s.note;
-      $('shNote').classList.add('on')});
-    d.appendChild(r)});
-  if(p>0&&p<100){
-    const cl=document.createElement('button');cl.className='linedel';
-    cl.style.color='var(--gold-dim)';cl.textContent='按现状结束';
-    cl.addEventListener('click',()=>openLineClose(L));
-    d.appendChild(cl)}
-  const del=document.createElement('button');del.className='linedel';del.textContent='移除此线';
-  del.addEventListener('click',()=>{if(confirm('移除「'+L.title+'」？（用于录入错误，记录不保留）')){
-    S.lines=S.lines.filter(x=>x.id!==L.id);save();renderAll()}});
-  d.appendChild(del);
-  return d}
-function renderLines(){
-  const act=S.lines.filter(L=>!L.closure&&lineProgress(L)<1);
-  $('secLines0').style.display=act.length?'block':'none';
-  const bt=$('lineToday');bt.innerHTML='';act.forEach(L=>bt.appendChild(lineCard(L)));
-  const ba=$('lineAll');ba.innerHTML='';
-  if(!S.lines.length)ba.innerHTML='<div class="empty">扔骨架给Claude → 粘贴进度包 → 任务线立起来</div>';
-  else{S.lines.filter(L=>!L.closure).forEach(L=>ba.appendChild(lineCard(L)));
-    S.lines.filter(L=>L.closure).forEach(L=>ba.appendChild(lineCard(L)))}}
 
 function vevent(id,name,day){
   const d0=day.replace(/-/g,'');
@@ -4137,11 +4118,6 @@ function renderBodyLog(){
     {id:uid(),name:'去巴黎',date:'2026-08-11'},
     {id:uid(),name:'面试 Lilou · 09:00',date:'2026-08-13'},
     {id:uid(),name:'Model Y 归还',date:'2026-09-15'});
-  S.lines.push({id:uid(),title:'收货补给线',stages:[
-    {n:'理仓库·腾位',type:'check',done:false},
-    {n:'收货·验货',type:'check',done:false},
-    {n:'归位入库',type:'check',done:false},
-    {n:'进鸡腿',type:'check',done:false}]});
   save();
 })();
 
@@ -4979,7 +4955,7 @@ function renderAll(){
   const d=new Date();
   $('todayDate').textContent=d.getFullYear()+' / '+(d.getMonth()+1)+' / '+d.getDate()
     +' · '+['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
-  renderLive();renderTasks();renderLines();renderEvents();renderHanger();renderGrid();renderStats();renderWorkToday();renderBodyLog();renderEats();renderRecent();renderSleepAsk();renderInsights();
+  renderLive();renderTasks();renderEvents();renderHanger();renderGrid();renderStats();renderWorkToday();renderBodyLog();renderEats();renderRecent();renderSleepAsk();renderInsights();
   if(typeof URGENT!=='undefined')try{URGENT.refresh()}catch(_){}}
 
 
@@ -5190,7 +5166,8 @@ const URGENT={
       d.textContent='解锁后查看';box.appendChild(d);return}
     this.items().forEach(t=>{
       const d=document.createElement('div');d.className='ud-item';
-      const meta=(t.day===todayStr()?'今天':(t.day||'').slice(5))+(t.at?' '+t.at:'');
+      const _na=nextItemOf(t);
+      const meta=(t.day===todayStr()?'今天':(t.day||'').slice(5))+(t.at?' '+t.at:'')+(_na?' · ▶ '+_na:'');
       d.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
         +'<div style="flex:1;min-width:0"><div class="t"></div><div class="m">'+meta+'</div></div>'
         +'<button class="ud-seal" style="width:34px;height:34px;border-radius:9px;border:none;flex:0 0 34px;'
