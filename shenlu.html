@@ -1090,7 +1090,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260813.3）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260813.4）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1872,7 +1872,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260813.3;
+const APP_VER=20260813.4;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2380,9 +2380,11 @@ document.addEventListener('click',e=>{            /* 捕获阶段统一处理:�
   if(tr.contains(e.target))hangerArm();           /* 轨内任何互动(含勾子项/+1)重置闲置钟 */
   else hangerRetract()},true);                    /* 点轨外立即回缩(对齐紧急栏;区别:永不自动弹出) */
 ['pointerdown','touchstart','touchmove','wheel','scroll'].forEach(ev=>
-  document.addEventListener(ev,e=>{               /* 滑动/滚动/按住都算互动,滑着滑着不被收走 */
+  document.addEventListener(ev,e=>{
     const tr=$('hangerTrack');
-    if(tr&&tr.classList.contains('is-expanded')&&tr.contains(e.target))hangerArm()},
+    if(!tr||!tr.classList.contains('is-expanded'))return;
+    if(tr.contains(e.target))hangerArm();         /* 轨内:滑动/滚动/按住都算互动,重置闲置钟 */
+    else hangerRetract()},                        /* 轨外:一有动静立即回缩(对齐紧急栏) */
     {capture:true,passive:true}));
 function renderHanger(){
   const tr=$('hangerTrack');if(!tr)return;
@@ -2416,7 +2418,8 @@ function renderHanger(){
       if(pd)hangerPendulums.push(pd)}catch(e){}})}
 function renderTasks(){
   const today=todayStr();
-  const open=S.tasks.filter(t=>!t.done&&!t.retired&&t.day<=today&&!t.hang);
+  const open=S.tasks.filter(t=>!t.done&&!t.retired&&t.day<=today&&!t.hang&&stateOf(t)!=='urgent');
+  /* 今日区只住蓝/绿:紧急在抽屉,悬着在轨,各归其位(董事长令20260813) */
   const bo=$('taskToday');bo.innerHTML='';
   if(!open.length)bo.innerHTML='<div class="empty">板上没事 · 想到什么就发一条<br>发布过的，到日子会自己浮上来</div>';
   else{const so={urgent:0,normal:1,relaxed:2};    // 紫红先行→蓝→绿
@@ -5183,7 +5186,7 @@ const URGENT={
       d.querySelector('.ud-seal').addEventListener('click',e=>{e.stopPropagation();
         doneTask(t.id)});   // 抽屉直接办妥,refresh经renderAll自动联动
       d.addEventListener('click',()=>{this.retract('nav');
-        document.querySelector('.nav button[data-tab="tabToday"]').click();
+        document.querySelector('.nav button[data-tab="tabTask"]').click();
         setTimeout(()=>{const row=document.querySelector('.tk-row[data-id="'+t.id+'"]');
           if(row){row.classList.add('urg-flashin');row.scrollIntoView({block:'center',behavior:'smooth'});
             setTimeout(()=>row.classList.remove('urg-flashin'),760)}},380)});
