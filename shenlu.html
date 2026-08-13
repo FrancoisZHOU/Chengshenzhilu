@@ -1090,7 +1090,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260813.2）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260813.3）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1872,7 +1872,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260813.2;
+const APP_VER=20260813.3;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2379,6 +2379,11 @@ document.addEventListener('click',e=>{            /* 捕获阶段统一处理:�
   if(!tr||!tr.classList.contains('is-expanded'))return;
   if(tr.contains(e.target))hangerArm();           /* 轨内任何互动(含勾子项/+1)重置闲置钟 */
   else hangerRetract()},true);                    /* 点轨外立即回缩(对齐紧急栏;区别:永不自动弹出) */
+['pointerdown','touchstart','touchmove','wheel','scroll'].forEach(ev=>
+  document.addEventListener(ev,e=>{               /* 滑动/滚动/按住都算互动,滑着滑着不被收走 */
+    const tr=$('hangerTrack');
+    if(tr&&tr.classList.contains('is-expanded')&&tr.contains(e.target))hangerArm()},
+    {capture:true,passive:true}));
 function renderHanger(){
   const tr=$('hangerTrack');if(!tr)return;
   const hung=S.tasks.filter(t=>!t.done&&!t.retired&&t.hang===true);
