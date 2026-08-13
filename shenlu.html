@@ -270,10 +270,14 @@ button{font-family:inherit}
 .hanger-grip::after{content:'✦';font-size:12px;text-shadow:0 0 10px var(--gold)}
 .hanger-items{width:0;overflow:hidden;transition:width .4s cubic-bezier(.34,1.56,.64,1);
   background:var(--card);border-left:1px solid var(--gold-dim)}
-.sky-hanger-track.is-expanded .hanger-items{width:172px;
+.sky-hanger-track.is-expanded .hanger-items{width:172px}
+.sky-hanger-track.is-expanded.rail-wide .hanger-items{width:min(78vw,320px)}
+.sky-hanger-track.is-expanded .hanger-items{
   box-shadow:-10px 10px 30px rgba(0,0,0,.6),inset 0 0 15px rgba(255,215,0,.05);
   padding:10px;max-height:62vh;overflow-y:auto;overflow-x:hidden}
-.sky-hanger-item{position:relative;width:148px;padding:13px 12px;margin:26px auto 6px;
+.sky-hanger-item{position:relative;width:148px;max-width:100%;padding:13px 12px;margin:26px auto 6px}
+.rail-wide .sky-hanger-item{width:100%}
+.sky-hanger-item{position:relative;
   border:1px solid transparent !important;
   background:
     linear-gradient(110deg,rgba(212,175,55,.16) 0%,rgba(212,175,55,.045) 56%,rgba(10,8,14,.93) 100%) padding-box,
@@ -337,19 +341,9 @@ button{font-family:inherit}
 .stg.done .sn{color:var(--ink-dim);text-decoration:line-through}
 .stg .cnt{display:flex;align-items:center;gap:9px}
 .stg .cnt b{font-size:15px;color:var(--gold);font-variant-numeric:tabular-nums;min-width:20px;text-align:center}
-/* v4统一任务卡:子项内嵌 */
-.tk-items{margin-top:7px;display:flex;flex-direction:column;gap:1px}
-.tk-it{display:flex;align-items:center;gap:9px;padding:4px 0;font-size:13px}
-.tk-it .cb2{width:19px;height:19px;border:1.5px solid #4A3A5C;border-radius:6px;flex:none;
-  display:flex;align-items:center;justify-content:center;font-size:11px;color:#9A8AB5}
-.tk-it.done .cb2{background:var(--gold);border-color:var(--gold);color:#241A05}
-.tk-it .n2{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tk-it.done .n2{color:var(--ink-dim);text-decoration:line-through}
-.tk-it .cnt2{display:flex;align-items:center;gap:7px}
-.tk-it .cnt2 b{color:var(--gold);font-variant-numeric:tabular-nums;font-size:13px}
-.tk-it .cnt2 button{width:29px;height:29px;border-radius:8px;background:none;border:1px solid #4A3A5C;color:var(--gold);font-size:15px}
-.tk-donecollapse{font-size:12px;color:var(--ink-dim);padding:2px 0 2px 28px}
-.tk-pmini{height:4px;background:#251C30;border-radius:2px;overflow:hidden;margin-top:7px}
+/* v4统一任务卡:子项内嵌(老版.stg行+新进度条) */
+.tk-items{margin-top:8px;display:flex;flex-direction:column}
+.tk-pmini{height:4px;background:#251C30;border-radius:2px;overflow:hidden;margin:2px 0 6px}
 .tk-pmini i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-deep),var(--gold) 70%,#7FE8C8 115%)}
 .tk-frac{font-size:12px;color:var(--gold);font-variant-numeric:tabular-nums}
 /* 远方任务:淡而在场,停动效,四色随透明度自然降饱和 */
@@ -1096,7 +1090,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260813.1）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260813.2）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1878,7 +1872,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260813.1;
+const APP_VER=20260813.2;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2242,50 +2236,58 @@ function taskAgeSpan(t){
     return '<span class="tk-age" data-mode="down" data-dl="'+dl+'" style="color:#B4C2F5 !important;text-shadow:0 0 8px rgba(140,153,216,.5)">剩 '+fmtDur(dl-now())+'</span>'}
   const ts=t.createdTs||now();
   return '<span class="tk-age" data-mode="up" data-ts="'+ts+'">已 '+fmtDur(now()-ts)+'</span>'}
-function tkSubRow(t,s){
+function stgRow(t,s){
+  /* 老版任务线样式回归(董事长令:字大行宽,勾选与取消都顺手;可撤=防误触) */
   const sdone=subDone(s);
-  const r=document.createElement('div');r.className='tk-it'+(sdone?' done':'');
-  const num=t.ordered?String(t.items.indexOf(s)+1):'';
-  let inner='<span class="cb2">'+(sdone?'✓':num)+'</span><span class="n2"></span>';
-  if(s.type==='count')inner+='<span class="cnt2"><b>'+(s.count||0)+(s.target?'/'+s.target:'')+'</b><button>＋</button></span>';
-  r.innerHTML=inner;
-  r.querySelector('.n2').textContent=s.n;
-  if(s.type==='count'){
-    r.querySelector('.cnt2 button').addEventListener('click',e=>{e.stopPropagation();
+  const r=document.createElement('div');r.className='stg'+(sdone?' done':'');
+  const num=(t.ordered&&!sdone)?String(t.items.indexOf(s)+1):(sdone?'✓':'');
+  if(s.type!=='count'){
+    r.innerHTML='<div class="cb">'+num+'</div><div class="sn"></div>';
+    if(num&&!sdone)r.querySelector('.cb').style.color='#9A8AB5';
+    r.querySelector('.sn').textContent=s.n;
+    r.addEventListener('click',e=>{e.stopPropagation();
+      s.done=!s.done;save();
+      if(s.done){
+        if(taskAllDone(t)){doneTask(t.id);return}   /* 末子项勾完=整卡自动收官 */
+        vibe(28);sTick()}                            /* 子项=微礼 */
+      renderAll()})}
+  else{
+    r.innerHTML='<div class="cb" style="border-style:dashed">'+(sdone?'✓':num)+'</div>'
+      +'<div class="sn"></div><div class="cnt">'
+      +'<button data-minus style="opacity:.5">−</button><b>'+(s.count||0)+'</b>'
+      +(s.target?'<span style="font-size:11px;color:var(--ink-dim)">/'+s.target+'</span>':'')
+      +'<button>＋</button></div>';
+    if(num&&!sdone)r.querySelector('.cb').style.color='#9A8AB5';
+    r.querySelector('.sn').textContent=s.n;
+    r.querySelector('[data-minus]').addEventListener('click',e=>{e.stopPropagation();
+      if((s.count||0)<=0)return;
+      s.count--;if(s.target>0&&s.count<s.target)s.done=false;   /* +点多了减得回来 */
+      save();vibe(20);renderAll()});
+    r.querySelector('.cnt button:not([data-minus])').addEventListener('click',e=>{e.stopPropagation();
       s.count=(s.count||0)+1;
       if(s.target>0&&s.count>=s.target)s.done=true;
       save();
-      if(taskAllDone(t)){doneTask(t.id);return}   /* 末子项达标=整卡自动收官,子项音被全礼吸收 */
+      if(taskAllDone(t)){doneTask(t.id);return}
       vibe(25);renderAll()});
     r.addEventListener('click',e=>e.stopPropagation())}
-  else r.addEventListener('click',e=>{e.stopPropagation();
-    s.done=!s.done;save();
-    if(s.done){
-      if(taskAllDone(t)){doneTask(t.id);return}
-      vibe(28);sTick()}                            /* 子项=微礼:轻震+短击,无金光无奖励不计数 */
-    renderAll()});
   return r}
+function buildSubList(t){
+  /* 统一子项面板:进度条+全量老版清单行;任务卡/紧急抽屉/悬挂轨共用 */
+  const wrap=document.createElement('div');wrap.className='tk-items';
+  const pr=taskProgress(t);
+  if(pr&&pr.tot){
+    const pb=document.createElement('div');pb.className='tk-pmini';
+    pb.innerHTML='<i style="width:'+Math.round(pr.done/Math.max(pr.tot,1)*100)+'%"></i>';
+    wrap.appendChild(pb)}
+  t.items.forEach(s=>wrap.appendChild(stgRow(t,s)));
+  return wrap}
 function tkRenderItems(card,t){
   const main=card.querySelector('.tk-main');if(!main)return;
   const pr=taskProgress(t);
   if(pr&&pr.tot){
     const f=document.createElement('span');f.className='tk-frac';f.textContent=pr.done+'/'+pr.tot;
-    const meta=card.querySelector('.tk-meta');if(meta)meta.appendChild(f);
-    const pb=document.createElement('div');pb.className='tk-pmini';
-    pb.innerHTML='<i style="width:'+Math.round(pr.done/Math.max(pr.tot,1)*100)+'%"></i>';
-    main.appendChild(pb)}
-  const box=document.createElement('div');box.className='tk-items';
-  const items=t.items;
-  if(items.length<=4)items.forEach(s=>box.appendChild(tkSubRow(t,s)));
-  else{
-    const doneN=items.filter(subDone).length;
-    if(doneN){const dc=document.createElement('div');dc.className='tk-donecollapse';
-      dc.textContent='✓ 已完成 '+doneN+' 项';box.appendChild(dc)}
-    const inc=items.filter(s=>!subDone(s));
-    inc.slice(0,3).forEach(s=>box.appendChild(tkSubRow(t,s)));
-    if(inc.length>3){const more=document.createElement('div');more.className='tk-donecollapse';
-      more.textContent='… 另有 '+(inc.length-3)+' 项';box.appendChild(more)}}
-  main.appendChild(box)}
+    const meta=card.querySelector('.tk-meta');if(meta)meta.appendChild(f)}
+  main.appendChild(buildSubList(t))}
 function taskRow(t,showDone){
   const d=document.createElement('div');d.dataset.id=t.id;
   const _st=stateOf(t);
@@ -2372,26 +2374,25 @@ $('hangerGrip').addEventListener('click',()=>{
     hangerPendulums.forEach(pd=>{try{pd&&pd.kick&&pd.kick(1.8)}catch(e){}});
     hangerArm()}                                  /* 展开即上闲置钟:4s无互动自动收敛 */
   else hangerRetract()});
-$('hangerTrack').addEventListener('click',()=>{   /* 轨内任何互动重置闲置钟 */
-  if($('hangerTrack').classList.contains('is-expanded'))hangerArm()});
-document.addEventListener('click',e=>{            /* 点轨外区域立即回缩(对齐紧急栏;区别:永不自动弹出) */
+document.addEventListener('click',e=>{            /* 捕获阶段统一处理:子项行的stopPropagation拦不住 */
   const tr=$('hangerTrack');
-  if(tr&&tr.classList.contains('is-expanded')&&!tr.contains(e.target))hangerRetract()},true);
+  if(!tr||!tr.classList.contains('is-expanded'))return;
+  if(tr.contains(e.target))hangerArm();           /* 轨内任何互动(含勾子项/+1)重置闲置钟 */
+  else hangerRetract()},true);                    /* 点轨外立即回缩(对齐紧急栏;区别:永不自动弹出) */
 function renderHanger(){
   const tr=$('hangerTrack');if(!tr)return;
   const hung=S.tasks.filter(t=>!t.done&&!t.retired&&t.hang===true);
   $('hangerCount').textContent=hung.length;
   tr.style.display=hung.length?'flex':'none';
+  tr.classList.toggle('rail-wide',hung.some(t=>t.items&&t.items.length));  /* 有结构任务→轨加宽 */
   if(!hung.length){tr.classList.remove('is-expanded')}
   const box=$('hangerItems');box.innerHTML='';hangerPendulums=[];
   hung.forEach(t=>{
     const c=document.createElement('div');c.className='sky-hanger-item';
-    const na=nextItemOf(t);
-    c.innerHTML='<div class="shi-t"></div>'
-      +(na?'<div class="shi-na" style="font-size:11px;color:#C9B37E;opacity:.85;margin:-3px 0 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>':'')
+    c.innerHTML='<div class="shi-t"></div><div class="shi-body"></div>'
       +'<div style="display:flex;gap:6px"><button class="shi-done">办妥</button><button class="shi-done" data-release style="opacity:.75">放下此事</button></div>';
     c.querySelector('.shi-t').textContent=t.title;
-    if(na)c.querySelector('.shi-na').textContent='▶ '+na;
+    if(t.items&&t.items.length)c.querySelector('.shi-body').appendChild(buildSubList(t));  /* 悬着×清单/阶段:卡内直接可勾 */
     c.querySelector('.shi-done:not([data-release])').addEventListener('click',e=>{
       e.stopPropagation();
       c.classList.add('is-dropped');vibe([40,60,90]);
@@ -5166,14 +5167,14 @@ const URGENT={
       d.textContent='解锁后查看';box.appendChild(d);return}
     this.items().forEach(t=>{
       const d=document.createElement('div');d.className='ud-item';
-      const _na=nextItemOf(t);
-      const meta=(t.day===todayStr()?'今天':(t.day||'').slice(5))+(t.at?' '+t.at:'')+(_na?' · ▶ '+_na:'');
+      const meta=(t.day===todayStr()?'今天':(t.day||'').slice(5))+(t.at?' '+t.at:'');
       d.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
         +'<div style="flex:1;min-width:0"><div class="t"></div><div class="m">'+meta+'</div></div>'
         +'<button class="ud-seal" style="width:34px;height:34px;border-radius:9px;border:none;flex:0 0 34px;'
         +'background:linear-gradient(150deg,#F6DC8A,#D4AF37 55%,#8A6B1F);color:#241A05;font-size:16px;font-weight:800;'
         +'box-shadow:0 2px 7px rgba(0,0,0,.45)">✓</button></div>';
       d.querySelector('.t').textContent=t.title;
+      if(t.items&&t.items.length)d.querySelector('div[style]').insertAdjacentElement('afterend',buildSubList(t));  /* 紧急×清单/阶段:抽屉内直接可勾 */
       d.querySelector('.ud-seal').addEventListener('click',e=>{e.stopPropagation();
         doneTask(t.id)});   // 抽屉直接办妥,refresh经renderAll自动联动
       d.addEventListener('click',()=>{this.retract('nav');
