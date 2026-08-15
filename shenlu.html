@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- 成神之路 v20260815.2 · 经验回响V2:避让改贴身候场(障碍一撤5秒即播) -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -1110,7 +1111,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
     <button class="mini" id="btnGate" style="width:100%;padding:13px;margin-bottom:8px">应用锁</button>
     <button class="mini" id="btnExport" style="width:100%;padding:13px;margin-bottom:8px">⚙ 导出存档 · 一键甩给Claude或网盘</button>
     <button class="mini" id="btnRestore" style="width:100%;padding:13px;margin-bottom:8px">📥 从存档文件恢复</button>
-    <button class="mini" id="btnSnap" style="width:100%;padding:13px">🕰 恢复本机旧版本（近3天）（近3天）</button>
+    <button class="mini" id="btnSnap" style="width:100%;padding:13px">🕰 恢复本机旧版本（近3天）</button>
     <input type="file" id="fileRestore" accept=".json,application/json" style="display:none">
   </div>
 </div>
@@ -1912,6 +1913,7 @@ S.envs=S.envs||[];
 S.pings=S.pings||[];
 S.insights=S.insights||[];
 S.insightRuntime=S.insightRuntime||{day:'',inlineShown:0,ambientShown:0,lastSurfaceAt:0};
+S.echoRt=S.echoRt||{order:[],idx:0};   // 经验回响V2·均等轮转指针(跨会话续走)
 S.money=S.money||[];
 S.ledger=S.ledger||[];
 S.pin=S.pin||null;
@@ -3890,9 +3892,10 @@ const POKE={lastTouch:0,resumeAt:0,hiddenAt:0,fxUntil:0,lastShow:0,cur:null,
       if(q.sink!=='none')S.pings.push({ts:now(),day:todayStr(),qid:q.id,category:q.category,
         prompt,answer,answerMode:q.mode,context:ctxSlim,via:'poke',q:q.category,a:answer});
       if(q.sink==='mood')S.moods.push({ts:now(),day:todayStr(),label:answer,via:'poke'});
-      if(q.sink==='insight'&&q.mode!=='chips')S.insights.push({id:uid(),txt:answer,dom:q.dom||'待整理',
+      if(q.sink==='insight'&&q.mode!=='chips'){S.insights.push({id:uid(),txt:answer,dom:q.dom||'待整理',
         createdTs:now(),createdDay:todayStr(),notBefore:0,level:0,status:'active',
-        shown:0,lastShownAt:0,cooldownUntil:0,misses:0})}
+        shown:0,lastShownAt:0,cooldownUntil:0,misses:0});
+        setTimeout(()=>ECHO2.synthOne(S.insights[S.insights.length-1]),800)}}
     /* 偏好与轮换记账 */
     S.pk.recent.push({id:q.id,ck:q.ck,family:q.family,mode:q.mode,sink:q.sink,
       ts:now(),day:todayStr(),out});
@@ -3957,26 +3960,119 @@ $('insSave').addEventListener('click',()=>{
   vibe([50,70,50]);sDing();
   const n=S.insights.filter(x=>x.status==='active').length;
   pop('新情报入册 ✦','「'+dom+'」册 · 现有 <b style="color:var(--gold)">'+n+'</b> 条','ding');
+  setTimeout(()=>ECHO2.synthOne(S.insights[S.insights.length-1]),800);  // 入册即预合成
   renderAll()});
 let curEcho=null;
 function insEmit(evt,payload){
-  try{
-    const t=now();
-    const rt=S.insightRuntime;
-    if(rt.day!==todayStr()){rt.day=todayStr();rt.inlineShown=0}
-    if(rt.inlineShown>=3)return;
-    if(t-(rt.lastSurfaceAt||0)<45*60000)return;
-    if(document.querySelector('.sheet.on'))return;
-    if($('cereN').classList.contains('on'))return;
-    if(Object.keys(S.active).length>0&&evt!=='day.wake')return;
-    // 死规则：只认到了回访日期的条目
-    const due=S.insights.filter(it=>
-      it.status==='active'&&it.notBefore&&t>=it.notBefore
-      &&(!it.cooldownUntil||t>=it.cooldownUntil)
-      &&(!it.lastShownAt||t-it.lastShownAt>=86400000));
-    if(!due.length)return;
-    due.sort((a,b)=>a.notBefore-b.notBefore);
-    showEcho(due[0],evt,payload)}catch(e){}}
+  /* V2接管(董事长案20260815):旧就地回响退役。
+     旧制notBefore死规则曾把随手经验(notBefore:0)永久锁在池外——Sol核出的真bug,
+     V2轮转不再依赖notBefore准入,bug随旧制一并消灭。函数保留为空壳,免断旧调用点。 */
+  return}
+
+/* ============ 经验回响 V2 · 董事长案 ============
+   真中间弹窗+弹出即读+读完3秒自动关+零按钮;
+   绝对均等轮转:全库过一遍才开第二遍,指针跨会话续走,一轮完重洗;
+   时机:开机随机1-5分钟保底首弹,之后前台每满20分钟追加,不设日上限;
+   只有两个不弹:别的语音在播、正在打字——顺延30秒再试,不作废;
+   计时中照弹照读(董事长:真正重要的事不计时,计时段=杂活段=耳朵最闲)。 */
+const ECHO2={
+  showing:false,lastAt:0,
+  hash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36)},
+  key(it){return 'ins-vv-'+this.hash(it.txt)},
+  pool(){const t=now();return S.insights.filter(it=>
+    it.status==='active'&&(!it.notBefore||t>=it.notBefore))},  // 手填回访日期只当"最早不得早于",不当准入门槛
+  next(){
+    const rt=S.echoRt,pool=this.pool();
+    if(!pool.length)return null;
+    const ids=pool.map(i=>i.id);
+    rt.order=(rt.order||[]).filter(id=>ids.indexOf(id)>=0);          // 清理已退休/已删
+    ids.forEach(id=>{if(rt.order.indexOf(id)<0)
+      rt.order.splice(rt.idx+Math.floor(Math.random()*(rt.order.length-rt.idx+1)),0,id)}); // 新经验插入本轮未播区,当轮就有机会
+    if(rt.idx>=rt.order.length){                                     // 一轮走完:重洗开新轮
+      rt.order=ids.slice();
+      for(let i=rt.order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));
+        const tmp=rt.order[i];rt.order[i]=rt.order[j];rt.order[j]=tmp}
+      rt.idx=0}
+    return pool.find(i=>i.id===rt.order[rt.idx])||null},
+  blocked(){
+    if(document.visibilityState!=='visible')return true;
+    if(Voice.busy)return true;                                       // 别的语音在播
+    const ae=document.activeElement;
+    if(ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'))return true; // 正在打字
+    return false},
+  stalk(){                                                            // 贴身候场:避让动作一结束,5秒后即播
+    if(this._stalkT)return;                                           // 已在候场,不重复挂
+    this._stalkT=setInterval(()=>{
+      if(this.blocked())return;                                       // 障碍还在,继续等
+      clearInterval(this._stalkT);this._stalkT=null;
+      setTimeout(()=>this.show(),5000)},1000)},
+  css(){
+    if(document.getElementById('ev2css'))return;
+    const st=document.createElement('style');st.id='ev2css';
+    st.textContent='#echoV2{position:fixed;inset:0;z-index:9600;display:flex;align-items:center;justify-content:center;'
+      +'background:rgba(4,6,14,.52);backdrop-filter:blur(3px);opacity:0;transition:opacity .38s}'
+      +'#echoV2.show{opacity:1}'
+      +'#echoV2 .ev2c{max-width:min(560px,82vw);padding:26px 26px 20px;border-radius:18px;'
+      +'background:linear-gradient(160deg,rgba(22,24,40,.97),rgba(12,14,26,.97));'
+      +'border:1px solid var(--gold-dim);box-shadow:0 0 34px rgba(255,215,0,.16),inset 0 0 22px rgba(255,215,0,.05);'
+      +'transform:scale(.94);transition:transform .38s}'
+      +'#echoV2.show .ev2c{transform:scale(1)}'
+      +'#echoV2 .ev2m{font-size:11px;letter-spacing:.3em;color:var(--gold-dim);margin-bottom:12px}'
+      +'#echoV2 .ev2t{font-size:16.5px;line-height:1.95;color:var(--gold-bright);text-shadow:0 0 12px rgba(255,215,0,.18)}'
+      +'#echoV2 .ev2f{font-size:11px;color:var(--ink-dim);margin-top:14px;text-align:right}';
+    document.head.appendChild(st)},
+  async show(){
+    if(this.showing)return;
+    if(this.blocked()){this.stalk();return}                          // 避让=贴身候场,不弃这次机会
+    const it=this.next();if(!it)return;
+    this.showing=true;this.css();
+    const el=document.createElement('div');el.id='echoV2';
+    const days=Math.max(1,Math.round((now()-it.createdTs)/86400000));
+    el.innerHTML='<div class="ev2c"><div class="ev2m">✦ 旧识回响</div>'
+      +'<div class="ev2t"></div>'
+      +'<div class="ev2f">——「'+esc(it.dom)+'」册 · '+days+'天前的你</div></div>';
+    el.querySelector('.ev2t').textContent=it.txt;
+    document.body.appendChild(el);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+    vibe(35);BGM.duck(0.65,180);
+    const self=this;let closed=false;
+    function close(){if(closed)return;closed=true;
+      el.classList.remove('show');setTimeout(()=>{try{el.remove()}catch(_){}},420);
+      BGM.unduck(600);
+      it.shown=(it.shown||0)+1;it.lastShownAt=now();
+      S.echoRt.idx++;self.lastAt=now();self.showing=false;save();
+      setTimeout(()=>self.warm(2),4000)}                             // 顺手预热下一批
+    const after=()=>setTimeout(close,3000);                          // 读完3秒自动关
+    el.addEventListener('pointerdown',close);                        // 提前散场可点,非必需操作
+    let played=false;
+    try{const b=await TTSC.get(this.key(it));
+      if(b){const c=await Voice.playBlob(b,40,{vol:0.9,onEnd:after});played=!!c}}catch(_){}
+    if(!played){try{const b=await ttsSynth(it.txt);
+      if(b&&b.size>800){TTSC.put(this.key(it),b);
+        const c=await Voice.playBlob(b,40,{vol:0.9,onEnd:after});played=!!c}}catch(_){}}
+    if(!played)played=Voice.say(it.txt,40,{rate:1.0,onEnd:after});
+    if(!played)setTimeout(close,3000+Math.min(9000,it.txt.length*280))}, // 全静音兜底:按阅读时长关
+  async synthOne(it){                                                // 录入即预合成,弹窗零等待
+    if(!it||!navigator.onLine||!ttsCfg())return;
+    const key=this.key(it);
+    try{if(await TTSC.get(key))return;
+      const b=await ttsSynth(it.txt);
+      if(b&&b.size>800)await TTSC.put(key,b)}catch(_){}},
+  async warm(n){                                                     // 预热轮转前方n条
+    if(!navigator.onLine||!ttsCfg())return;
+    const rt=S.echoRt;
+    for(let k=0;k<(n||2);k++){
+      const id=(rt.order||[])[rt.idx+k];if(!id)break;
+      const it=S.insights.find(i=>i.id===id);if(!it)continue;
+      await this.synthOne(it);
+      await new Promise(r=>setTimeout(r,600))}},
+  boot(){
+    this.lastAt=now();
+    setTimeout(()=>this.show(),(60+Math.random()*240)*1000);         // 保底首弹:随机1-5分钟
+    setInterval(()=>{                                                // 追加:每满20分钟一弹,多开多弹无上限
+      if(!this.showing&&now()-this.lastAt>=20*60000)this.show()},60000);
+    setTimeout(()=>this.warm(2),15000)}
+};
 function showEcho(it,evt,payload){
   curEcho=it;
   const why='到日子了 · 过去的你约好今天递给你这句话';
@@ -5423,6 +5519,7 @@ renderGateBtn();
 if(S.gate&&S.pin)showGate();
 URGENT.boot();
 POKE.boot();
+ECHO2.boot();   // 经验回响V2(v20260815.2)
 if(!S.lastBackup||now()-S.lastBackup>7*86400000)
   setTimeout(()=>toast('提示：好久没存档了 · 战绩页⚙一键甩给网盘'),2600);
 if(S.sleep.start){ // still sleeping -> show night screen with wake button
