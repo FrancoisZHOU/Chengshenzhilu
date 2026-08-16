@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- 成神之路 v20260815.2 · 经验回响V2:避让改贴身候场(障碍一撤5秒即播) -->
+<!-- 成神之路 v20260815.3 · 悬着"放下此事"补可跳过的原因输入(挂账单①放下项落地) -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -1091,7 +1091,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260815.2）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260815.3）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1873,7 +1873,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260815.2;
+const APP_VER=20260815.3;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2409,10 +2409,11 @@ function renderHanger(){
     c.querySelector('[data-release]').addEventListener('click',e=>{
       e.stopPropagation();
       if(!confirm('「'+t.title+'」将不再悬着，并保留在记录中。放下？'))return;
+      const why=(prompt('想留一句为什么放下吗？（可留空直接确定）','')||'').trim();  /* 可跳过的补充说明 */
       c.classList.add('is-dropped');vibe(45);
       setTimeout(()=>{
-        t.retired=true;t.retireReason='放下此事';t.retiredDay=todayStr();
-        TC.retire(t,'放下此事');save();sOff();
+        t.retired=true;t.retireReason=why?('放下此事 · '+why):'放下此事';t.retiredDay=todayStr();
+        TC.retire(t,t.retireReason);save();sOff();
         pop('已放下','「'+esc(t.title)+'」不再悬着 · 已留在记录中','off');
         renderAll()},500)});
     box.appendChild(c);
