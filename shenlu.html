@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- 成神之路 v20260817.2 · 晨醒全量详单+紧急卡✕未完成结束(可跳过原因,进度留档) -->
+<!-- 成神之路 v20260817.3 · 修晨醒双钮sticky重叠(收进同一页脚) -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -415,7 +415,7 @@ body.slx-pixel-theme .sheet:not(#shFlow),.sheet:not(#shFlow){z-index:50}
 .cere.on{display:flex}
 #cereM{background:radial-gradient(ellipse at 50% 38%,#2E2010 0%,#0D0A11 62%);
   justify-content:flex-start;overflow-y:auto;padding-top:38px}
-#cereM .c-btn{position:sticky;bottom:16px;margin-top:22px;flex-shrink:0}
+#cereM .c-foot{position:sticky;bottom:14px;margin-top:22px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:12px}
 .ci-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;
   align-items:start;text-align:left;line-height:1.75;width:100%;max-width:340px;margin:0 auto}
 .ci-row .n{min-width:0;overflow-wrap:anywhere}
@@ -1093,7 +1093,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260817.2）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260817.3）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1329,8 +1329,10 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   <div class="c-line" id="cGreet"></div>
   <div class="c-list" id="cEvents"></div>
   <div class="c-list" id="cTasks"></div>
-  <button class="c-btn" id="cGo">开 启 今 日</button>
-  <button class="c-btn night" id="cBackSleep" style="margin-top:14px;padding:13px 40px;font-size:13px">继 续 睡</button>
+  <div class="c-foot">
+    <button class="c-btn" id="cGo">开 启 今 日</button>
+    <button class="c-btn night" id="cBackSleep" style="padding:13px 40px;font-size:13px">继 续 睡</button>
+  </div>
 </div>
 
 <div class="cere" id="cereN">
@@ -1875,7 +1877,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260817.2;
+const APP_VER=20260817.3;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
