@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- 成神之路 v20260815.3 · 悬着"放下此事"补可跳过的原因输入(挂账单①放下项落地) -->
+<!-- 成神之路 v20260817.2 · 晨醒全量详单+紧急卡✕未完成结束(可跳过原因,进度留档) -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -421,6 +421,8 @@ body.slx-pixel-theme .sheet:not(#shFlow),.sheet:not(#shFlow){z-index:50}
 .ci-row .n{min-width:0;overflow-wrap:anywhere}
 .ci-row b{white-space:nowrap;color:var(--gold)}
 .ci-sec{margin-top:12px;color:var(--ink-dim);letter-spacing:.15em;font-size:13px}
+.ci-sub{font-size:12.5px;opacity:.72;padding:1px 0 1px 24px}
+.ci-sub.ok{opacity:.42;text-decoration:line-through}
 #cereN{background:radial-gradient(ellipse at 50% 62%,#120E26 0%,#08060A 65%)}
 .halo{position:absolute;top:18%;left:50%;transform:translate(-50%,-50%);
   width:230px;height:230px;border-radius:50%;filter:blur(46px);
@@ -1091,7 +1093,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260815.3）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260817.2）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1873,7 +1875,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260815.3;
+const APP_VER=20260817.2;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2938,11 +2940,23 @@ function wakeUp(){
     .map(e=>{const cd=evCountdown(e);return cd>=0?('<div class="ci-row"><span class="n">'+esc(e.name)+'</span><b>'+(cd===0?'今天':'还有'+cd+'天')+'</b></div>'):''})
     .filter(Boolean).join('');
   $('cEvents').innerHTML=evs;
-  const open=S.tasks.filter(t=>!t.done&&(t.day<=todayStr()||t.hang)).length;
-  const floats=S.tasks.filter(t=>!t.done&&t.hang===true);
-  let tline=open?('任务板待办 <b>'+open+'</b> 条'):'任务板空着 · 醒来先发布今天的悬赏';
-  if(floats.length){tline+='<div class="ci-sec">悬 着 的 事 · '+floats.length+'</div>'
-    +floats.map(t=>'<div class="ci-row"><span class="n">· '+esc(t.title)+'</span></div>').join('')}
+  const _today2=todayStr();
+  const _live=S.tasks.filter(t=>!t.done&&!t.retired);   /* 修:退休任务不再阴魂不散 */
+  const _urg2=_live.filter(t=>stateOf(t)==='urgent');
+  const _hg2=_live.filter(t=>stateOf(t)==='hanging');
+  const _td2=_live.filter(t=>!t.hang&&stateOf(t)!=='urgent'&&t.day<=_today2);
+  const _far2=_live.filter(t=>!t.hang&&stateOf(t)!=='urgent'&&t.day>_today2);
+  const _sub2=t=>(t.items&&t.items.length)?t.items.map(s=>
+    '<div class="ci-sub'+(s.done?' ok':'')+'">'+(s.done?'✓':'○')+' '+esc(s.n)
+    +(s.type==='count'?' '+(s.count||0)+'/'+(s.target||'?'):'')+'</div>').join(''):'';
+  const _row2=t=>{
+    const pr=(t.items&&t.items.length)?('<b>'+t.items.filter(s=>s.done).length+'/'+t.items.length+'</b>'):'';
+    const dd=(t.day>_today2)?'<b style="color:var(--ink-dim)">'+t.day.slice(5)+'</b>':'';
+    return '<div class="ci-row"><span class="n">· '+esc(t.title)
+      +(t.at?' <span style="opacity:.7">'+t.at+'</span>':'')+'</span>'+(pr||dd)+'</div>'+_sub2(t)};
+  const _sec2=(nm,arr)=>arr.length?('<div class="ci-sec">'+nm+' · '+arr.length+'</div>'+arr.map(_row2).join('')):'';
+  let tline=_live.length?'':'任务板空着 · 醒来先发布今天的悬赏';
+  tline+=_sec2('紧 急',_urg2)+_sec2('悬 着 的 事',_hg2)+_sec2('今 日',_td2)+_sec2('远 方',_far2);
   $('cTasks').innerHTML=tline;
   $('cereM').classList.add('on');
   setTimeout(()=>insEmit('day.wake',{text:S.tasks.filter(t=>!t.done).map(t=>t.title).join(' ')}),2600);
@@ -5275,6 +5289,9 @@ const URGENT={
       const meta=(t.day===todayStr()?'今天':(t.day||'').slice(5))+(t.at?' '+t.at:'');
       d.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
         +'<div style="flex:1;min-width:0"><div class="t"></div><div class="m">'+meta+'</div></div>'
+        +'<button class="ud-x" style="width:34px;height:34px;border-radius:9px;flex:0 0 34px;'
+        +'background:rgba(40,32,52,.9);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.55);'
+        +'font-size:15px;font-weight:700">✕</button>'
         +'<button class="ud-seal" style="width:34px;height:34px;border-radius:9px;border:none;flex:0 0 34px;'
         +'background:linear-gradient(150deg,#F6DC8A,#D4AF37 55%,#8A6B1F);color:#241A05;font-size:16px;font-weight:800;'
         +'box-shadow:0 2px 7px rgba(0,0,0,.45)">✓</button></div>';
@@ -5282,6 +5299,14 @@ const URGENT={
       if(t.items&&t.items.length)d.querySelector('div[style]').insertAdjacentElement('afterend',buildSubList(t));  /* 紧急×清单/阶段:抽屉内直接可勾 */
       d.querySelector('.ud-seal').addEventListener('click',e=>{e.stopPropagation();
         doneTask(t.id)});   // 抽屉直接办妥,refresh经renderAll自动联动
+      d.querySelector('.ud-x').addEventListener('click',e=>{e.stopPropagation();
+        /* 未完成结束:非成功出口,已勾子项进度随任务留档不清零 */
+        if(!confirm('「'+t.title+'」未完成，就此收场？将保留在记录中。'))return;
+        const why=(prompt('想留一句原因吗？（可留空直接确定）','')||'').trim();
+        t.retired=true;t.retireReason=why?('未完成结束 · '+why):'未完成结束';t.retiredDay=todayStr();
+        TC.retire(t,t.retireReason);save();
+        pop('已收场','「'+esc(t.title)+'」未完成结束 · 已留在记录中','off');
+        renderAll()});
       d.addEventListener('click',()=>{this.retract('nav');
         document.querySelector('.nav button[data-tab="tabTask"]').click();
         setTimeout(()=>{const row=document.querySelector('.tk-row[data-id="'+t.id+'"]');
