@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- 成神之路 v20260817.3 · 修晨醒双钮sticky重叠(收进同一页脚) -->
+<!-- 成神之路 v20260817.4 · 成就库·人生数据库(第五栏/粘贴唯一入口/双排序/成就·追踪两性质/破纪录仪式) -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -423,6 +423,26 @@ body.slx-pixel-theme .sheet:not(#shFlow),.sheet:not(#shFlow){z-index:50}
 .ci-sec{margin-top:12px;color:var(--ink-dim);letter-spacing:.15em;font-size:13px}
 .ci-sub{font-size:12.5px;opacity:.72;padding:1px 0 1px 24px}
 .ci-sub.ok{opacity:.42;text-decoration:line-through}
+.ach-row{display:flex;align-items:center;gap:10px;padding:13px 4px;border-bottom:1px solid rgba(255,255,255,.07)}
+.ach-row .an{flex:1;min-width:0}
+.ach-row .an b{font-size:15px}
+.ach-row .an small{display:block;color:var(--ink-dim);font-size:11.5px;margin-top:2px}
+.ach-row .av{text-align:right}
+.ach-row .av b{color:var(--gold);font-size:15px}
+.ach-row .av small{display:block;color:var(--ink-dim);font-size:11px;margin-top:2px}
+#achModal{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;background:rgba(4,6,14,.6);backdrop-filter:blur(3px)}
+#achModal.on{display:flex}
+#achModal .amc{width:min(560px,90vw);max-height:76vh;overflow-y:auto;padding:20px 18px;border-radius:18px;background:linear-gradient(160deg,rgba(22,24,40,.98),rgba(12,14,26,.98));border:1px solid var(--gold-dim);box-shadow:0 0 34px rgba(255,215,0,.14)}
+#achModal .amh{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+#achModal .amh b{flex:1;font-size:16px;min-width:0}
+.am-sw{display:flex;gap:8px;margin:8px 0 12px}
+.am-sw button{flex:1;padding:9px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);color:var(--ink);font-size:12.5px}
+.am-sw button.on{border-color:var(--gold);color:var(--gold)}
+.am-rec{display:flex;gap:10px;align-items:baseline;padding:10px 2px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13.5px}
+.am-rec .rk{color:var(--gold);min-width:34px;font-weight:700;flex-shrink:0}
+.am-rec .vv{font-weight:700}
+.am-rec .nn{display:block;color:var(--ink-dim);font-size:11.5px;margin-top:2px}
+.am-rec .dd{color:var(--ink-dim);margin-left:auto;font-size:11.5px;white-space:nowrap;flex-shrink:0}
 #cereN{background:radial-gradient(ellipse at 50% 62%,#120E26 0%,#08060A 65%)}
 .halo{position:absolute;top:18%;left:50%;transform:translate(-50%,-50%);
   width:230px;height:230px;border-radius:50%;filter:blur(46px);
@@ -1093,7 +1113,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260817.3）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260817.5）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1119,8 +1139,31 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 </div>
 
 <!-- ============ NAV ============ -->
+<div id="tabAch" class="tab">
+  <div class="hd"><div class="eyebrow">人 生 数 据 库</div></div>
+  <div class="sec">
+    <div class="sec-t">成 就 与 追 踪 <button class="mini" id="btnAchImport">粘贴导入</button></div>
+    <div id="achList"></div>
+  </div>
+</div>
+
+<div id="achModal"><div class="amc">
+  <div class="amh"><b id="amTitle"></b><span id="amKind" style="font-size:11.5px;color:var(--ink-dim)"></span>
+    <button class="mini" id="amClose" style="padding:6px 12px">✕</button></div>
+  <div class="am-sw"><button id="amBtnTime" class="on">按 时 间</button><button id="amBtnRank">按 排 名</button></div>
+  <div id="amList"></div>
+</div></div>
+
+<div class="sheet" id="shAchIn"><div class="sheet-in">
+  <h3>成 就 直 录（人 生 数 据 库）</h3>
+  <div class="hint">每行一条,由Claude统一出提示词:<br>#成就 类目 数值 [日期] [方向:大胜/小胜] [性质:成就/追踪] [备注:...]<br>类目/归类/调整全走此框,粘贴即生效。</div>
+  <div class="field"><textarea id="achText" placeholder="#成就 晨跑距离 3.58km 2026-08-17 备注:配速6分33"></textarea></div>
+  <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="achSave">全部入库</button></div>
+</div></div>
+
 <div class="nav">
   <button data-tab="tabToday" class="on"><span class="nico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9L19 19M19 5l-2.1 2.1M7.1 16.9L5 19"/></svg></span>今日</button>
+  <button data-tab="tabAch"><span class="nico"><svg viewBox="0 0 24 24"><path d="M8 4h8v4a4 4 0 01-8 0V4zM8 5H5a3 3 0 003.2 3M16 5h3a3 3 0 01-3.2 3M12 12v3M9.5 20h5M10.5 15h3v5h-3z"/></svg></span>成就</button>
   <button id="navFlow"><span class="nico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/></svg><i class="flowdot"></i></span>入世</button>
   <button data-tab="tabTask"><span class="nico"><svg viewBox="0 0 24 24"><path d="M4 20l6.5-6.5M20 4l-9.5 9.5M14.5 4H20v5.5M4 14.5V20h5.5"/></svg></span>任务</button>
   <button data-tab="tabStat"><span class="nico"><svg viewBox="0 0 24 24"><path d="M4 18l2.5-9 4 5 3-7 3.5 6L20 8v10H4z"/></svg></span>战绩</button>
@@ -1877,7 +1920,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260817.3;
+const APP_VER=20260817.5;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -1916,6 +1959,7 @@ S.trips=S.trips||[];
 S.envs=S.envs||[];
 S.pings=S.pings||[];
 S.insights=S.insights||[];
+S.ach=S.ach||{cats:{},recs:[]};   /* 成就库·人生数据库(董事长案20260817) */
 S.insightRuntime=S.insightRuntime||{day:'',inlineShown:0,ambientShown:0,lastSurfaceAt:0};
 S.echoRt=S.echoRt||{order:[],idx:0};   // 经验回响V2·均等轮转指针(跨会话续走)
 S.money=S.money||[];
@@ -2074,6 +2118,101 @@ function pop(main,sub,sound){
   clearTimeout(p._t);
   p._t=setTimeout(()=>{p.classList.remove('show');
     setTimeout(()=>p.classList.remove('on'),450)},sound==='ding'?2600:1900)}
+
+/* ============ 成就库 · 人生数据库(董事长案20260817) ============
+   唯一入口=粘贴;类目自动建;成就类有排名+破纪录仪式,追踪类只时间线+极值标注,身体指标不发奖牌 */
+function achParseVal(v){
+  const p=v.match(/^(\d+)['分](\d+)/);                 // 配速/时长 6'33 或 6分33
+  if(p)return parseInt(p[1])*60+parseInt(p[2]);
+  const m=v.match(/-?\d+(?:[.,]\d+)?/);
+  return m?parseFloat(m[0].replace(',','.')):null}
+function achIngest(line){
+  let l=line.replace(/^#成就\s*/,'').trim();if(!l)return false;
+  let dir=null,kindSet=null,note='';
+  const dm=l.match(/方向[:：]\s*(大胜|小胜)/);if(dm){dir=dm[1]==='大胜'?'max':'min';l=l.replace(dm[0],' ')}
+  const km=l.match(/性质[:：]\s*(成就|追踪)/);if(km){kindSet=km[1];l=l.replace(km[0],' ')}
+  const nm=l.match(/备注[:：]\s*(.+)$/);if(nm){note=nm[1].trim();l=l.replace(nm[0],' ')}
+  const tk=l.trim().split(/\s+/);
+  if(tk.length<2){toast('成就行缺数值');return false}
+  const cat=tk[0],valRaw=tk[1];
+  let day=todayStr();
+  const dtok=tk.slice(2).find(x=>/^\d{4}-\d{2}-\d{2}$/.test(x));if(dtok)day=dtok;
+  const c=S.ach.cats[cat]||(S.ach.cats[cat]={dir:null,kind:'成就'});
+  if(dir)c.dir=dir;if(kindSet)c.kind=kindSet;
+  if(c.kind==='成就'&&!c.dir)c.dir='max';              // 成就类默认大者为王
+  const val=achParseVal(valRaw);
+  let crowned=false;
+  if(c.kind==='成就'&&val!=null){                       // 破纪录判定:入库前比现榜首
+    const olds=S.ach.recs.filter(r=>r.cat===cat&&r.val!=null);
+    if(olds.length){
+      const best=c.dir==='min'?Math.min.apply(null,olds.map(r=>r.val)):Math.max.apply(null,olds.map(r=>r.val));
+      crowned=c.dir==='min'?val<best:val>best}}
+  S.ach.recs.push({id:uid(),cat:cat,valRaw:valRaw,val:val,day:day,note:note,ts:now()});
+  if(crowned){pop('新 纪 录 ✦',esc(cat)+' <b style="color:var(--gold)">'+esc(valRaw)+'</b>','ding');
+    try{ascendLight(true)}catch(_){}}
+  return true}
+function achRankOf(rec,c){
+  const rs=S.ach.recs.filter(r=>r.cat===rec.cat&&r.val!=null).slice()
+    .sort((a,b)=>c.dir==='min'?a.val-b.val:b.val-a.val);
+  const i=rs.findIndex(r=>r.id===rec.id);return i<0?null:i+1}
+function renderAch(){
+  const el=$('achList');if(!el)return;
+  const cats=Object.keys(S.ach.cats);
+  if(!cats.length){el.innerHTML='<div class="hint" style="padding:14px 4px">还没有记录 · 把数据发给Claude,拿到 #成就 行后点上方「粘贴导入」</div>';return}
+  const latest=c=>S.ach.recs.reduce((p,r)=>r.cat===c&&r.ts>p?r.ts:p,0);
+  el.innerHTML=cats.sort((a,b)=>latest(b)-latest(a)).map(cat=>{
+    const c=S.ach.cats[cat];
+    const rs=S.ach.recs.filter(r=>r.cat===cat);
+    let main='—',sub='';
+    if(c.kind==='成就'){
+      const vs=rs.filter(r=>r.val!=null);
+      if(vs.length){const best=vs.reduce((p,r)=>(c.dir==='min'?r.val<p.val:r.val>p.val)?r:p);
+        main=best.valRaw;sub='最佳 · '+best.day.slice(5)}}
+    else if(rs.length){const last=rs.reduce((p,r)=>r.ts>p.ts?r:p);
+      main=last.valRaw;sub='最新 · '+last.day.slice(5)}
+    return '<div class="ach-row" data-cat="'+esc(cat)+'"><div class="an"><b>'+esc(cat)+'</b>'
+      +'<small>'+(c.kind==='成就'?'🏆 成就':'📈 追踪')+' · '+rs.length+' 条</small></div>'
+      +'<div class="av"><b>'+esc(main)+'</b><small>'+sub+'</small></div></div>'}).join('');
+  el.querySelectorAll('.ach-row').forEach(r=>r.addEventListener('click',()=>openAch(r.dataset.cat)))}
+let achCat=null,achSort='time';
+function openAch(cat){achCat=cat;achSort='time';drawAch();$('achModal').classList.add('on');vibe(20)}
+function drawAch(){
+  const c=S.ach.cats[achCat];if(!c)return;
+  $('amTitle').textContent=achCat;
+  $('amKind').textContent=c.kind==='成就'?('🏆 '+(c.dir==='min'?'小者为王':'大者为王')):'📈 追踪';
+  $('amBtnRank').style.display=c.kind==='成就'?'':'none';
+  $('amBtnTime').classList.toggle('on',achSort==='time');
+  $('amBtnRank').classList.toggle('on',achSort==='rank');
+  let rs=S.ach.recs.filter(r=>r.cat===achCat).slice();
+  if(achSort==='rank')rs.sort((a,b)=>{
+    if(a.val==null)return 1;if(b.val==null)return -1;
+    return c.dir==='min'?a.val-b.val:b.val-a.val});
+  else rs.sort((a,b)=>b.ts-a.ts);
+  const vs=rs.filter(r=>r.val!=null);
+  const hi=vs.length?Math.max.apply(null,vs.map(r=>r.val)):null;
+  const lo=vs.length?Math.min.apply(null,vs.map(r=>r.val)):null;
+  $('amList').innerHTML=rs.map((r,i)=>{
+    let tag;
+    if(c.kind==='成就'){
+      const rk=achSort==='rank'?(r.val!=null?i+1:null):(r.val!=null?achRankOf(r,c):null);
+      tag='<span class="rk">'+(rk?'#'+rk:'—')+'</span>'}
+    else{const mk=(vs.length>1&&r.val===hi)?'▲高':((vs.length>1&&r.val===lo)?'▼低':'');
+      tag='<span class="rk" style="color:var(--ink-dim)">'+mk+'</span>'}
+    return '<div class="am-rec">'+tag+'<div style="flex:1;min-width:0"><span class="vv">'+esc(r.valRaw)+'</span>'
+      +(r.note?'<span class="nn">'+esc(r.note)+'</span>':'')+'</div><span class="dd">'+r.day+'</span></div>'}).join('')||
+    '<div class="hint">此类目暂无记录</div>'}
+$('amBtnTime').addEventListener('click',()=>{achSort='time';drawAch()});
+$('amBtnRank').addEventListener('click',()=>{achSort='rank';drawAch()});
+$('amClose').addEventListener('click',()=>$('achModal').classList.remove('on'));
+$('achModal').addEventListener('click',e=>{if(e.target.id==='achModal')$('achModal').classList.remove('on')});
+$('btnAchImport').addEventListener('click',()=>{$('achText').value='';$('shAchIn').classList.add('on')});
+$('achSave').addEventListener('click',()=>{
+  const raw=$('achText').value;if(!raw.trim()){toast('先粘贴或输入');return}
+  let n=0;raw.split('\n').forEach(l=>{l=l.trim();if(!l)return;
+    if(achIngest(l.startsWith('#成就')?l:'#成就 '+l))n++});
+  save();$('shAchIn').classList.remove('on');
+  if(n){toast('入库 '+n+' 条');vibe(35)}
+  renderAch()});
 
 /* ============ TABS ============ */
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{
@@ -2492,6 +2631,7 @@ $('lineSave').addEventListener('click',()=>{
     if(!rl.trim()){cur=null;return}
     const indented=/^[\s\u3000]/.test(rl);
     let l=rl.trim();
+    if(l.startsWith('#成就')){achIngest(l);cur=null;return}   /* 通吃:成就行就地入库 */
     const bullet=/^[-*•·]\s+/.test(l);
     const numbered=/^\d+[.、)]\s+/.test(l);
     if(cur&&(indented||bullet||numbered||l.startsWith('>'))){
@@ -5077,7 +5217,7 @@ function renderAll(){
   const d=new Date();
   $('todayDate').textContent=d.getFullYear()+' / '+(d.getMonth()+1)+' / '+d.getDate()
     +' · '+['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
-  renderLive();renderTasks();renderEvents();renderHanger();renderGrid();renderStats();renderWorkToday();renderBodyLog();renderEats();renderRecent();renderSleepAsk();renderInsights();
+  renderLive();renderTasks();renderEvents();renderHanger();renderGrid();renderStats();renderWorkToday();renderBodyLog();renderEats();renderRecent();renderSleepAsk();renderInsights();try{renderAch()}catch(_){}
   if(typeof URGENT!=='undefined')try{URGENT.refresh()}catch(_){}}
 
 
