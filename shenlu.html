@@ -57,6 +57,9 @@ button{font-family:inherit}
 .hd .eyebrow{font-size:10px;letter-spacing:.5em;color:var(--gold-dim)}
 .hd h1{font-size:26px;font-weight:300;letter-spacing:.3em;margin-top:8px}
 .sec{padding:18px 20px 2px}
+.sec-glass{margin:14px 16px;padding:14px 16px 6px;border-radius:16px;
+  background:rgba(7,9,18,.68);border:1px solid rgba(255,255,255,.07);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
 .sec-t{font-size:11px;letter-spacing:.35em;color:var(--ink-dim);margin-bottom:12px;
   display:flex;justify-content:space-between;align-items:center}
 .sec-t .mini{background:none;border:1px solid var(--line);color:var(--gold-dim);
@@ -1092,7 +1095,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
     <div class="sec-t">入世统计</div>
     <div class="card" id="stActs"><div class="empty">开始入世后这里会长出来</div></div>
   </div>
-  <div class="sec">
+  <div class="sec sec-glass">
     <div class="sec-t">情 报 册 <span id="insCount" style="letter-spacing:.05em"></span></div>
     <div id="insBook"><div class="empty">💡 灵光一闪记下的经验住在这里<br>被采纳会慢慢变金，长进身体里就退休</div></div>
   </div>
@@ -1113,7 +1116,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260817.5）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260817.6）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1141,7 +1144,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <!-- ============ NAV ============ -->
 <div id="tabAch" class="tab">
   <div class="hd"><div class="eyebrow">人 生 数 据 库</div></div>
-  <div class="sec">
+  <div class="sec sec-glass">
     <div class="sec-t">成 就 与 追 踪 <button class="mini" id="btnAchImport">粘贴导入</button></div>
     <div id="achList"></div>
   </div>
@@ -1920,7 +1923,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260817.5;
+const APP_VER=20260817.6;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
