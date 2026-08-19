@@ -1116,7 +1116,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260819.1）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260819.3）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1148,8 +1148,12 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
     <div class="sec-t">成 就 与 追 踪 <button class="mini" id="btnAchImport">粘贴导入</button></div>
     <div id="achList"></div>
   </div>
+</div>
+
+<div id="tabCt" class="tab">
+  <div class="hd"><div class="eyebrow">合 同 台 账</div></div>
   <div class="sec sec-glass">
-    <div class="sec-t">合 同 台 账 <span id="ctHint" style="letter-spacing:.05em"></span></div>
+    <div class="sec-t">在 役 与 归 档 <span id="ctHint" style="letter-spacing:.05em"></span> <button class="mini" id="btnCtImport">粘贴导入</button></div>
     <div id="ctList"></div>
   </div>
 </div>
@@ -1170,6 +1174,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 
 <div class="nav">
   <button data-tab="tabToday" class="on"><span class="nico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9L19 19M19 5l-2.1 2.1M7.1 16.9L5 19"/></svg></span>今日</button>
+  <button data-tab="tabCt"><span class="nico"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6V3zM15 3v4h4M9 11h6M9 15h6M9 18h4"/></svg></span>合同</button>
   <button data-tab="tabAch"><span class="nico"><svg viewBox="0 0 24 24"><path d="M8 4h8v4a4 4 0 01-8 0V4zM8 5H5a3 3 0 003.2 3M16 5h3a3 3 0 01-3.2 3M12 12v3M9.5 20h5M10.5 15h3v5h-3z"/></svg></span>成就</button>
   <button id="navFlow"><span class="nico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/></svg><i class="flowdot"></i></span>入世</button>
   <button data-tab="tabTask"><span class="nico"><svg viewBox="0 0 24 24"><path d="M4 20l6.5-6.5M20 4l-9.5 9.5M14.5 4H20v5.5M4 14.5V20h5.5"/></svg></span>任务</button>
@@ -1927,7 +1932,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260819.1;
+const APP_VER=20260819.3;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2214,6 +2219,7 @@ $('amBtnRank').addEventListener('click',()=>{achSort='rank';drawAch()});
 $('amClose').addEventListener('click',()=>$('achModal').classList.remove('on'));
 $('achModal').addEventListener('click',e=>{if(e.target.id==='achModal')$('achModal').classList.remove('on')});
 $('btnAchImport').addEventListener('click',()=>{$('achText').value='';$('shAchIn').classList.add('on')});
+$('btnCtImport').addEventListener('click',()=>{$('achText').value='';$('shAchIn').classList.add('on')});
 $('achSave').addEventListener('click',()=>{
   const raw=$('achText').value;if(!raw.trim()){toast('先粘贴或输入');return}
   let n=0;raw.split('\n').forEach(l=>{l=l.trim();if(!l)return;
