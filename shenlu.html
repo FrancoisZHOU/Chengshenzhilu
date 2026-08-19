@@ -1116,7 +1116,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260817.6）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260819.1）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1148,6 +1148,10 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
     <div class="sec-t">成 就 与 追 踪 <button class="mini" id="btnAchImport">粘贴导入</button></div>
     <div id="achList"></div>
   </div>
+  <div class="sec sec-glass">
+    <div class="sec-t">合 同 台 账 <span id="ctHint" style="letter-spacing:.05em"></span></div>
+    <div id="ctList"></div>
+  </div>
 </div>
 
 <div id="achModal"><div class="amc">
@@ -1159,7 +1163,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 
 <div class="sheet" id="shAchIn"><div class="sheet-in">
   <h3>成 就 直 录（人 生 数 据 库）</h3>
-  <div class="hint">每行一条,由Claude统一出提示词:<br>#成就 类目 数值 [日期] [方向:大胜/小胜] [性质:成就/追踪] [备注:...]<br>类目/归类/调整全走此框,粘贴即生效。</div>
+  <div class="hint">每行一条,由Claude统一出提示词:<br>#成就 类目 数值 [日期] [方向:大胜/小胜] [性质:成就/追踪] [备注:...]<br>#合同 姓名 CDD 止日期 · #合同 姓名 CDD 起日期 止日期 · #合同 姓名 终止<br>类目/归类/调整全走此框,粘贴即生效。</div>
   <div class="field"><textarea id="achText" placeholder="#成就 晨跑距离 3.58km 2026-08-17 备注:配速6分33"></textarea></div>
   <div class="sh-btns"><button class="b-dim" data-close>取消</button><button class="b-gold" id="achSave">全部入库</button></div>
 </div></div>
@@ -1923,7 +1927,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260817.6;
+const APP_VER=20260819.1;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -1963,6 +1967,7 @@ S.envs=S.envs||[];
 S.pings=S.pings||[];
 S.insights=S.insights||[];
 S.ach=S.ach||{cats:{},recs:[]};   /* 成就库·人生数据库(董事长案20260817) */
+S.contracts=S.contracts||[];      /* 合同台账(董事长案20260819):{id,name,type,start,end,status,note} */
 S.insightRuntime=S.insightRuntime||{day:'',inlineShown:0,ambientShown:0,lastSurfaceAt:0};
 S.echoRt=S.echoRt||{order:[],idx:0};   // 经验回响V2·均等轮转指针(跨会话续走)
 S.money=S.money||[];
@@ -2212,10 +2217,61 @@ $('btnAchImport').addEventListener('click',()=>{$('achText').value='';$('shAchIn
 $('achSave').addEventListener('click',()=>{
   const raw=$('achText').value;if(!raw.trim()){toast('先粘贴或输入');return}
   let n=0;raw.split('\n').forEach(l=>{l=l.trim();if(!l)return;
+    if(l.startsWith('#合同')){if(ctIngest(l))n++;return}
     if(achIngest(l.startsWith('#成就')?l:'#成就 '+l))n++});
   save();$('shAchIn').classList.remove('on');
   if(n){toast('入库 '+n+' 条');vibe(35)}
-  renderAch()});
+  renderAch();renderContracts()});
+
+/* ============ 合同台账(董事长案20260819) ============
+   只做看板:倒计时+周末会计警示;系统级提醒走手机日历四道链,app不弹窗。
+   #合同 姓名 CDD 止日期 / #合同 姓名 CDD 起 止 / #合同 姓名 CDI / #合同 姓名 终止 */
+function ctIngest(line){
+  let l=line.replace(/^#合同\s*/,'').trim();if(!l)return false;
+  const tk=l.split(/\s+/);
+  if(tk.length<2){toast('合同行不完整');return false}
+  const name=tk[0];
+  if(tk[1]==='终止'){
+    const c=S.contracts.find(x=>x.name===name&&x.status==='active');
+    if(!c){toast('没有'+name+'的在役合同');return false}
+    c.status='ended';c.endedDay=todayStr();c.endNote='终止';
+    toast(name+' 合同已归档');return true}
+  const type=tk[1].toUpperCase();
+  const dates=tk.slice(2).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x));
+  const old=S.contracts.find(x=>x.name===name&&x.status==='active');
+  if(old){old.status='ended';old.endedDay=todayStr();old.endNote='已续签'}  // 同名覆盖=续签,旧约归档
+  S.contracts.push({id:uid(),name:name,type:type,
+    start:dates.length>1?dates[0]:null,end:dates.length>1?dates[1]:(dates[0]||null),
+    status:'active',ts:now()});
+  return true}
+function ctPrevWorkday(dstr){                 // 到期落周末→前一个工作日(会计休周六日)
+  const d=new Date(dstr+'T12:00:00');
+  while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()-1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function renderContracts(){
+  const el=$('ctList');if(!el)return;
+  const wk=['周日','周一','周二','周三','周四','周五','周六'];
+  const act=S.contracts.filter(c=>c.status==='active');
+  const old=S.contracts.filter(c=>c.status!=='active');
+  $('ctHint').textContent=act.length?('在役 '+act.length):'';
+  if(!S.contracts.length){el.innerHTML='<div class="hint" style="padding:10px 4px">还没有合同 · 报给Claude,拿到 #合同 行后粘贴导入</div>';return}
+  const t0=new Date(todayStr()+'T12:00:00').getTime();
+  el.innerHTML=act.sort((a,b)=>(a.end||'9999')<(b.end||'9999')?-1:1).map(c=>{
+    let right='<b style="color:var(--ink-dim)">无固定期</b>',warn='';
+    if(c.end){
+      const de=new Date(c.end+'T12:00:00');
+      const days=Math.round((de.getTime()-t0)/86400000);
+      const col=days<=3?'var(--urg)':(days<=7?'var(--gold)':'var(--ink)');
+      right='<b style="color:'+col+'">'+(days<0?('过期'+(-days)+'天'):('剩 '+days+' 天'))+'</b>'
+        +'<small>止 '+c.end.slice(5)+' '+wk[de.getDay()]+'</small>';
+      if(de.getDay()===0||de.getDay()===6)
+        warn='<div class="ci-sub" style="color:var(--gold);opacity:.9">⚠️ 到期落'+wk[de.getDay()]+' · 最迟 '+ctPrevWorkday(c.end).slice(5)+' 通知会计</div>'}
+    return '<div class="ach-row"><div class="an"><b>'+esc(c.name)+'</b>'
+      +'<small>'+esc(c.type)+(c.start?' · 起 '+c.start.slice(5):'')+'</small></div>'
+      +'<div class="av">'+right+'</div></div>'+warn}).join('')
+    +(old.length?('<div class="ci-sec" style="margin-top:10px">已 归 档 · '+old.length+'</div>'
+      +old.sort((a,b)=>b.ts-a.ts).map(c=>'<div class="ach-row" style="opacity:.45"><div class="an"><b>'+esc(c.name)+'</b>'
+      +'<small>'+esc(c.type)+(c.end?' · 止 '+c.end:'')+' · '+esc(c.endNote||'')+'('+(c.endedDay||'').slice(5)+')</small></div></div>').join('')):'')}
 
 /* ============ TABS ============ */
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{
@@ -2635,6 +2691,7 @@ $('lineSave').addEventListener('click',()=>{
     const indented=/^[\s\u3000]/.test(rl);
     let l=rl.trim();
     if(l.startsWith('#成就')){achIngest(l);cur=null;return}   /* 通吃:成就行就地入库 */
+    if(l.startsWith('#合同')){ctIngest(l);cur=null;return}    /* 通吃:合同行就地入账 */
     const bullet=/^[-*•·]\s+/.test(l);
     const numbered=/^\d+[.、)]\s+/.test(l);
     if(cur&&(indented||bullet||numbered||l.startsWith('>'))){
@@ -5220,7 +5277,7 @@ function renderAll(){
   const d=new Date();
   $('todayDate').textContent=d.getFullYear()+' / '+(d.getMonth()+1)+' / '+d.getDate()
     +' · '+['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
-  renderLive();renderTasks();renderEvents();renderHanger();renderGrid();renderStats();renderWorkToday();renderBodyLog();renderEats();renderRecent();renderSleepAsk();renderInsights();try{renderAch()}catch(_){}
+  renderLive();renderTasks();renderEvents();renderHanger();renderGrid();renderStats();renderWorkToday();renderBodyLog();renderEats();renderRecent();renderSleepAsk();renderInsights();try{renderAch()}catch(_){}try{renderContracts()}catch(_){}
   if(typeof URGENT!=='undefined')try{URGENT.refresh()}catch(_){}}
 
 
