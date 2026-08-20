@@ -1116,7 +1116,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260819.3）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260819.4）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1153,7 +1153,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <div id="tabCt" class="tab">
   <div class="hd"><div class="eyebrow">合 同 台 账</div></div>
   <div class="sec sec-glass">
-    <div class="sec-t">在 役 与 归 档 <span id="ctHint" style="letter-spacing:.05em"></span> <button class="mini" id="btnCtImport">粘贴导入</button></div>
+    <div class="sec-t">在 役 与 归 档 <span id="ctHint" style="letter-spacing:.05em"></span> <span><button class="mini" id="btnCtClean">清空归档</button> <button class="mini" id="btnCtImport">粘贴导入</button></span></div>
     <div id="ctList"></div>
   </div>
 </div>
@@ -1932,7 +1932,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260819.3;
+const APP_VER=20260819.4;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2220,6 +2220,12 @@ $('amClose').addEventListener('click',()=>$('achModal').classList.remove('on'));
 $('achModal').addEventListener('click',e=>{if(e.target.id==='achModal')$('achModal').classList.remove('on')});
 $('btnAchImport').addEventListener('click',()=>{$('achText').value='';$('shAchIn').classList.add('on')});
 $('btnCtImport').addEventListener('click',()=>{$('achText').value='';$('shAchIn').classList.add('on')});
+$('btnCtClean').addEventListener('click',()=>{
+  const n=S.contracts.filter(c=>c.status!=='active').length;
+  if(!n){toast('归档区已是空的');return}
+  if(!confirm('清空归档区 '+n+' 条历史合同？在役合同不受影响,此操作不可撤销。'))return;
+  S.contracts=S.contracts.filter(c=>c.status==='active');
+  save();renderContracts();toast('已清空 '+n+' 条归档');vibe(35)});
 $('achSave').addEventListener('click',()=>{
   const raw=$('achText').value;if(!raw.trim()){toast('先粘贴或输入');return}
   let n=0;raw.split('\n').forEach(l=>{l=l.trim();if(!l)return;
