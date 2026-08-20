@@ -1034,6 +1034,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
         <button id="btnTrip">📍 出行打卡</button>
         <button id="btnEnv">🌡 温湿度记录</button>
         <button id="btnMoney">⚡ 资金槽</button>
+        <button id="btnNap">😴 午睡计时</button>
       </div>
       <div class="snap-btns" style="margin-top:8px">
         <button id="btnInsight" style="border-color:rgba(255,215,0,.35);color:var(--gold)">💡 灵光一闪 · 记下经验</button>
@@ -1116,7 +1117,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260819.4）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260820.2）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1932,7 +1933,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260819.4;
+const APP_VER=20260820.2;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2284,6 +2285,106 @@ function renderContracts(){
     +(old.length?('<div class="ci-sec" style="margin-top:10px">已 归 档 · '+old.length+'</div>'
       +old.sort((a,b)=>b.ts-a.ts).map(c=>'<div class="ach-row" style="opacity:.45"><div class="an"><b>'+esc(c.name)+'</b>'
       +'<small>'+esc(c.type)+(c.end?' · 止 '+c.end:'')+' · '+esc(c.endNote||'')+'('+(c.endedDay||'').slice(5)+')</small></div></div>').join('')):'')}
+
+/* ============ 午睡·闭关(董事长案20260820·游戏层v2) ============
+   入定仪式(三印选时)→盲计时(丹火明灭,不显数字)→出关揭晓(时长=战利品+修真评语+连击)。
+   数据自动入人生数据库「午睡时长」追踪类。锁屏被杀重开即补响补结算。 */
+const NAP={
+  t:null,
+  css(){if(document.getElementById('napCss'))return;
+    const st=document.createElement('style');st.id='napCss';
+    st.textContent='@keyframes napEmber{0%,100%{opacity:.25;transform:scale(.85)}50%{opacity:1;transform:scale(1.12)}}'
+      +'#napCard{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:9400;'
+      +'padding:16px 34px;border-radius:18px;background:linear-gradient(165deg,rgba(16,10,32,.97),rgba(8,6,18,.97));'
+      +'border:1px solid rgba(255,215,0,.28);box-shadow:0 0 28px rgba(120,60,200,.22);text-align:center;display:none}'
+      +'#napCard .nd{width:14px;height:14px;border-radius:50%;margin:8px auto 6px;'
+      +'background:radial-gradient(circle,#FFE9A8 0%,#D4AF37 55%,rgba(212,175,55,0) 75%);'
+      +'box-shadow:0 0 18px rgba(255,215,0,.7);animation:napEmber 3.6s ease-in-out infinite}'
+      +'#napSeal{position:fixed;inset:0;z-index:9450;display:flex;align-items:center;justify-content:center;'
+      +'background:rgba(4,6,14,.6);backdrop-filter:blur(3px)}'
+      +'#napSeal .nsc{padding:22px 24px;border-radius:18px;background:linear-gradient(160deg,rgba(22,24,40,.98),rgba(12,14,26,.98));'
+      +'border:1px solid var(--gold-dim);text-align:center}'
+      +'#napSeal .nsb{display:flex;gap:12px;margin-top:14px}'
+      +'#napSeal button{padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.05);'
+      +'border:1px solid rgba(255,215,0,.35);color:var(--gold-bright);font-size:13px;line-height:1.5}';
+    document.head.appendChild(st)},
+  el(){this.css();let e=document.getElementById('napCard');
+    if(!e){e=document.createElement('div');e.id='napCard';
+      e.innerHTML='<div style="font-size:11px;letter-spacing:.3em;color:var(--ink-dim)">闭 关 中</div>'
+        +'<div class="nd"></div><div id="napT" style="font-size:12px;color:var(--ink-dim)">丹火未熄 · 勿念时辰</div>'
+        +'<div style="font-size:10px;color:var(--ink-dim);opacity:.7;margin-top:4px">出关点此</div>';
+      e.addEventListener('click',()=>NAP.wake());
+      document.body.appendChild(e)}
+    return e},
+  pick(){this.css();
+    const e=document.createElement('div');e.id='napSeal';
+    e.innerHTML='<div class="nsc"><div style="font-size:12px;letter-spacing:.3em;color:var(--ink-dim)">闭 关 几 刻 ?</div>'
+      +'<div class="nsb"><button data-m="15">一炷香<br><small style="color:var(--ink-dim)">十五分</small></button>'
+      +'<button data-m="20">一盏茶<br><small style="color:var(--ink-dim)">二十分</small></button>'
+      +'<button data-m="25">一刻钟<br><small style="color:var(--ink-dim)">二十五分</small></button></div></div>';
+    e.addEventListener('click',ev=>{
+      const b=ev.target.closest('button');
+      if(b){e.remove();NAP.start(parseInt(b.dataset.m))}
+      else if(ev.target.id==='napSeal')e.remove()});
+    document.body.appendChild(e)},
+  start(min){
+    S.napRun={startTs:now(),durMin:min};save();
+    try{BGM.duck(0.12,8000)}catch(_){}
+    this.el().style.display='block';this._rang=false;
+    const el=document.getElementById('napT');if(el)el.textContent='丹火未熄 · 勿念时辰';
+    this.t=setInterval(()=>this.tick(),1000);
+    toast('入定 · 铃响出关');vibe(25)},
+  tick(){
+    if(!S.napRun)return;
+    if(S.napRun.startTs+S.napRun.durMin*60000-now()<=0)this.ring()},
+  ring(){
+    if(this._rang)return;this._rang=true;
+    clearInterval(this.t);
+    const el=document.getElementById('napT');if(el){el.textContent='时辰已到 · 出关 ✦';el.style.color='var(--gold-bright)'}
+    vibe(200);setTimeout(()=>vibe(200),600);setTimeout(()=>vibe(200),1200);
+    try{sDing()}catch(_){}
+    let n=0;this._ringT=setInterval(()=>{try{sDing()}catch(_){}vibe(150);if(++n>=8)clearInterval(this._ringT)},2500)},
+  verdict(m){
+    const bonus=['丹田微暖,今日诸事可为','梦里似有旧识低语','醒来的人间,与你睡前无异,但你已不同'];
+    let v;
+    if(m<5)return null;
+    else if(m<15)v='浅眠回气 · 聊胜于无';
+    else if(m<=25)v='炼气小成 · 神识清明';
+    else if(m<=40)v='闭关有成 · 气息绵长';
+    else v='入定过深 · 出关缓行';
+    if(Math.random()<0.1)v=bonus[Math.floor(Math.random()*bonus.length)];
+    return v},
+  streak(){
+    const days=[...new Set(S.ach.recs.filter(r=>r.cat==='午睡时长').map(r=>r.day))].sort().reverse();
+    let n=0;const d=new Date(todayStr()+'T12:00:00');
+    for(;;){const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      if(days.includes(ds)){n++;d.setDate(d.getDate()-1)}else break}
+    return n},
+  wake(){
+    if(!S.napRun)return;
+    clearInterval(this.t);clearInterval(this._ringT);this._rang=false;
+    const mins=Math.round((now()-S.napRun.startTs)/60000);
+    S.napRun=null;
+    this.el().style.display='none';
+    try{BGM.unduck(1500)}catch(_){}
+    const v=this.verdict(mins);
+    if(!v){save();toast('心浮气躁 · 未入定,不记');return}
+    const cat='午睡时长';
+    if(!S.ach.cats[cat])S.ach.cats[cat]={dir:null,kind:'追踪'};
+    S.ach.recs.push({id:uid(),cat:cat,valRaw:mins+'分',val:mins,day:todayStr(),note:v,ts:now()});
+    save();renderAll();
+    const st=this.streak();
+    pop('出关 · '+mins+' 分',v+(st>1?' · 连续闭关 <b style="color:var(--gold)">'+st+'</b> 日':''),'mute')},
+  boot(){
+    if(!S.napRun)return;
+    this.el().style.display='block';
+    if(S.napRun.startTs+S.napRun.durMin*60000-now()<=0)this.ring();
+    else this.t=setInterval(()=>this.tick(),1000)}
+};
+$('btnNap').addEventListener('click',()=>{
+  if(S.napRun){NAP.wake();return}
+  NAP.pick()});
+NAP.boot();
 
 /* ============ TABS ============ */
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{
