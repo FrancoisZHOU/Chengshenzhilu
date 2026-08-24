@@ -1128,7 +1128,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260823.3）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260824.1）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1944,7 +1944,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260823.3;
+const APP_VER=20260824.1;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2357,7 +2357,7 @@ const NAP={
       +'i.android.intent.extra.alarm.LENGTH='+(min*60)
       +';S.android.intent.extra.alarm.MESSAGE='+encodeURIComponent('闭关出关')
       +';B.android.intent.extra.alarm.SKIP_UI=true;end'}catch(_){}   /* 系统倒计时接管叫醒 */
-    try{BGM.duck(0.0,8000)}catch(_){}   /* 入定:BGM八秒淡至无声 */
+    try{BGM.duck(0.0,500)}catch(_){}   /* 入定:半秒即全静(立静但不爆音) */
     this.el().style.display='block';this._rang=false;
     const el=document.getElementById('napT');if(el)el.textContent='丹火未熄 · 勿念时辰';
     this.t=setInterval(()=>this.tick(),1000);
