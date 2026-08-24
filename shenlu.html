@@ -1128,7 +1128,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260823.2）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260823.3）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1944,7 +1944,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260823.2;
+const APP_VER=20260823.3;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2357,7 +2357,7 @@ const NAP={
       +'i.android.intent.extra.alarm.LENGTH='+(min*60)
       +';S.android.intent.extra.alarm.MESSAGE='+encodeURIComponent('闭关出关')
       +';B.android.intent.extra.alarm.SKIP_UI=true;end'}catch(_){}   /* 系统倒计时接管叫醒 */
-    try{BGM.duck(0.12,8000)}catch(_){}
+    try{BGM.duck(0.0,8000)}catch(_){}   /* 入定:BGM八秒淡至无声 */
     this.el().style.display='block';this._rang=false;
     const el=document.getElementById('napT');if(el)el.textContent='丹火未熄 · 勿念时辰';
     this.t=setInterval(()=>this.tick(),1000);
@@ -4309,6 +4309,7 @@ const POKE={lastTouch:0,resumeAt:0,hiddenAt:0,fxUntil:0,lastShow:0,cur:null,
     return q},
   /* ---- 展示 ---- */
   show(force){
+    if(S.napRun)return;                                              /* 闭关中:POKE静默 */
     const c=this.ctx();
     if(this.blocked(c)||!this.caps())return;
     if(c.band==='deepnight'){
@@ -4466,6 +4467,7 @@ const ECHO2={
     return pool.find(i=>i.id===rt.order[rt.idx])||null},
   blocked(){
     if(document.visibilityState!=='visible')return true;
+    if(S.napRun)return true;                                         // 闭关中:绝对静默,人在睡觉
     if(Voice.busy)return true;                                       // 别的语音在播
     const ae=document.activeElement;
     if(ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'))return true; // 正在打字
