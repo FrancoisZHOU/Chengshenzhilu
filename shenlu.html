@@ -1128,7 +1128,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260823.1）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260823.2）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1944,7 +1944,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260823.1;
+const APP_VER=20260823.2;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -2224,9 +2224,21 @@ function drawAch(){
       tag='<span class="rk">'+(rk?'#'+rk:'—')+'</span>'}
     else{const mk=(vs.length>1&&r.val===hi)?'▲高':((vs.length>1&&r.val===lo)?'▼低':'');
       tag='<span class="rk" style="color:var(--ink-dim)">'+mk+'</span>'}
-    return '<div class="am-rec">'+tag+'<div style="flex:1;min-width:0"><span class="vv">'+esc(r.valRaw)+'</span>'
+    return '<div class="am-rec" data-rid="'+r.id+'">'+tag+'<div style="flex:1;min-width:0"><span class="vv">'+esc(r.valRaw)+'</span>'
       +(r.note?'<span class="nn">'+esc(r.note)+'</span>':'')+'</div><span class="dd">'+r.day+'</span></div>'}).join('')||
-    '<div class="hint">此类目暂无记录</div>'}
+    '<div class="hint">此类目暂无记录</div>';
+  /* 长按0.6秒删单条(误录/虚假记录出口),类目本体不动 */
+  $('amList').querySelectorAll('.am-rec[data-rid]').forEach(row=>{
+    let pt=null;
+    const arm=()=>{pt=setTimeout(()=>{
+      const rec=S.ach.recs.find(x=>x.id===row.dataset.rid);if(!rec)return;
+      if(confirm('删除这条记录？\n'+rec.valRaw+' · '+rec.day+'\n(仅删此条,不可恢复)')){
+        S.ach.recs=S.ach.recs.filter(x=>x.id!==rec.id);
+        save();vibe(40);toast('已删除');drawAch();renderAch()}},600)};
+    const disarm=()=>{if(pt){clearTimeout(pt);pt=null}};
+    row.addEventListener('touchstart',arm,{passive:true});
+    row.addEventListener('touchend',disarm);row.addEventListener('touchmove',disarm);
+    row.addEventListener('mousedown',arm);row.addEventListener('mouseup',disarm);row.addEventListener('mouseleave',disarm)})}
 $('amBtnTime').addEventListener('click',()=>{achSort='time';drawAch()});
 $('amBtnRank').addEventListener('click',()=>{achSort='rank';drawAch()});
 $('amClose').addEventListener('click',()=>$('achModal').classList.remove('on'));
@@ -2341,6 +2353,10 @@ const NAP={
     document.body.appendChild(e)},
   start(min){
     S.napRun={startTs:now(),durMin:min};save();
+    try{location.href='intent://timer#Intent;action=android.intent.action.SET_TIMER;'
+      +'i.android.intent.extra.alarm.LENGTH='+(min*60)
+      +';S.android.intent.extra.alarm.MESSAGE='+encodeURIComponent('闭关出关')
+      +';B.android.intent.extra.alarm.SKIP_UI=true;end'}catch(_){}   /* 系统倒计时接管叫醒 */
     try{BGM.duck(0.12,8000)}catch(_){}
     this.el().style.display='block';this._rang=false;
     const el=document.getElementById('napT');if(el)el.textContent='丹火未熄 · 勿念时辰';
@@ -2375,11 +2391,13 @@ const NAP={
   wake(){
     if(!S.napRun)return;
     clearInterval(this.t);clearInterval(this._ringT);this._rang=false;
-    const mins=Math.round((now()-S.napRun.startTs)/60000);
+    let mins=Math.round((now()-S.napRun.startTs)/60000);
+    let capped=false;
+    if(mins>S.napRun.durMin+30){mins=S.napRun.durMin;capped=true}  /* 忘收香:按设定时长收摊 */
     S.napRun=null;
     this.el().style.display='none';
     try{BGM.unduck(1500)}catch(_){}
-    const v=this.verdict(mins);
+    const v=capped?'香已燃尽多时 · 按设定收摊':this.verdict(mins);
     if(!v){save();toast('心浮气躁 · 未入定,不记');return}
     const cat='午睡时长';
     if(!S.ach.cats[cat])S.ach.cats[cat]={dir:null,kind:'追踪'};
@@ -2391,9 +2409,15 @@ const NAP={
   boot(){
     if(!S.napRun)return;
     this.el().style.display='block';
-    if(S.napRun.startTs+S.napRun.durMin*60000-now()<=0)this.ring();
+    const over=S.napRun.startTs+S.napRun.durMin*60000-now();
+    if(over<=0){ if(-over>60000)this.wake();else this.ring() }   /* 回前台时辰已到→直接自动出关 */
     else this.t=setInterval(()=>this.tick(),1000)}
 };
+document.addEventListener('visibilitychange',()=>{               /* 关掉系统闹钟回屏即自动出关 */
+  if(document.visibilityState==='visible'&&S.napRun
+    &&now()>=S.napRun.startTs+S.napRun.durMin*60000)NAP.wake()});
+setInterval(()=>{                                                 /* 铃响30分钟无人认领,自动收摊 */
+  if(S.napRun&&now()-(S.napRun.startTs+S.napRun.durMin*60000)>30*60000)NAP.wake()},60000);
 $('btnNap').addEventListener('click',()=>{
   if(S.napRun){NAP.wake();return}
   NAP.pick()});
