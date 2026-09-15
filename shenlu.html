@@ -1128,7 +1128,9 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
   </div>
   <div class="sec">
     <button class="mini" id="btnDrive" style="width:100%;padding:13px;margin-bottom:8px">☁ Drive自动存档：未开启</button>
-    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260824.1）</button>
+    <button class="mini" id="btnUpdate" style="width:100%;padding:13px;margin-bottom:8px">🔄 检查更新（当前 20260915.1）</button>
+    <div id="stoGauge" class="card" style="padding:12px 14px;margin-bottom:8px;font-size:12.5px;line-height:1.7"></div>
+    <button class="mini" id="btnStoClean" style="width:100%;padding:13px;margin-bottom:8px">🧹 清理本机旧备份（主数据不动）</button>
     <button class="mini" id="btnVoice" style="width:100%;padding:13px;margin-bottom:8px">语音陪伴</button>
     <button class="mini" id="btnBgm" style="width:100%;padding:13px;margin-bottom:8px">🎵 背景音乐</button>
     <div class="card" style="padding:12px 15px;margin-bottom:8px">
@@ -1944,7 +1946,7 @@ body.slx-pixel-theme .tk-row.slx-gold-glass,.tk-row.urg-urgent,.tk-row.urg-norma
 <script>
 (function(){
 "use strict";
-const APP_VER=20260824.1;
+const APP_VER=20260915.1;
 const KEY='shenlu_v1';
 const $=id=>document.getElementById(id);
 const now=()=>Date.now();
@@ -3869,17 +3871,48 @@ function renderLedger(){
     r.querySelector('.ev-name').textContent=e.day.slice(5)+' · '+e.label;
     box.appendChild(r)})}
 
-/* ============ AUTO-SNAPSHOT (minute-level) ============ */
+/* ============ 本机备份仓:IndexedDB(v20260915.1,董事长案) ============
+   同域四工具共用localStorage一格(~10MB),备份搬进独立配额的IndexedDB;
+   localStorage只留主数据shenlu_v1。启动时把旧LS备份键迁入并清除,迁移留档键一并清。 */
+const BAK={dbp:null,
+  open(){if(this.dbp)return this.dbp;
+    this.dbp=new Promise((res,rej)=>{try{
+      const r=indexedDB.open('shenlu_bak',1);
+      r.onupgradeneeded=()=>{try{r.result.createObjectStore('kv')}catch(_){}};
+      r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});
+    return this.dbp},
+  async get(k){try{const db=await this.open();
+    return await new Promise(res=>{const q=db.transaction('kv').objectStore('kv').get(k);
+      q.onsuccess=()=>res(q.result||null);q.onerror=()=>res(null)})}catch(_){return null}},
+  async put(k,v){try{const db=await this.open();
+    return await new Promise(res=>{const q=db.transaction('kv','readwrite').objectStore('kv').put(v,k);
+      q.onsuccess=()=>res(1);q.onerror=()=>res(0)})}catch(_){return 0}},
+  async del(k){try{const db=await this.open();
+    return await new Promise(res=>{const q=db.transaction('kv','readwrite').objectStore('kv').delete(k);
+      q.onsuccess=()=>res(1);q.onerror=()=>res(0)})}catch(_){return 0}},
+  async migrateFromLS(){   // 旧LS备份键→IDB,然后清LS;迁移留档键直接清
+    try{
+      const a=localStorage.getItem(KEY+'_auto');
+      if(a){const cur=(await this.get('auto'))||[];const old=JSON.parse(a);
+        await this.put('auto',cur.concat(old).slice(-12));localStorage.removeItem(KEY+'_auto')}
+      const s=localStorage.getItem(KEY+'_snap');
+      if(s){const cur=(await this.get('daily'))||[];const old=JSON.parse(s);
+        await this.put('daily',cur.concat(old).slice(-7));localStorage.removeItem(KEY+'_snap')}
+      ['shenlu_before_line_retire_v4','shenlu_v1_before_task_type_v3'].forEach(k=>{try{localStorage.removeItem(k)}catch(_){}});
+    }catch(_){}}
+};
+BAK.migrateFromLS();
+
+/* ============ AUTO-SNAPSHOT (minute-level → IDB) ============ */
 let dirty=false;
 const _save=save;
 save=function(){_save();dirty=true};
-function autoSnap(force){try{
+async function autoSnap(force){try{
   if(!dirty&&!force)return;
-  const K=KEY+'_auto';
-  let snaps=JSON.parse(localStorage.getItem(K)||'[]');
+  let snaps=(await BAK.get('auto'))||[];
   snaps.push({ts:now(),data:JSON.stringify(S)});
   if(snaps.length>12)snaps=snaps.slice(-12);
-  localStorage.setItem(K,JSON.stringify(snaps));dirty=false;
+  await BAK.put('auto',snaps);dirty=false;
 }catch(e){}}
 setInterval(()=>autoSnap(false),5*60000);
 document.addEventListener('visibilitychange',()=>{
@@ -3928,18 +3961,18 @@ $('fileRestore').addEventListener('change',e=>{
     toast('恢复成功 · 世界恢复');setTimeout(()=>location.reload(),900)
   }catch(err){toast('文件读不了')}};
   rd.readAsText(f)});
-(function dailySnap(){try{
-  const K=KEY+'_snap';
-  let snaps=JSON.parse(localStorage.getItem(K)||'[]');
+(async function dailySnap(){try{
+  await BAK.migrateFromLS();
+  let snaps=(await BAK.get('daily'))||[];
   if(!snaps.length||snaps[snaps.length-1].day!==todayStr()){
     snaps.push({day:todayStr(),data:JSON.stringify(S)});
-    if(snaps.length>3)snaps=snaps.slice(-3);
-    localStorage.setItem(K,JSON.stringify(snaps))}
+    if(snaps.length>7)snaps=snaps.slice(-7);
+    await BAK.put('daily',snaps)}
 }catch(e){}})();
-$('btnSnap').addEventListener('click',()=>{try{
-  const daily=JSON.parse(localStorage.getItem(KEY+'_snap')||'[]')
+$('btnSnap').addEventListener('click',async()=>{try{
+  const daily=((await BAK.get('daily'))||[])
     .map(s=>({label:s.day,data:s.data}));
-  const auto=JSON.parse(localStorage.getItem(KEY+'_auto')||'[]')
+  const auto=((await BAK.get('auto'))||[])
     .map(s=>{const d=new Date(s.ts);
       return{label:(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'),data:s.data}});
   const all=daily.concat(auto);
@@ -5971,6 +6004,29 @@ async function checkUpdate(silent){
     }else{if(!silent)toast('已是最新版 · '+APP_VER)}
   }catch(e){if(!silent)toast('检查失败 · 看看网络')}}
 $('btnUpdate').textContent='🔄 检查更新（当前版 '+APP_VER+'）';
+/* ---- 本地存储仪表(董事长案D) ---- */
+function renderStorage(){try{
+  const el=$('stoGauge');if(!el)return;
+  let total=0,n=0,mine=[];
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);const v=localStorage.getItem(k)||'';
+    const b=(k.length+v.length)*2;total+=b;n++;
+    if(k.startsWith('shenlu'))mine.push([k,b])}
+  const MB=x=>(x/1048576).toFixed(2);
+  const pct=Math.min(100,Math.round(total/10485760*100));
+  const col=pct>=80?'var(--urg)':(pct>=50?'var(--gold)':'var(--ink)');
+  el.innerHTML='<div style="letter-spacing:.2em;color:var(--ink-dim);font-size:11px;margin-bottom:4px">本 地 存 储（同域共用 · 参考线 10 MB）</div>'
+    +'<div><b style="color:'+col+'">'+MB(total)+' MB</b> · '+n+' 键 · 占 <b style="color:'+col+'">'+pct+'%</b></div>'
+    +'<div style="height:5px;border-radius:3px;background:rgba(255,255,255,.08);margin:6px 0"><div style="height:100%;width:'+pct+'%;border-radius:3px;background:'+col+'"></div></div>'
+    +mine.sort((a,b)=>b[1]-a[1]).map(x=>'<div style="display:flex;justify-content:space-between;color:var(--ink-dim)"><span>'+esc(x[0])+'</span><span>'+(x[1]/1024).toFixed(0)+' KB</span></div>').join('')
+    +'<div style="color:var(--ink-dim);margin-top:4px">备份已搬入 IndexedDB（独立配额），localStorage 只留主数据。</div>';
+}catch(_){}}
+renderStorage();
+document.querySelectorAll('.nav button[data-tab]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.tab==='tabStat')setTimeout(renderStorage,50)}));
+$('btnStoClean').addEventListener('click',async()=>{
+  if(!confirm('清理本机旧备份？会清空 IndexedDB 里的分钟级/日快照备份，并删除 localStorage 里残留的旧备份键和迁移留档。主数据 shenlu_v1 不动，Drive 云备份不动。'))return;
+  try{await BAK.del('auto');await BAK.del('daily');
+    [KEY+'_auto',KEY+'_snap','shenlu_before_line_retire_v4','shenlu_v1_before_task_type_v3'].forEach(k=>{try{localStorage.removeItem(k)}catch(_){}});
+    toast('已清理 · 主数据完好');vibe(35);renderStorage()}catch(_){toast('清理出错')}});
 $('btnUpdate').addEventListener('click',()=>checkUpdate(false));
 setTimeout(()=>checkUpdate(true),6000);
 
